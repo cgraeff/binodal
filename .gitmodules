@@ -1,0 +1,3 @@
+[submodule "src/libdatafun"]
+	path = src/libdatafun
+	url = https://github.com/cgraeff/libdatafun.git
