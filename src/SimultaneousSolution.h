@@ -42,7 +42,7 @@ int MultiDimensionalRootFinderHelperFunction(const gsl_vector   *x,
                                              void               *params,
                                              gsl_vector         *return_values);
 
-double ZeroedRenormalizedChemicalPotentialEquation(double renormalized_chemical_potential,
-                                                   void * params);
+double ZeroedRenormalizedQuarkChemicalPotentialEquation(double renormalized_chemical_potential,
+                                                        void * params);
 #endif /* SimultaneousSolution_h */
 

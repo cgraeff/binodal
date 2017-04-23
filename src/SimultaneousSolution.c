@@ -106,10 +106,10 @@ int MultiDimensionalRootFinderHelperFunction(const gsl_vector   *x,
     const double up_quark_mass = pow(gsl_vector_get(x, 2), 2.0);
     const double down_quark_mass = pow(gsl_vector_get(x, 3), 2.0);
 
-    printf("bar_dens: %f\n"
-           "hadron_mass: %f\n"
-           "up_q_mass: %f\n"
-           "dn_q_mass: %f\n",
+    printf("bar_dens: %20.15E\n"
+           "hadron_mass: %20.15E\n"
+           "up_q_mass: %20.15E\n"
+           "dn_q_mass: %20.15E\n",
            barionic_density,
            hadron_mass,
            up_quark_mass,
@@ -152,12 +152,13 @@ int MultiDimensionalRootFinderHelperFunction(const gsl_vector   *x,
     h_gap_input.proton_density = proton_density;
     h_gap_input.neutron_density = neutron_density;
 
-    double zeroed_gap_eq = HadronGapEquation(hadron_mass, &h_gap_input);
+    double zeroed_gap_eq = HadronZeroedGapEquation(hadron_mass, &h_gap_input);
 
     // Prepare return vector
    	gsl_vector_set(return_values, 0, zeroed_gap_eq);
 
-   	// Gibbs Conditions: // TODO verify: are those up and down barionic chemical potentials? should they be?
+    // Gibbs Conditions:
+
     // Use chemical potential equality to determine
     // quark chemical potentials
     double up_chemical_potential = (2.0 * proton_chemical_potential
@@ -224,7 +225,7 @@ int MultiDimensionalRootFinderHelperFunction(const gsl_vector   *x,
 
     double regularized_thermodynamic_potential = up_quark_thermodynamic_potential
                                                  + down_quark_thermodynamic_potential
-                                                 - p->quark_vacuum_thermodynamic_potential;
+                                                 - 2.0 * p->quark_vacuum_thermodynamic_potential;// TODO should be times 2?
 
     double quark_pressure = QuarkPressure(regularized_thermodynamic_potential,
                                             parameters.variables.temperature);
@@ -233,10 +234,10 @@ int MultiDimensionalRootFinderHelperFunction(const gsl_vector   *x,
 
     gsl_vector_set(return_values, 3, zeroed_pressure);
 
-    printf("eq 1: %f\n"
-           "eq 2: %f\n"
-           "eq 3: %f\n"
-           "eq 4: %f\n",
+    printf("eq 1: %20.15E\n"
+           "eq 2: %20.15E\n"
+           "eq 3: %20.15E\n"
+           "eq 4: %20.15E\n",
            gsl_vector_get(return_values, 0),
            gsl_vector_get(return_values, 1),
            gsl_vector_get(return_values, 2),
@@ -245,85 +246,3 @@ int MultiDimensionalRootFinderHelperFunction(const gsl_vector   *x,
     return GSL_SUCCESS;
 }
 
-double QuarkZeroedGapEquation(double mass,
-                         void * params)
-{
-    quark_gap_eq_input_params * p = (quark_gap_eq_input_params *)params;
-
-    double term = 2.0 * parameters.quark_model.G_S * CONST_HBAR_C
-                  * QuarkScalarDensity(parameters.variables.temperature,
-                                  mass,
-                                  p->renormalized_chemical_potential);
-
-    return mass - parameters.quark_model.bare_mass + term;
-}
-
-double HadronZeroedGapEquation(double mass,
-                               void * params)
-{
-    hadron_gap_eq_input_params * p = (hadron_gap_eq_input_params *)params;
-
-    double barionic_density = p->proton_density + p->neutron_density;
-    double rho_3 = p->proton_density - p->neutron_density;
-
-	double scalar_density = HadronScalarDensity(mass,
-                                                p->proton_fermi_momentum,
-                                                parameters.hadron_model.cutoff)
-                            + HadronScalarDensity(mass,
-                                                  p->neutron_fermi_momentum,
-                                                  parameters.hadron_model.cutoff);
-
-	double gap_1st_term = parameters.hadron_model.G_S * scalar_density;
-	double gap_2nd_term = - parameters.hadron_model.G_SV
-                            * scalar_density
-                            * pow(barionic_density, 2.0);
-    double gap_3rd_term = - parameters.hadron_model.G_SRHO
-                            * scalar_density
-                            * pow(rho_3, 2.0);
-
-	return mass
-           + 2.0 * CONST_HBAR_C
-             * (gap_1st_term + gap_2nd_term + gap_3rd_term)
-           - parameters.hadron_model.bare_mass;
-}
-
-double QuarkSelfConsistentRenormChemPot(double quark_mass,
-                                        double chemical_potential,
-                                        double temperature)
-{
-
-    renorm_chem_pot_equation_input p;
-    p.chemical_potential = chemical_potential;
-    p.mass = quark_mass;
-    p.temperature = temperature;
-
-    gsl_function F;
-    F.params = (void *)&p;
-    F.function = &ZeroedRenormalizedChemicalPotentialEquation;
-
-    double result = 0;
-
-    int status = UnidimensionalRootFinder(&F,
-                                          parameters.q_renorm_chem_pot_finding,
-                                          &result);
-
-    if (status != 0){
-        printf("Problems in rootfinding in %s, line %d\n", __FILE__, __LINE__);
-        abort();
-    }
-
-    return result;
-}
-
-double ZeroedRenormalizedChemicalPotentialEquation(double renormalized_chemical_potential,
-                                                   void * params)
-{
-    renorm_chem_pot_equation_input * p = (renorm_chem_pot_equation_input *)params;
-
-    double term = 2.0 * parameters.quark_model.G_V * NUM_Q_COLORS * CONST_HBAR_C
-                  * QuarkBarionicDensity(p->mass,
-                                         renormalized_chemical_potential,
-                                         p->temperature);
-
-    return renormalized_chemical_potential - p->chemical_potential + term;
-}

@@ -106,7 +106,7 @@ void RunTests()
         SetFilePath (NULL);
     }
 
-    if (true)
+    if (false)
     {
         int n_pts = 1000;
 
@@ -126,7 +126,7 @@ void RunTests()
         double mu_r = 0;
         for (int i = 0; i < n_pts; i++){
             double result =
-                ZeroedRenormalizedChemicalPotentialEquation(mu_r, (void *)&params);
+                ZeroedRenormalizedQuarkChemicalPotentialEquation(mu_r, (void *)&params);
 
             fprintf(file, "%20.15E\t%20.15E\n", mu_r, result);
 

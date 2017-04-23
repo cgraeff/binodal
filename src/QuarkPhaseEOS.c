@@ -36,7 +36,7 @@ double QuarkBarionicDensity(double mass,
                             double renormalized_chemical_potential,
                             double temperature)
 {
-    double constant = NUM_Q_FLAVORS / (pow(M_PI, 2.0) * pow(CONST_HBAR_C, 3.0));
+    double constant = NUM_Q_COLORS / (pow(M_PI, 2.0) * pow(CONST_HBAR_C, 3.0));
 
     if (temperature == 0){
 
@@ -83,7 +83,7 @@ double QuarkThermodynamicPotentialFreeGasContribution(double mass,
                                                       double renormalized_chemical_potential,
                                                       double temperature)
 {
-    double constant = - NUM_Q_FLAVORS * NUM_Q_COLORS * pow(CONST_HBAR_C, -3.0)
+    double constant = - NUM_Q_COLORS * pow(CONST_HBAR_C, -3.0)
                         / pow(M_PI, 2.0);
 
     if (temperature == 0){
@@ -179,7 +179,7 @@ double QuarkScalarDensity(double temperature,
         return 0;
     }
 
-    double constant = - NUM_Q_COLORS * NUM_Q_FLAVORS
+    double constant = - NUM_Q_COLORS
                         / (pow(M_PI, 2.0) * pow(CONST_HBAR_C, 3.0));
 
     if (temperature == 0){
@@ -206,3 +206,57 @@ double QPFermiMomentum(double mass, double renormalized_chemical_potential)
     return sqrt(pow(renormalized_chemical_potential, 2.0) - pow(mass, 2.0));
 }
 
+double QuarkZeroedGapEquation(double mass,
+                         void * params)
+{
+    quark_gap_eq_input_params * p = (quark_gap_eq_input_params *)params;
+
+    double term = 2.0 * parameters.quark_model.G_S * CONST_HBAR_C
+                  * QuarkScalarDensity(parameters.variables.temperature,
+                                  mass,
+                                  p->renormalized_chemical_potential);
+
+    return mass - parameters.quark_model.bare_mass + term;
+}
+
+
+double QuarkSelfConsistentRenormChemPot(double quark_mass,
+                                        double chemical_potential,
+                                        double temperature)
+{
+
+    renorm_chem_pot_equation_input p;
+    p.chemical_potential = chemical_potential;
+    p.mass = quark_mass;
+    p.temperature = temperature;
+
+    gsl_function F;
+    F.params = (void *)&p;
+    F.function = &ZeroedRenormalizedQuarkChemicalPotentialEquation;
+
+    double result = 0;
+
+    int status = UnidimensionalRootFinder(&F,
+                                          parameters.q_renorm_chem_pot_finding,
+                                          &result);
+
+    if (status != 0){
+        printf("Problems in rootfinding in %s, line %d\n", __FILE__, __LINE__);
+        abort();
+    }
+
+    return result;
+}
+
+double ZeroedRenormalizedQuarkChemicalPotentialEquation(double renormalized_chemical_potential,
+                                                   void * params)
+{
+    renorm_chem_pot_equation_input * p = (renorm_chem_pot_equation_input *)params;
+
+    double term = 2.0 * parameters.quark_model.G_V * CONST_HBAR_C
+                  * QuarkBarionicDensity(p->mass,
+                                         renormalized_chemical_potential,
+                                         p->temperature);
+
+    return renormalized_chemical_potential - p->chemical_potential + term;
+}

@@ -10,8 +10,9 @@ typedef struct _hadron_gap_eq_input_params{
     double renormalized_chemical_potential;
 } hadron_gap_eq_input_params;
 
-double HadronGapEquation(double    mass,
-                         void     *input);
+
+double HadronZeroedGapEquation(double mass,
+                               void * params);
 
 double HadronScalarDensity(double mass,
                            double fermi_momentum,

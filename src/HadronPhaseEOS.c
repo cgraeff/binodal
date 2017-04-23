@@ -18,29 +18,32 @@
 #include "Constants.h"
 #include "Functions.h"
 
-double HadronGapEquation(double    mass,
-                         void     *input)
+double HadronZeroedGapEquation(double mass,
+                               void * params)
 {
-	hadron_gap_eq_input_params * param = (hadron_gap_eq_input_params *)input;
+    hadron_gap_eq_input_params * p = (hadron_gap_eq_input_params *)params;
 
-    double barionic_density = param->proton_density + param->neutron_density;
-    double rho_3 = param->proton_density - param->neutron_density;
+    double barionic_density = p->proton_density + p->neutron_density;
+    double rho_3 = p->proton_density - p->neutron_density;
 
 	double scalar_density = HadronScalarDensity(mass,
-                                                param->proton_fermi_momentum,
+                                                p->proton_fermi_momentum,
                                                 parameters.hadron_model.cutoff)
                             + HadronScalarDensity(mass,
-                                                  param->neutron_fermi_momentum,
+                                                  p->neutron_fermi_momentum,
                                                   parameters.hadron_model.cutoff);
 
 	double gap_1st_term = parameters.hadron_model.G_S * scalar_density;
-	double gap_2nd_term = - parameters.hadron_model.G_SV * scalar_density
+	double gap_2nd_term = - parameters.hadron_model.G_SV
+                            * scalar_density
                             * pow(barionic_density, 2.0);
-    double gap_3rd_term = - parameters.hadron_model.G_SRHO * scalar_density
+    double gap_3rd_term = - parameters.hadron_model.G_SRHO
+                            * scalar_density
                             * pow(rho_3, 2.0);
 
 	return mass
-           + 2.0 * CONST_HBAR_C * (gap_1st_term + gap_2nd_term + gap_3rd_term)
+           + 2.0 * CONST_HBAR_C
+             * (gap_1st_term + gap_2nd_term + gap_3rd_term)
            - parameters.hadron_model.bare_mass;
 }
 
@@ -171,7 +174,7 @@ double HadronPressure(double termodynamic_potential)
 	return - termodynamic_potential + vacuum_energy_density;
 }
 
-double HadronThermodynamicPotential(double scalar_density,
+double HadronThermodynamicPotential(double total_scalar_density,
                                     double barionic_density,
                                     double proton_density,
                                     double neutron_density,
@@ -182,20 +185,20 @@ double HadronThermodynamicPotential(double scalar_density,
 	double rho_3 = proton_density - neutron_density;
 
 	double omega = kinectic_energy_density
-                   + parameters.hadron_model.bare_mass * scalar_density;
+                   + parameters.hadron_model.bare_mass * total_scalar_density;
 
 	omega += - proton_chemical_potential * proton_density
 			 - neutron_chemical_potential * neutron_density;
 
-	omega += (- parameters.hadron_model.G_S * pow(scalar_density, 2.0)
+	omega += (- parameters.hadron_model.G_S * pow(total_scalar_density, 2.0)
 			  + parameters.hadron_model.G_V * pow(barionic_density, 2.0)
 			  + parameters.hadron_model.G_SV
-                * pow(scalar_density * barionic_density, 2.0)
+                * pow(total_scalar_density * barionic_density, 2.0)
 			  + parameters.hadron_model.G_RHO * pow(rho_3, 2.0)
 			  + parameters.hadron_model.G_VRHO
                 * pow(barionic_density * rho_3, 2.0)
               + parameters.hadron_model.G_SRHO
-                * pow(scalar_density * rho_3, 2.0))
+                * pow(total_scalar_density * rho_3, 2.0))
              * CONST_HBAR_C;
 
 	return omega;
