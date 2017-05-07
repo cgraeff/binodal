@@ -20,6 +20,9 @@ typedef struct _EntropyParameters{
     int integration_key;
 } EntropyParameters;
 
+double QuarkSelfConsistentRenormChemPot(double quark_mass,
+                                        double chemical_potential,
+                                        double temperature);
 
 double QuarkBarionicDensity(double mass,
                             double renormalized_chemical_potential,

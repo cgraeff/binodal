@@ -92,6 +92,8 @@ double QuarkThermodynamicPotentialFreeGasContribution(double mass,
 
         double F_diff = F_E(mass, parameters.quark_model.cutoff) - F_E(mass, fermi_momentum);
 
+        printf("F_E_DIFF: %f\n", F_diff);
+
         return constant
                * (F_diff
                   + renormalized_chemical_potential * pow(fermi_momentum, 3.0) / 3.0);

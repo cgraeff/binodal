@@ -14,15 +14,9 @@ int MultiDimensionalRootFinderHelperFunction(const gsl_vector   *x,
                                              void               *params,
                                              gsl_vector         *return_values);
 
-double QuarkSelfConsistentRenormChemPot(double quark_mass,
-                                        double chemical_potential,
-                                        double temperature);
-
-
-
 void SimultaneousSolution(SimultaneousSolutionParameters params,
                           double quark_vacuum_thermodynamic_potential,
-                          double vacuum_thermodynamic_potential,
+                          double hadron_vacuum_thermodynamic_potential,
                           double *return_barionic_density,
                           double *return_hadron_mass,
                           double *return_quark_mass,
@@ -34,6 +28,8 @@ void SimultaneousSolution(SimultaneousSolutionParameters params,
     multi_dim_root_params p;
     p.temperature = parameters.variables.temperature;
     p.proton_fraction = parameters.variables.proton_fraction;
+    p.quark_vacuum_thermodynamic_potential = quark_vacuum_thermodynamic_potential;
+    p.hadron_vacuum_thermodynamic_potential = hadron_vacuum_thermodynamic_potential;
 
     // Set dimension (number of equations|variables to solve|find)
     const int dimension = 4;
@@ -218,17 +214,24 @@ int MultiDimensionalRootFinderHelperFunction(const gsl_vector   *x,
                                         up_renormalized_chemical_potential,
                                         parameters.variables.temperature);
     double down_quark_thermodynamic_potential =
-            QuarkThermodynamicPotential(up_quark_mass,
-                                        up_chemical_potential,
-                                        up_renormalized_chemical_potential,
+            QuarkThermodynamicPotential(down_quark_mass,
+                                        down_chemical_potential,
+                                        down_renormalized_chemical_potential,
                                         parameters.variables.temperature);
+
+    printf("up_omega: %20.15E\n", up_quark_thermodynamic_potential);
+    printf("dn_omega: %20.15E\n", down_quark_thermodynamic_potential);
+    printf("vac_omega: %20.15E\n", p->quark_vacuum_thermodynamic_potential);
 
     double regularized_thermodynamic_potential = up_quark_thermodynamic_potential
                                                  + down_quark_thermodynamic_potential
-                                                 - 2.0 * p->quark_vacuum_thermodynamic_potential;// TODO should be times 2?
+                                                 - 2.0 * p->quark_vacuum_thermodynamic_potential;
 
     double quark_pressure = QuarkPressure(regularized_thermodynamic_potential,
                                             parameters.variables.temperature);
+
+    printf("P_H: %20.15E\n", hadron_pressure);
+    printf("P_Q: %20.15E\n", quark_pressure);
 
     double zeroed_pressure = hadron_pressure - quark_pressure;
 

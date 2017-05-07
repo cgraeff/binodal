@@ -60,7 +60,11 @@ double HadronThermodynamicPotential(double scalar_density,
     if (options.verbose){
         printf("\tQuark vacuum mass: %f\n", quark_vacuum_mass);
         printf("\tHadron vacuum mass: %f\n", hadron_vacuum_mass);
+        printf("\tQuark vacuum thermodynamic potential: %f\n",
+               2.0 * quark_vacuum_thermodynamic_potential);
     }
+
+    abort();
 
     if (options.verbose)
         printf("Solving gap equation and equations of state ...\n");
