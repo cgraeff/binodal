@@ -17,17 +17,16 @@ int MultiDimensionalRootFinderHelperFunction(const gsl_vector   *x,
 void SimultaneousSolution(SimultaneousSolutionParameters params,
                           double quark_vacuum_thermodynamic_potential,
                           double hadron_vacuum_thermodynamic_potential,
+                          double proton_fraction,
                           double *return_barionic_density,
                           double *return_hadron_mass,
-                          double *return_quark_mass,
-                          double *return_proton_chemical_potential,
-                          double *return_neutron_chemical_potential,
-                          double *return_pressure)
+                          double *return_up_quark_mass,
+                          double *return_down_quark_mass)
 {
     // Set up parameters to be passed to helper function
     multi_dim_root_params p;
     p.temperature = parameters.variables.temperature;
-    p.proton_fraction = parameters.variables.proton_fraction;
+    p.proton_fraction = proton_fraction;
     p.quark_vacuum_thermodynamic_potential = quark_vacuum_thermodynamic_potential;
     p.hadron_vacuum_thermodynamic_potential = hadron_vacuum_thermodynamic_potential;
 
@@ -65,9 +64,10 @@ void SimultaneousSolution(SimultaneousSolutionParameters params,
 
     // Save results in return variables,
     // taking care of the mappinps
-    *return_barionic_density = pow(gsl_vector_get(return_results, 0), 2.0); // TODO return this?
+    *return_barionic_density = pow(gsl_vector_get(return_results, 0), 2.0);
     *return_hadron_mass = pow(gsl_vector_get(return_results, 1), 2.0);
-    *return_quark_mass = pow(gsl_vector_get(return_results, 2), 2.0);
+    *return_up_quark_mass = pow(gsl_vector_get(return_results, 2), 2.0);
+    *return_down_quark_mass = pow(gsl_vector_get(return_results, 3), 2.0);
 
     // Free vectors
     gsl_vector_free(initial_guess);
@@ -101,17 +101,23 @@ int MultiDimensionalRootFinderHelperFunction(const gsl_vector   *x,
     const double hadron_mass = pow(gsl_vector_get(x, 1), 2.0);
     const double up_quark_mass = pow(gsl_vector_get(x, 2), 2.0);
     const double down_quark_mass = pow(gsl_vector_get(x, 3), 2.0);
-
-    printf("bar_dens: %20.15E\n"
-           "hadron_mass: %20.15E\n"
-           "up_q_mass: %20.15E\n"
-           "dn_q_mass: %20.15E\n",
+/*
+    printf("%s:%d\n"
+           "\tRHO: %f\n"
+           "\tM_H: %f\n"
+           "\tUP_M: %f\n"
+           "\tDN_M: %f\n",
+           __FILE__,
+           __LINE__,
            barionic_density,
            hadron_mass,
            up_quark_mass,
            down_quark_mass);
+*/
+    /*
+     *  Hadrons
+     */
 
-    // Hadrons:
     double proton_density = proton_fraction * barionic_density;
     double neutron_density = (1.0 - proton_fraction) * barionic_density;
 
@@ -153,42 +159,66 @@ int MultiDimensionalRootFinderHelperFunction(const gsl_vector   *x,
     // Prepare return vector
    	gsl_vector_set(return_values, 0, zeroed_gap_eq);
 
-    // Gibbs Conditions:
+    /*
+     * Gibbs Conditions
+     */
 
     // Use chemical potential equality to determine
     // quark chemical potentials
+    // TODO: Verify that this is correct
     double up_chemical_potential = (2.0 * proton_chemical_potential
                                     - neutron_chemical_potential) / 3.0;
 
     double down_chemical_potential = (-proton_chemical_potential
                                       + 2.0 * neutron_chemical_potential) / 3.0;
 
-   	// Quarks:
-    quark_gap_eq_input_params q_gap_input;
+    /*
+     *  Quarks
+     */
 
-    // up quark
-    double up_renormalized_chemical_potential =
-        QuarkSelfConsistentRenormChemPot(up_quark_mass, up_chemical_potential, p->temperature);
+    // Self consistent determination of renormalized
+    // chemical potentials
 
-    q_gap_input.renormalized_chemical_potential = up_renormalized_chemical_potential;
-    q_gap_input.temperature = p->temperature;
+    double up_renorm_chem_pot;
+    double down_renorm_chem_pot;
 
-    double up_quark_zeroed_gap_eq = QuarkZeroedGapEquation(up_quark_mass, &q_gap_input);
+    QuarkSelfConsistentRenormalizedChemicalPotential(parameters.simultaneous_solution.renorm_chem_pot_solution,
+                                                      up_quark_mass,
+                                                      down_quark_mass,
+                                                      up_chemical_potential,
+                                                      down_chemical_potential,
+                                                      parameters.variables.temperature,
+                                                      &up_renorm_chem_pot,
+                                                      &down_renorm_chem_pot);
+
+    // Gap equations:
+    double up_scalar_density =
+        QuarkScalarDensity(parameters.variables.temperature,
+                           up_quark_mass,
+                           up_renorm_chem_pot);
+
+    double down_scalar_density =
+        QuarkScalarDensity(parameters.variables.temperature,
+                           down_quark_mass,
+                           down_renorm_chem_pot);
+
+    double up_quark_zeroed_gap_eq =
+        QuarkZeroedGapEquation(up_quark_mass,
+                               up_scalar_density,
+                               down_scalar_density);
+
+    double down_quark_zeroed_gap_eq =
+        QuarkZeroedGapEquation(down_quark_mass,
+                               up_scalar_density,
+                               down_scalar_density);
 
     gsl_vector_set(return_values, 1, up_quark_zeroed_gap_eq);
-
-    // down quark
-    double down_renormalized_chemical_potential =
-        QuarkSelfConsistentRenormChemPot(down_quark_mass, down_chemical_potential, p->temperature);
-
-    q_gap_input.renormalized_chemical_potential = down_renormalized_chemical_potential;
-    q_gap_input.temperature = p->temperature;
-
-    double down_quark_zeroed_gap_eq = QuarkZeroedGapEquation(down_quark_mass, &q_gap_input);
-
     gsl_vector_set(return_values, 2, down_quark_zeroed_gap_eq);
 
-    // Gibbs' conditions:
+    /*
+     * Gibbs' conditions for pressure
+     */
+
     // Determination of hadron pressure
 
     double hadron_kinectic_energy_density =
@@ -205,46 +235,31 @@ int MultiDimensionalRootFinderHelperFunction(const gsl_vector   *x,
                                      neutron_chemical_potential,
                                      hadron_kinectic_energy_density);
 
-    double hadron_pressure = HadronPressure(hadron_thermodynamic_potential);
+    double hadron_pressure = HadronPressure(hadron_thermodynamic_potential
+                                            - p->hadron_vacuum_thermodynamic_potential);
 
     // Determination o quark pressure
-    double up_quark_thermodynamic_potential =
-            QuarkThermodynamicPotential(up_quark_mass,
-                                        up_chemical_potential,
-                                        up_renormalized_chemical_potential,
-                                        parameters.variables.temperature);
-    double down_quark_thermodynamic_potential =
-            QuarkThermodynamicPotential(down_quark_mass,
-                                        down_chemical_potential,
-                                        down_renormalized_chemical_potential,
-                                        parameters.variables.temperature);
+    double quark_thermodynamic_potential =
+        QuarkThermodynamicPotential(up_quark_mass,
+                                    down_quark_mass,
+                                    up_chemical_potential,
+                                    down_chemical_potential,
+                                    up_renorm_chem_pot,
+                                    down_renorm_chem_pot,
+                                    parameters.variables.temperature);
 
-    printf("up_omega: %20.15E\n", up_quark_thermodynamic_potential);
-    printf("dn_omega: %20.15E\n", down_quark_thermodynamic_potential);
-    printf("vac_omega: %20.15E\n", p->quark_vacuum_thermodynamic_potential);
-
-    double regularized_thermodynamic_potential = up_quark_thermodynamic_potential
-                                                 + down_quark_thermodynamic_potential
-                                                 - 2.0 * p->quark_vacuum_thermodynamic_potential;
+    double regularized_thermodynamic_potential = quark_thermodynamic_potential
+                                                 - p->quark_vacuum_thermodynamic_potential;
 
     double quark_pressure = QuarkPressure(regularized_thermodynamic_potential,
                                             parameters.variables.temperature);
 
-    printf("P_H: %20.15E\n", hadron_pressure);
-    printf("P_Q: %20.15E\n", quark_pressure);
-
     double zeroed_pressure = hadron_pressure - quark_pressure;
 
-    gsl_vector_set(return_values, 3, zeroed_pressure);
+//    printf("\tPRESSURE: %f\n", hadron_pressure);
+//    printf("\tMU_B: %f\n", (proton_chemical_potential + neutron_chemical_potential) * 0.5);
 
-    printf("eq 1: %20.15E\n"
-           "eq 2: %20.15E\n"
-           "eq 3: %20.15E\n"
-           "eq 4: %20.15E\n",
-           gsl_vector_get(return_values, 0),
-           gsl_vector_get(return_values, 1),
-           gsl_vector_get(return_values, 2),
-           gsl_vector_get(return_values, 3));
+    gsl_vector_set(return_values, 3, zeroed_pressure);
 
     return GSL_SUCCESS;
 }

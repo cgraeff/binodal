@@ -9,6 +9,8 @@
 #ifndef QuarkPhaseEOS_h
 #define QuarkPhaseEOS_h
 
+#include "SimultaneousSolution.h"
+
 // Parameters for the determination of
 // entropy by integration
 typedef struct _EntropyParameters{
@@ -20,8 +22,9 @@ typedef struct _EntropyParameters{
     int integration_key;
 } EntropyParameters;
 
-double QuarkSelfConsistentRenormChemPot(double quark_mass,
-                                        double chemical_potential,
+double QuarkSelfConsistentRenormChemPot(double chemical_potential,
+                                        double up_barionic_density,
+                                        double down_barionic_density,
                                         double temperature);
 
 double QuarkBarionicDensity(double mass,
@@ -32,9 +35,12 @@ double QuarkScalarDensity(double temperature,
                           double mass,
                           double renormalized_chemical_potential);
 
-double QuarkThermodynamicPotential(double mass,
-                                   double chemical_potential,
-                                   double renormalized_chemical_potential,
+double QuarkThermodynamicPotential(double up_mass,
+                                   double down_mass,
+                                   double up_chemical_potential,
+                                   double down_chemical_potential,
+                                   double up_renormalized_chemical_potential,
+                                   double down_renormalized_chemical_potential,
                                    double temperature);
 
 double
@@ -59,25 +65,38 @@ double QuarkEntropy(double mass,
 double QuarkEntropyIntegrand(double momentum,
                              void * parameters);
 
-typedef struct _quark_gap_eq_input_params{
-    double renormalized_chemical_potential;
-	double temperature;
-} quark_gap_eq_input_params;
-
 typedef struct _quark_renorm_chem_pot_equation_input{
     double chemical_potential;
     double mass;
 	double temperature;
 } quark_renorm_chem_pot_equation_input;
 
+int ZeroedRenormalizedQuarkChemicalPotentialEquation(const gsl_vector   *x,
+                                                        void *params,
+                                                        gsl_vector *return_values);
+
+void QuarkSelfConsistentRenormalizedChemicalPotential(RenormChemPotSolutionParameters params,
+                                                      double up_quark_mass,
+                                                      double down_quark_mass,
+                                                      double up_chemical_potential,
+                                                      double down_chemical_potential,
+                                                      double temperature,
+                                                      double *return_up_renorm_chem_pot,
+                                                      double *return_down_renorm_chem_pot);
 double QuarkZeroedGapEquation(double mass,
-                         void * params);
+                              double up_scalar_density,
+                              double down_scalar_density);
 
-double
-QuarkZeroedRenormalizedChemicalPotentialEquation(double  renorm_chemical_potential,
-                                                 void   *params);
+void QuarkThermodynamicPotentialMinimum(double * up_mass_at_minimum,
+                                        double * down_mass_at_minimum);
 
-double QuarkVacuumMassDetermination();
+void QuarkVacuumMassDetermination(double * up_vacuum_mass,
+                                  double * down_vacuum_mass);
+
+int QuarkVacuumMassDeterminationEquation(const gsl_vector   *x,
+                                         void *params,
+                                         gsl_vector *return_values);
+
 double QuarkVacuumMassEquation(double mass, void * input);
 
 double QPFermiMomentum(double mass, double renormalized_chemical_potential);

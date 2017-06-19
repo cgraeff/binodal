@@ -33,7 +33,7 @@ int CommandlineOptionsParse(int argc, char * argv[])
     // the arguments after the first will be misinterpreted as unknown, or unclaimed.
     // This particular implementation will stop if there are any unprocessed arguments.
 
-    char * short_options = "p:t:lqdauh";
+    char * short_options = "q:h:t:lsdau";
 
     int opt;
     while ((opt = getopt(argc, argv, short_options)) != -1){

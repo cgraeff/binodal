@@ -47,6 +47,36 @@ double HadronZeroedGapEquation(double mass,
            - parameters.hadron_model.bare_mass;
 }
 
+double HadronSolveGapEquation(UnidimensionalRootFindingParameters rootfinding_params,
+                              double proton_density,
+                              double neutron_density,
+                              double proton_fermi_momentum,
+                              double neutron_fermi_momentum)
+{
+    hadron_gap_eq_input_params p;
+    p.proton_density = proton_density;
+    p.neutron_density = neutron_density;
+    p.proton_fermi_momentum = proton_fermi_momentum;
+    p.neutron_fermi_momentum= neutron_fermi_momentum;
+
+    gsl_function func;
+    func.function = &HadronZeroedGapEquation;
+    func.params = &p;
+
+    double return_result;
+    int status = UnidimensionalRootFinder(&func,
+                                          rootfinding_params,
+                                          &return_result);
+
+    if (status != 0){
+
+        // If no root could be found, that means
+        // we've reached chiral restoration
+        return 0.0;
+    }
+    return return_result;
+}
+
 double HadronScalarDensity(double mass,
                            double fermi_momentum,
                            double cutoff)
@@ -169,9 +199,7 @@ double HadronEnergyDensity(double pressure,
 
 double HadronPressure(double termodynamic_potential)
 {
-	double vacuum_energy_density = HadronVacuumEnergyDensity();
-
-	return - termodynamic_potential + vacuum_energy_density;
+	return - termodynamic_potential;
 }
 
 double HadronThermodynamicPotential(double total_scalar_density,

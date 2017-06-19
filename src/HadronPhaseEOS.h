@@ -14,6 +14,12 @@ typedef struct _hadron_gap_eq_input_params{
 double HadronZeroedGapEquation(double mass,
                                void * params);
 
+double HadronSolveGapEquation(UnidimensionalRootFindingParameters rootfinding_params,
+                              double proton_density,
+                              double neutron_density,
+                              double proton_fermi_momentum,
+                              double neutron_fermi_momentum);
+
 double HadronScalarDensity(double mass,
                            double fermi_momentum,
                            double cutoff);

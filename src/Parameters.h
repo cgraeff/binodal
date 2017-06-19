@@ -51,8 +51,28 @@ typedef struct _HadronModelParameters{
 // performing the calculation of the EOS
 typedef struct _VariableParameters{
     double temperature; // (MeV)
-    double proton_fraction;		// (no dimension)
+    double min_proton_fraction;		// (no dimension)
+    double max_proton_fraction;
+    int num_points;
 } VariableParameters;
+
+typedef struct _QuarkVacuumMassDeterminationParameters{
+    double up_vacuum_mass_guess;
+    double down_vacuum_mass_guess;
+
+    int max_iter;
+
+    double abs_error;
+    double rel_error;
+} QuarkVacuumMassDeterminationParameters;
+
+typedef struct _OtherRootfindingParameters{
+    double up_mass_guess;
+    double down_mass_guess;
+    double abs_error;
+    double rel_error;
+    int max_iter;
+} OtherRootFindingParameters;
 
 typedef struct _parameters
 {
@@ -60,12 +80,17 @@ typedef struct _parameters
     HadronModelParameters hadron_model;
     QuarkModelParameters quark_model;
 
-    UnidimensionalRootFindingParameters vacuum_mass_determination;
+    QuarkVacuumMassDeterminationParameters vacuum_mass_determination;
     UnidimensionalRootFindingParameters q_renorm_chem_pot_finding;
     SimultaneousSolutionParameters simultaneous_solution;
 
     IntegratorParameters fermi_dirac_integrals;
     IntegratorParameters therm_pot_free_gas_integral;
+
+    //my tests
+    UnidimensionalRootFindingParameters rootfinding_params;
+    OtherRootFindingParameters other_rootfinding;
+    UnidimensionalRootFindingParameters binodal_rootfinding_params;
 
 } Parameters;
 

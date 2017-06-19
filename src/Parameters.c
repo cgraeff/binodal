@@ -588,19 +588,26 @@ void SetParametersSet(char * quark_set_identifier, char * hadron_set_identifier)
         parameters.quark_model = quark_model_par_sets[0];
     }
     else{
+
+        bool set_found = false;
         for (int i = 0; i < quark_model_par_sets_count; i++){
 
             QuarkModelParameters p = quark_model_par_sets[i];
 
             if (!strcasecmp(p.parameters_set_identifier, quark_set_identifier)){
                 parameters.quark_model = p;
+
+                set_found = true;
+                break;
             }
-            else{
-                printf("Parameters set %s unrecognized.\n"
-                       "Use -l to list available parameterizations.\n",
-                        quark_set_identifier);
-                exit(EXIT_FAILURE);
-            }
+        }
+
+        if (set_found == false){
+
+            printf("Parameters set %s unrecognized.\n"
+                   "Use -l to list available parameterizations.\n",
+                   quark_set_identifier);
+            exit(EXIT_FAILURE);
         }
     }
 
@@ -608,19 +615,26 @@ void SetParametersSet(char * quark_set_identifier, char * hadron_set_identifier)
         parameters.hadron_model = hadron_model_par_sets[0];
     }
     else{
+
+        bool set_found = false;
         for (int i = 0; i < hadron_model_par_sets_count; i++){
 
             HadronModelParameters p = hadron_model_par_sets[i];
 
             if (!strcasecmp(p.parameters_set_identifier, hadron_set_identifier)){
                 parameters.hadron_model = p;
+
+                set_found = true;
+
+                break;
             }
-            else{
-                printf("Parameters set %s unrecognized.\n"
-                       "Use -l to list available parameterizations.\n",
-                        hadron_set_identifier);
-                exit(EXIT_FAILURE);
-            }
+        }
+
+        if (set_found == false){
+            printf("Parameters set %s unrecognized.\n"
+                   "Use -l to list available parameterizations.\n",
+                   hadron_set_identifier);
+            exit(EXIT_FAILURE);
         }
     }
 
@@ -631,35 +645,39 @@ Parameters NumericalParameters()
 {
     Parameters p;
 
+    p.variables.num_points = 1;
     p.variables.temperature = 0.0; // (MeV)
-    p.variables.proton_fraction = 0.5;
+    p.variables.min_proton_fraction = 0.5;
+    p.variables.max_proton_fraction = 0.5;
 
     // Low lower_bound but not zero, as it may be problematic if bare_mass == 0
     // upper_bound near the value of the nucleon mass.
-    p.vacuum_mass_determination.lower_bound = 1.0E-3;
-    p.vacuum_mass_determination.upper_bound = 1000.0;
+    p.vacuum_mass_determination.max_iter = 1000;
     p.vacuum_mass_determination.abs_error = 1.0E-5;
     p.vacuum_mass_determination.rel_error = 1.0E-5;
-    p.vacuum_mass_determination.max_iterations = 2000;
+    p.vacuum_mass_determination.up_vacuum_mass_guess = 300.0;
+    p.vacuum_mass_determination.down_vacuum_mass_guess = 300.0;
 
-    p.q_renorm_chem_pot_finding.lower_bound = 1.0E-3;
+    //this is not needed anymore, is it?
+    p.q_renorm_chem_pot_finding.lower_bound = 1.0E-5;
     p.q_renorm_chem_pot_finding.upper_bound = 1000.0;
     p.q_renorm_chem_pot_finding.abs_error = 1.0E-5;
     p.q_renorm_chem_pot_finding.rel_error = 1.0E-5;
     p.q_renorm_chem_pot_finding.max_iterations = 2000;
 
-    // In the following, the guesses are used for the first iteration.
-    // Any subsequent iteration uses the values of mass
-    // and renormalized chemical potential from the previous
-    // iteration as new guesses. This shall work well for
-    // the "stepping" evolution of a control variable.
     p.simultaneous_solution.max_iter = 8000;
-    p.simultaneous_solution.barionic_density_guess = 0.10;
-    p.simultaneous_solution.up_quark_mass_guess = 400.0; // (MeV)
-    p.simultaneous_solution.down_quark_mass_guess = 400.0; // (MeV)
+    p.simultaneous_solution.barionic_density_guess = 0.45;
+    p.simultaneous_solution.up_quark_mass_guess = 300.0; // (MeV)
+    p.simultaneous_solution.down_quark_mass_guess = 300.0; // (MeV)
     p.simultaneous_solution.hadron_mass_guess = 939.0; // (MeV)
     p.simultaneous_solution.abs_error = 1.0E-8;
     p.simultaneous_solution.rel_error = 1.0E-8;
+
+    p.simultaneous_solution.renorm_chem_pot_solution.abs_error = 1.0E-7;
+    p.simultaneous_solution.renorm_chem_pot_solution.rel_error = 1.0E-7;
+    p.simultaneous_solution.renorm_chem_pot_solution.max_iter = 1000;
+    p.simultaneous_solution.renorm_chem_pot_solution.up_renorm_chem_pot_guess = 350.0;
+    p.simultaneous_solution.renorm_chem_pot_solution.down_renorm_chem_pot_guess = 350.0;
 
     p.fermi_dirac_integrals.lower_limit = 0.0; // (MeV)
     p.fermi_dirac_integrals.upper_limit = 2000.0; // (MeV)
@@ -683,6 +701,26 @@ Parameters NumericalParameters()
     /* pq.simultaneous_solution.entropy.rel_error = 1.0E-3; */
     /* pq.simultaneous_solution.entropy.max_sub_interval = 1000; */
     /* pq.simultaneous_solution.entropy.integration_key = GSL_INTEG_GAUSS61; */
+
+    //my tests
+
+    p.rootfinding_params.max_iterations = 2000;
+    p.rootfinding_params.lower_bound = 0.01;
+    p.rootfinding_params.upper_bound = 4000;
+    p.rootfinding_params.abs_error = 1E-5;
+    p.rootfinding_params.rel_error = 1E-5;
+
+    p.other_rootfinding.up_mass_guess = 300.0;
+    p.other_rootfinding.down_mass_guess = 300.0;
+    p.other_rootfinding.abs_error = 1.0E-5;
+    p.other_rootfinding.rel_error = 1.0E-5;
+    p.other_rootfinding.max_iter = 1000;
+
+    p.binodal_rootfinding_params.max_iterations = 2000;
+    p.binodal_rootfinding_params.lower_bound = 0.35;
+    p.binodal_rootfinding_params.upper_bound = 1.0;
+    p.binodal_rootfinding_params.abs_error = 1E-5;
+    p.binodal_rootfinding_params.rel_error = 1E-5;
 
     return p;
 }
