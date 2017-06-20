@@ -113,25 +113,31 @@ int SolveFiniteTemperatureEOS(){
 
 
     // Write results
-    SetFilePath("data");
+    SetFilePath("output/data");
 
-    WriteVectorsToFile ("pressure.dat",
+    WriteVectorsToFile ("pressure_at_transition.dat",
                         "# proton fraction, pressure at transition (MeV/fm^3)\n",
                         2,
                         proton_fraction_vector,
                         pressure_vector);
 
-    WriteVectorsToFile ("barionic_chemical_potential.dat",
+    WriteVectorsToFile ("barionic_chemical_potential_at_transition.dat",
                         "# proton fraction, barionic chemical potential at transition (MeV)\n",
                         2,
                         proton_fraction_vector,
                         barionic_chemical_potential_vector);
 
-    WriteVectorsToFile ("isovector_chemical_potential.dat",
-                        "# proton fraction, barionic chemical potential at transition (MeV)\n",
+    WriteVectorsToFile ("isovector_chemical_potential_at_transition.dat",
+                        "# proton fraction, isovector chemical potential at transition (MeV)\n",
                         2,
                         proton_fraction_vector,
                         isovector_chemical_potential_vector);
+
+    WriteVectorsToFile ("barionic_density_at_transition.dat",
+                        "# proton fraction, barionic density at transition (fm^{-3})\n",
+                        2,
+                        proton_fraction_vector,
+                        barionic_density_vector);
 
     if (options.verbose)
         printf("Done!\n");
