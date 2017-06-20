@@ -32,3 +32,9 @@ eos
 # Debug files
 *.dSYM/
 *.su
+
+# Data files
+*.dat
+
+# Figures
+*.png

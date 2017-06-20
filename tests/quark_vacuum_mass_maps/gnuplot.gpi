@@ -1,0 +1,15 @@
+set term png size 1024,768
+
+unset key
+
+set out "quark_vacuum_mass_maps.png"
+
+set view 38, 134
+
+set contour
+
+splot "data/quark_vacuum_mass_maps.dat" u 1:2:3 w pm3d, "" u 1:2:4 w pm3d,  0 w lines lc rgb 'black', "data/quark_vacuum_mass_location.dat" w points pt 7 lc rgb 'black'
+
+set out "equal_mass_view.png"
+
+plot "data/equal_mass_view.dat" w l, 0

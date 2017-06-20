@@ -1,0 +1,17 @@
+set term png
+
+unset key
+
+set out "quark_thermodynamic_potential_vs_mass.dat"
+
+set xtics 0, 200
+set ytics 0, 200
+
+splot "data/quark_thermodynamic_potential_mass_map.dat" w pm3d, "data/quark_thermodynamic_potential_mass_map_minimum_location.dat" w points pt 7 lc rgb 'black'
+
+
+set out "quark_thermodynamic_potential_mass_map.dat"
+set view map
+set contour
+
+splot "data/quark_thermodynamic_potential_mass_map.dat" w pm3d, "data/quark_thermodynamic_potential_mass_map_minimum_location.dat" w points pt 7 lc rgb 'black'

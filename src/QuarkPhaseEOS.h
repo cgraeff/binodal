@@ -100,4 +100,16 @@ int QuarkVacuumMassDeterminationEquation(const gsl_vector   *x,
 double QuarkVacuumMassEquation(double mass, void * input);
 
 double QPFermiMomentum(double mass, double renormalized_chemical_potential);
+
+int TestMassAndRenormChemPotSimultaneousSolution(double up_chemical_potential,
+                                                 double down_chemical_potential,
+                                                 double up_mass_guess,
+                                                 double down_mass_guess,
+                                                 double abs_error,
+                                                 double rel_error,
+                                                 int max_iter,
+                                                 double * return_up_mass,
+                                                 double * return_down_mass,
+                                                 double * return_up_renorm_chem_pot,
+                                                 double * return_down_renorm_chem_pot);
 #endif /* QuarkPhaseEOS_h */

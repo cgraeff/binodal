@@ -531,3 +531,132 @@ int ZeroedRenormalizedQuarkChemicalPotentialEquation(const gsl_vector   *x,
 
     return GSL_SUCCESS;
 }
+
+typedef struct _TestMassAndRenormChemPot{
+    double up_chemical_potential;
+    double down_chemical_potential;
+
+    double up_renorm_chem_pot;
+    double down_renorm_chem_pot;
+} TestMassAndRenormChemPot;
+
+int TestMassAndRenormChemPotSimultaneousSolutionEquation(const gsl_vector   *x,
+                                                         void *params,
+                                                         gsl_vector *return_values);
+
+int TestMassAndRenormChemPotSimultaneousSolution(double up_chemical_potential,
+                                                 double down_chemical_potential,
+                                                 double up_mass_guess,
+                                                 double down_mass_guess,
+                                                 double abs_error,
+                                                 double rel_error,
+                                                 int max_iter,
+                                                 double * return_up_mass,
+                                                 double * return_down_mass,
+                                                 double * return_up_renorm_chem_pot,
+                                                 double * return_down_renorm_chem_pot)
+{
+    // Set up parameters to be passed to helper function
+    TestMassAndRenormChemPot params;
+    params.up_chemical_potential = up_chemical_potential;
+    params.down_chemical_potential = down_chemical_potential;
+
+    // Set dimension (number of equations|variables to solve|find)
+    const int dimension = 2;
+
+    gsl_multiroot_function f;
+    f.f = &TestMassAndRenormChemPotSimultaneousSolutionEquation;
+    f.n = dimension;
+    f.params = (void *)&params;
+
+    gsl_vector * initial_guess = gsl_vector_alloc(dimension);
+    gsl_vector * return_results = gsl_vector_alloc(dimension);
+
+    gsl_vector_set(initial_guess,
+                   0,
+                   sqrt(up_mass_guess));
+    gsl_vector_set(initial_guess,
+                   1,
+                   sqrt(down_mass_guess));
+
+    int status =
+        MultidimensionalRootFinder(dimension,
+                                   &f,
+                                   initial_guess,
+                                   abs_error,
+                                   rel_error,
+                                   max_iter,
+                                   return_results);
+
+    if (status != 0){
+        printf("%s:%d: Something is wrong with the rootfinding.\n",
+               __FILE__,
+               __LINE__);
+        abort();
+    }
+
+    // Save results in return variables,
+    // taking care of the mappinps
+    *return_up_mass = pow(gsl_vector_get(return_results, 0), 2.0);
+    *return_down_mass = pow(gsl_vector_get(return_results, 1), 2.0);
+
+    *return_up_renorm_chem_pot = params.up_renorm_chem_pot;
+    *return_down_renorm_chem_pot = params.down_renorm_chem_pot;
+
+    // Free vectors
+    gsl_vector_free(initial_guess);
+    gsl_vector_free(return_results);
+
+    return status;
+}
+
+int TestMassAndRenormChemPotSimultaneousSolutionEquation(const gsl_vector   *x,
+                                                         void *params,
+                                                         gsl_vector *return_values)
+{
+    const double up_mass = pow(gsl_vector_get(x, 0), 2.0);
+    const double down_mass = pow(gsl_vector_get(x, 1), 2.0);
+
+    TestMassAndRenormChemPot * p = (TestMassAndRenormChemPot *)params;
+
+    double up_renorm_chem_pot;
+    double down_renorm_chem_pot;
+
+    QuarkSelfConsistentRenormalizedChemicalPotential(parameters.simultaneous_solution.renorm_chem_pot_solution,
+                                                     up_mass,
+                                                     down_mass,
+                                                     p->up_chemical_potential,
+                                                     p->down_chemical_potential,
+                                                     parameters.variables.temperature,
+                                                     &up_renorm_chem_pot,
+                                                     &down_renorm_chem_pot);
+    // save renormalized chemical potentials
+    p->up_renorm_chem_pot = up_renorm_chem_pot;
+    p->down_renorm_chem_pot = down_renorm_chem_pot;
+
+    // Gap equations:
+    double up_scalar_density =
+        QuarkScalarDensity(parameters.variables.temperature,
+                           up_mass,
+                           up_renorm_chem_pot);
+
+    double down_scalar_density =
+        QuarkScalarDensity(parameters.variables.temperature,
+                           down_mass,
+                           down_renorm_chem_pot);
+
+    double up_quark_zeroed_gap_eq =
+        QuarkZeroedGapEquation(up_mass,
+                               up_scalar_density,
+                               down_scalar_density);
+
+    double down_quark_zeroed_gap_eq =
+        QuarkZeroedGapEquation(down_mass,
+                               up_scalar_density,
+                               down_scalar_density);
+
+    gsl_vector_set(return_values, 0, up_quark_zeroed_gap_eq);
+    gsl_vector_set(return_values, 1, down_quark_zeroed_gap_eq);
+
+    return GSL_SUCCESS;
+}
