@@ -1,0 +1,25 @@
+set term png
+
+###
+
+set out "pressure_at_transition.png"
+
+plot "data/pressure_at_transition.dat" w l
+
+###
+
+set out "barionic_density_at_transition.dat"
+
+plot "data/barionic_density_at_transition.dat" w l
+
+###
+
+set out "barionic_chemical_potential_at_transition.dat"
+
+plot "data/barionic_chemical_potential_at_transition.dat" w l
+
+###
+
+set out "isovector_chemical_potential_at_transition.png"
+
+plot "data/isovector_chemical_potential_at_transition.dat" w l
