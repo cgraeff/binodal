@@ -1,6 +1,6 @@
 //
 //  Tests.h
-//  quarks EOS
+//  binodal
 //
 //  Created by Clebson Graeff on 2016-06-08.
 //  Copyright © 2016 Clebson Graeff. All rights reserved.

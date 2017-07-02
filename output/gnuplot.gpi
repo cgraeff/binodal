@@ -8,13 +8,13 @@ plot "data/pressure_at_transition.dat" w l
 
 ###
 
-set out "barionic_density_at_transition.dat"
+set out "barionic_density_at_transition.png"
 
 plot "data/barionic_density_at_transition.dat" w l
 
 ###
 
-set out "barionic_chemical_potential_at_transition.dat"
+set out "barionic_chemical_potential_at_transition.png"
 
 plot "data/barionic_chemical_potential_at_transition.dat" w l
 

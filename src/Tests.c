@@ -1,17 +1,18 @@
 //
 //  Tests.c
-//  quarks EOS
+//  binodal
 //
 //  Created by Clebson Graeff on 2016-06-08.
 //  Copyright © 2016 Clebson Graeff. All rights reserved.
 //
 
-#include "Tests.h"
+#include <stdbool.h>
 
 #include "libdatafun/libdatafun.h"
 
+#include "Tests.h"
+
 #include "Parameters.h"
-#include "SimultaneousSolution.h"
 #include "QuarkPhaseEOS.h"
 #include "HadronPhaseEOS.h"
 #include "Binodal.h"
@@ -254,12 +255,12 @@ void RunTests()
             double hadron_pressure;
             double proton_chemical_potential;
             double neutron_chemical_potential;
-            DetermineHadronPressureAndChemicalPotentials(barionic_density,
-                                                         proton_fraction,
-                                                         hadron_vacuum_potential,
-                                                         &hadron_pressure,
-                                                         &proton_chemical_potential,
-                                                         &neutron_chemical_potential);
+            DetermineHadronPressureAndChemPots(barionic_density,
+                                               proton_fraction,
+                                               hadron_vacuum_potential,
+                                               &hadron_pressure,
+                                               &proton_chemical_potential,
+                                               &neutron_chemical_potential);
 
             double up_chemical_potential = (2.0 * proton_chemical_potential
                                             - neutron_chemical_potential) / 3.0;

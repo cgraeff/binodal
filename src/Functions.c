@@ -1,3 +1,10 @@
+//
+//  Functions.c
+//  binodal
+//
+//  Created by Clebson Graeff on 2017-06-20.
+//  Copyright © 2017 Clebson Graeff. All rights reserved.
+//
 
 #include <math.h>
 
@@ -7,7 +14,7 @@
 double F0(double mass,
           double momentum)
 {
-	double E = sqrt(pow(mass, 2.0) + pow(momentum, 2.0));
+    double E = sqrt(pow(mass, 2.0) + pow(momentum, 2.0));
 
     double first_term = momentum * E;
     double second_term = - pow(mass, 2.0) * log(momentum + E);
@@ -22,19 +29,6 @@ double F0(double mass,
         third_term = 0;
 
     return (1.0 / 2.0) * (first_term +second_term + third_term);
-}
-
-double F_P_0(double mass,
-             double momentum)
-{
-    double E = sqrt(pow(mass, 2.0) + pow(momentum, 2.0));
-
-    double result = mass * momentum / E;
-    result += - 2.0 * mass * log((E + momentum) / mass);
-    result += - pow(mass, 3.0) / (E * (E + momentum));
-    result += mass;
-
-    return 0.5 * result;
 }
 
 double F2(double mass,

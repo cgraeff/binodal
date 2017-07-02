@@ -1,6 +1,6 @@
 //
 //  Parameters.c
-//  NJLv
+//  binodal
 //
 //  Created by Clebson Graeff on 2017-02-14.
 //  Copyright © 2017 Clebson Graeff. All rights reserved.
@@ -24,12 +24,11 @@ static int hadron_model_par_sets_count = 0;
 static QuarkModelParameters quark_model_par_sets[256] = {0};
 static int quark_model_par_sets_count = 0;
 
-Parameters NewCopyOfParametersSetFromTemplate();
-void AppendQuarkParametersSetToList(QuarkModelParameters a_set);
-void AppendHadronParametersSetToList(HadronModelParameters a_set);
-Parameters NumericalParameters();
+static void AppendQuarkParametersSetToList(QuarkModelParameters a_set);
+static void AppendHadronParametersSetToList(HadronModelParameters a_set);
+static void NumericalParameters();
 
-void ParametersSetsSetup(void)
+void ParseModelParametersSets(void)
 {
     // See header file for units and other relevant
     // information about the parameters below.
@@ -324,8 +323,9 @@ void ParametersSetsSetup(void)
     HadronModelParameters ph;
 
     ph.parameters_set_identifier = "eNJL1";
-    ph.parameters_set_origin = "Helena Pais, Débora P. Menezes, and Constança Providência, "
-                               "Phys. Rev. C 93, 065805 – Published 8 June 2016";
+    ph.parameters_set_origin =
+    "Helena Pais, Débora P. Menezes, and Constança Providência, "
+    "Phys. Rev. C 93, 065805 – Published 8 June 2016";
 
     ph.G_S = 4.855;         // (fm)^2
     ph.G_V = 4.65;          // (fm)^2
@@ -337,13 +337,14 @@ void ParametersSetsSetup(void)
     ph.bare_mass = 0.0;     // (MeV)
     ph.nucleon_mass = 939.0; // (MeV)
 
-  	AppendHadronParametersSetToList(ph);
+    AppendHadronParametersSetToList(ph);
 
-  	////
+    ////
 
     ph.parameters_set_identifier = "eNJL1OmegaRho1";
-    ph.parameters_set_origin = "Helena Pais, Débora P. Menezes, and Constança Providência, "
-							  "Phys. Rev. C 93, 065805 – Published 8 June 2016";
+    ph.parameters_set_origin =
+    "Helena Pais, Débora P. Menezes, and Constança Providência, "
+    "Phys. Rev. C 93, 065805 – Published 8 June 2016";
 
     ph.G_S = 4.855;
     ph.G_V = 4.65;
@@ -357,11 +358,12 @@ void ParametersSetsSetup(void)
 
     AppendHadronParametersSetToList(ph);
 
-  	////
+    ////
 
     ph.parameters_set_identifier = "eNJL1OmegaRho2";
-    ph.parameters_set_origin = "Helena Pais, Débora P. Menezes, and Constança Providência, "
-							  "Phys. Rev. C 93, 065805 – Published 8 June 2016";
+    ph.parameters_set_origin =
+    "Helena Pais, Débora P. Menezes, and Constança Providência, "
+    "Phys. Rev. C 93, 065805 – Published 8 June 2016";
 
     ph.G_S = 4.855;
     ph.G_V = 4.65;
@@ -375,11 +377,12 @@ void ParametersSetsSetup(void)
 
     AppendHadronParametersSetToList(ph);
 
-  	////
+    ////
 
     ph.parameters_set_identifier = "eNJL2";
-    ph.parameters_set_origin = "Helena Pais, Débora P. Menezes, and Constança Providência, "
-							  "Phys. Rev. C 93, 065805 – Published 8 June 2016";
+    ph.parameters_set_origin =
+    "Helena Pais, Débora P. Menezes, and Constança Providência, "
+    "Phys. Rev. C 93, 065805 – Published 8 June 2016";
 
     ph.G_S = 3.8;
     ph.G_V = 3.8;
@@ -393,11 +396,12 @@ void ParametersSetsSetup(void)
 
     AppendHadronParametersSetToList(ph);
 
-  	////
+    ////
 
     ph.parameters_set_identifier = "eNJL2OmegaRho1";
-    ph.parameters_set_origin = "Helena Pais, Débora P. Menezes, and Constança Providência, "
-							  "Phys. Rev. C 93, 065805 – Published 8 June 2016";
+    ph.parameters_set_origin =
+    "Helena Pais, Débora P. Menezes, and Constança Providência, "
+    "Phys. Rev. C 93, 065805 – Published 8 June 2016";
 
     ph.G_S = 3.8;
     ph.G_V = 3.8;
@@ -411,11 +415,12 @@ void ParametersSetsSetup(void)
 
     AppendHadronParametersSetToList(ph);
 
-  	////
+    ////
 
     ph.parameters_set_identifier = "eNJL3";
-    ph.parameters_set_origin = "Helena Pais, Débora P. Menezes, and Constança Providência, "
-							  "Phys. Rev. C 93, 065805 – Published 8 June 2016";
+    ph.parameters_set_origin =
+    "Helena Pais, Débora P. Menezes, and Constança Providência, "
+    "Phys. Rev. C 93, 065805 – Published 8 June 2016";
 
     ph.G_S = 1.93;
     ph.G_V = 3.0;
@@ -429,11 +434,12 @@ void ParametersSetsSetup(void)
 
     AppendHadronParametersSetToList(ph);
 
-  	////
+    ////
 
     ph.parameters_set_identifier = "eNJL3SigmaRho1";
-    ph.parameters_set_origin = "Helena Pais, Débora P. Menezes, and Constança Providência, "
-							  "Phys. Rev. C 93, 065805 – Published 8 June 2016";
+    ph.parameters_set_origin =
+    "Helena Pais, Débora P. Menezes, and Constança Providência, "
+    "Phys. Rev. C 93, 065805 – Published 8 June 2016";
 
     ph.G_S = 1.93;
     ph.G_V = 3.0;
@@ -450,8 +456,9 @@ void ParametersSetsSetup(void)
   	////
 
     ph.parameters_set_identifier = "eNJL1m";
-    ph.parameters_set_origin = "Helena Pais, Débora P. Menezes, and Constança Providência, "
-							  "Phys. Rev. C 93, 065805 – Published 8 June 2016";
+    ph.parameters_set_origin =
+    "Helena Pais, Débora P. Menezes, and Constança Providência, "
+    "Phys. Rev. C 93, 065805 – Published 8 June 2016";
 
     ph.G_S = 1.3833;
     ph.G_V = 1.781;
@@ -465,11 +472,12 @@ void ParametersSetsSetup(void)
 
     AppendHadronParametersSetToList(ph);
 
-  	////
+    ////
 
     ph.parameters_set_identifier = "eNJL1mSigmaRho1";
-    ph.parameters_set_origin = "Helena Pais, Débora P. Menezes, and Constança Providência, "
-							  "Phys. Rev. C 93, 065805 – Published 8 June 2016";
+    ph.parameters_set_origin =
+    "Helena Pais, Débora P. Menezes, and Constança Providência, "
+    "Phys. Rev. C 93, 065805 – Published 8 June 2016";
 
     ph.G_S = 1.3833;
     ph.G_V = 1.781;
@@ -483,11 +491,12 @@ void ParametersSetsSetup(void)
 
     AppendHadronParametersSetToList(ph);
 
-  	////
+    ////
 
     ph.parameters_set_identifier = "eNJL2m";
-    ph.parameters_set_origin = "Helena Pais, Débora P. Menezes, and Constança Providência, "
-							  "Phys. Rev. C 93, 065805 – Published 8 June 2016";
+    ph.parameters_set_origin =
+    "Helena Pais, Débora P. Menezes, and Constança Providência, "
+    "Phys. Rev. C 93, 065805 – Published 8 June 2016";
 
     ph.G_S = 1.078;
     ph.G_V = 1.955;
@@ -501,11 +510,12 @@ void ParametersSetsSetup(void)
 
     AppendHadronParametersSetToList(ph);
 
-  	////
+    ////
 
     ph.parameters_set_identifier = "eNJL2mSigmaRho1";
-    ph.parameters_set_origin = "Helena Pais, Débora P. Menezes, and Constança Providência, "
-							  "Phys. Rev. C 93, 065805 – Published 8 June 2016";
+    ph.parameters_set_origin =
+    "Helena Pais, Débora P. Menezes, and Constança Providência, "
+    "Phys. Rev. C 93, 065805 – Published 8 June 2016";
 
     ph.G_S = 1.078;
     ph.G_V = 1.955;
@@ -574,18 +584,20 @@ void ParametersSetsSetup(void)
 
     // If there isn't at least one set, exit
     if (quark_model_par_sets_count == 0 || hadron_model_par_sets_count == 0){
-        printf("There are not parameters set declared. Declare at least one set.\n");
+        printf("There are not parameters set declared. "
+               "Declare at least one set.\n");
         exit(EXIT_FAILURE);
     }
 }
 
 void SetParametersSet(char * quark_set_identifier, char * hadron_set_identifier)
 {
-    parameters = NumericalParameters();
+    QuarkModelParameters selected_quark_parameters;
+    HadronModelParameters selected_hadron_parameters;
 
     // If the identifier is null, return default case
     if (quark_set_identifier == NULL){
-        parameters.quark_model = quark_model_par_sets[0];
+        selected_quark_parameters = quark_model_par_sets[0];
     }
     else{
 
@@ -595,7 +607,7 @@ void SetParametersSet(char * quark_set_identifier, char * hadron_set_identifier)
             QuarkModelParameters p = quark_model_par_sets[i];
 
             if (!strcasecmp(p.parameters_set_identifier, quark_set_identifier)){
-                parameters.quark_model = p;
+                selected_quark_parameters = p;
 
                 set_found = true;
                 break;
@@ -612,7 +624,7 @@ void SetParametersSet(char * quark_set_identifier, char * hadron_set_identifier)
     }
 
     if (hadron_set_identifier == NULL){
-        parameters.hadron_model = hadron_model_par_sets[0];
+        selected_hadron_parameters = hadron_model_par_sets[0];
     }
     else{
 
@@ -621,8 +633,9 @@ void SetParametersSet(char * quark_set_identifier, char * hadron_set_identifier)
 
             HadronModelParameters p = hadron_model_par_sets[i];
 
-            if (!strcasecmp(p.parameters_set_identifier, hadron_set_identifier)){
-                parameters.hadron_model = p;
+            if (!strcasecmp(p.parameters_set_identifier,
+                            hadron_set_identifier)){
+                selected_hadron_parameters = p;
 
                 set_found = true;
 
@@ -638,91 +651,85 @@ void SetParametersSet(char * quark_set_identifier, char * hadron_set_identifier)
         }
     }
 
+    parameters.quark.model = selected_quark_parameters;
+    parameters.hadron.model = selected_hadron_parameters;
+
+    NumericalParameters();
+
     return;
 }
 
-Parameters NumericalParameters()
+void NumericalParameters()
 {
-    Parameters p;
-
-    p.variables.num_points = 100;
-    p.variables.temperature = 0.0; // (MeV)
-    p.variables.min_proton_fraction = 0.4;
-    p.variables.max_proton_fraction = 0.6;
+    parameters.variables.num_points = 100;
+    parameters.variables.temperature = 0.0; // (MeV)
+    parameters.variables.min_proton_fraction = 0.4;
+    parameters.variables.max_proton_fraction = 0.6;
 
     // Low lower_bound but not zero, as it may be problematic if bare_mass == 0
     // upper_bound near the value of the nucleon mass.
-    p.vacuum_mass_determination.max_iter = 1000;
-    p.vacuum_mass_determination.abs_error = 1.0E-5;
-    p.vacuum_mass_determination.rel_error = 1.0E-5;
-    p.vacuum_mass_determination.up_vacuum_mass_guess = 300.0;
-    p.vacuum_mass_determination.down_vacuum_mass_guess = 300.0;
+    parameters.quark.vacuum_mass_determination.max_iter = 1000;
+    parameters.quark.vacuum_mass_determination.abs_error = 1.0E-5;
+    parameters.quark.vacuum_mass_determination.rel_error = 1.0E-5;
+    parameters.quark.vacuum_mass_determination.up_vacuum_mass_guess = 300.0;
+    parameters.quark.vacuum_mass_determination.down_vacuum_mass_guess = 300.0;
 
-    //this is not needed anymore, is it?
-    p.q_renorm_chem_pot_finding.lower_bound = 1.0E-5;
-    p.q_renorm_chem_pot_finding.upper_bound = 1000.0;
-    p.q_renorm_chem_pot_finding.abs_error = 1.0E-5;
-    p.q_renorm_chem_pot_finding.rel_error = 1.0E-5;
-    p.q_renorm_chem_pot_finding.max_iterations = 2000;
+    parameters.quark.therm_pot_minimum.max_iter = 20000;
+    parameters.quark.therm_pot_minimum.tolerance = 1.0E-3;
+    parameters.quark.therm_pot_minimum.up_vacuum_mass_guess = 300.0;
+    parameters.quark.therm_pot_minimum.down_vacuum_mass_guess = 300.0;
+    parameters.quark.therm_pot_minimum.up_mass_step = 0.5;
+    parameters.quark.therm_pot_minimum.down_mass_step = 0.5;
 
-    p.simultaneous_solution.max_iter = 8000;
-    p.simultaneous_solution.barionic_density_guess = 0.45;
-    p.simultaneous_solution.up_quark_mass_guess = 300.0; // (MeV)
-    p.simultaneous_solution.down_quark_mass_guess = 300.0; // (MeV)
-    p.simultaneous_solution.hadron_mass_guess = 939.0; // (MeV)
-    p.simultaneous_solution.abs_error = 1.0E-8;
-    p.simultaneous_solution.rel_error = 1.0E-8;
+    parameters.quark.renorm_chem_pot_solution.abs_error = 1.0E-7;
+    parameters.quark.renorm_chem_pot_solution.rel_error = 1.0E-7;
+    parameters.quark.renorm_chem_pot_solution.max_iter = 1000;
+    parameters.quark.renorm_chem_pot_solution.up_renorm_chem_pot_guess = 350.0;
+    parameters.quark.renorm_chem_pot_solution.down_renorm_chem_pot_guess =
+        350.0;
 
-    p.simultaneous_solution.renorm_chem_pot_solution.abs_error = 1.0E-7;
-    p.simultaneous_solution.renorm_chem_pot_solution.rel_error = 1.0E-7;
-    p.simultaneous_solution.renorm_chem_pot_solution.max_iter = 1000;
-    p.simultaneous_solution.renorm_chem_pot_solution.up_renorm_chem_pot_guess = 350.0;
-    p.simultaneous_solution.renorm_chem_pot_solution.down_renorm_chem_pot_guess = 350.0;
+    parameters.quark.entropy_integration_params.lower_limit = 0.0;
+    parameters.quark.entropy_integration_params.upper_limit =
+        parameters.quark.model.cutoff;
+    parameters.quark.entropy_integration_params.abs_error = 1.0E-3;
+    parameters.quark.entropy_integration_params.rel_error = 1.0E-3;
+    parameters.quark.entropy_integration_params.max_sub_interval = 1000;
+    parameters.quark.entropy_integration_params.integration_key =
+        GSL_INTEG_GAUSS61;
 
-    p.fermi_dirac_integrals.lower_limit = 0.0; // (MeV)
-    p.fermi_dirac_integrals.upper_limit = 2000.0; // (MeV)
-    p.fermi_dirac_integrals.max_interval_num = 8000;
-    p.fermi_dirac_integrals.integration_key = GSL_INTEG_GAUSS61;
-    p.fermi_dirac_integrals.max_sub_interval = 8000;
-    p.fermi_dirac_integrals.abs_error = 1.0E-10;
-    p.fermi_dirac_integrals.rel_error = 1.0E-10;
+    parameters.fermi_dirac_integrals.lower_limit = 0.0; // (MeV)
+    parameters.fermi_dirac_integrals.upper_limit = 2000.0; // (MeV)
+    parameters.fermi_dirac_integrals.max_interval_num = 8000;
+    parameters.fermi_dirac_integrals.integration_key = GSL_INTEG_GAUSS61;
+    parameters.fermi_dirac_integrals.max_sub_interval = 8000;
+    parameters.fermi_dirac_integrals.abs_error = 1.0E-10;
+    parameters.fermi_dirac_integrals.rel_error = 1.0E-10;
 
-    p.therm_pot_free_gas_integral.lower_limit = 0.0; // (MeV)
-    p.therm_pot_free_gas_integral.upper_limit = 2000.0; // (MeV)
-    p.therm_pot_free_gas_integral.max_interval_num = 8000;
-    p.therm_pot_free_gas_integral.integration_key = GSL_INTEG_GAUSS61;
-    p.therm_pot_free_gas_integral.max_sub_interval = 8000;
-    p.therm_pot_free_gas_integral.abs_error = 1.0E-10;
-    p.therm_pot_free_gas_integral.rel_error = 1.0E-10;
+    parameters.therm_pot_free_gas_integral.lower_limit = 0.0; // (MeV)
+    parameters.therm_pot_free_gas_integral.upper_limit = 2000.0; // (MeV)
+    parameters.therm_pot_free_gas_integral.max_interval_num = 8000;
+    parameters.therm_pot_free_gas_integral.integration_key = GSL_INTEG_GAUSS61;
+    parameters.therm_pot_free_gas_integral.max_sub_interval = 8000;
+    parameters.therm_pot_free_gas_integral.abs_error = 1.0E-10;
+    parameters.therm_pot_free_gas_integral.rel_error = 1.0E-10;
 
-    /* pq.simultaneous_solution.entropy.lower_limit = 0.0; */
-    /* pq.simultaneous_solution.entropy.upper_limit = parameters.model.cutoff; */
-    /* pq.simultaneous_solution.entropy.abs_error = 1.0E-3; */
-    /* pq.simultaneous_solution.entropy.rel_error = 1.0E-3; */
-    /* pq.simultaneous_solution.entropy.max_sub_interval = 1000; */
-    /* pq.simultaneous_solution.entropy.integration_key = GSL_INTEG_GAUSS61; */
+    parameters.hadron.gap_eq_solution_params.max_iterations = 2000;
+    parameters.hadron.gap_eq_solution_params.lower_bound = 0.01;
+    parameters.hadron.gap_eq_solution_params.upper_bound = 4000;
+    parameters.hadron.gap_eq_solution_params.abs_error = 1E-5;
+    parameters.hadron.gap_eq_solution_params.rel_error = 1E-5;
 
-    //my tests
+    parameters.quark.mass_and_renorm_chem_pot_solution.up_mass_guess = 300.0;
+    parameters.quark.mass_and_renorm_chem_pot_solution.down_mass_guess = 300.0;
+    parameters.quark.mass_and_renorm_chem_pot_solution.abs_error = 1.0E-5;
+    parameters.quark.mass_and_renorm_chem_pot_solution.rel_error = 1.0E-5;
+    parameters.quark.mass_and_renorm_chem_pot_solution.max_iter = 1000;
 
-    p.rootfinding_params.max_iterations = 2000;
-    p.rootfinding_params.lower_bound = 0.01;
-    p.rootfinding_params.upper_bound = 4000;
-    p.rootfinding_params.abs_error = 1E-5;
-    p.rootfinding_params.rel_error = 1E-5;
-
-    p.other_rootfinding.up_mass_guess = 300.0;
-    p.other_rootfinding.down_mass_guess = 300.0;
-    p.other_rootfinding.abs_error = 1.0E-5;
-    p.other_rootfinding.rel_error = 1.0E-5;
-    p.other_rootfinding.max_iter = 1000;
-
-    p.binodal_rootfinding_params.max_iterations = 2000;
-    p.binodal_rootfinding_params.lower_bound = 0.35;
-    p.binodal_rootfinding_params.upper_bound = 1.0;
-    p.binodal_rootfinding_params.abs_error = 1E-5;
-    p.binodal_rootfinding_params.rel_error = 1E-5;
-
-    return p;
+    parameters.binodal_rootfinding_params.max_iterations = 2000;
+    parameters.binodal_rootfinding_params.lower_bound = 0.35;
+    parameters.binodal_rootfinding_params.upper_bound = 1.0;
+    parameters.binodal_rootfinding_params.abs_error = 1E-5;
+    parameters.binodal_rootfinding_params.rel_error = 1E-5;
 }
 
 void AppendQuarkParametersSetToList(QuarkModelParameters a_set)

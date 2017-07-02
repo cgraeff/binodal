@@ -1,6 +1,6 @@
 //
 //  Loop.c
-//  NJLv
+//  binodal
 //
 //  Created by Clebson Graeff on 2017-02-14.
 //  Copyright © 2017 Clebson Graeff. All rights reserved.
@@ -15,15 +15,15 @@
 #include "HadronPhaseEOS.h"
 #include "Binodal.h"
 
-int SolveFiniteTemperatureEOS(){
+int SolveBinodalForVariablesRange(){
 
     // Print name of parametrization
     if (options.verbose){
         printf("Calculation performed with %s quark phase parameters set\n"
                "and %s hadron phase paarameters set.\n"
                "\ttemperature: %4.2f (MeV)\n",
-               parameters.quark_model.parameters_set_identifier,
-               parameters.hadron_model.parameters_set_identifier,
+               parameters.quark.model.parameters_set_identifier,
+               parameters.hadron.model.parameters_set_identifier,
                parameters.variables.temperature);
     }
 
@@ -101,8 +101,13 @@ int SolveFiniteTemperatureEOS(){
                      &isovector_chemical_potential,
                      &pressure);
 
-        gsl_vector_set(barionic_chemical_potential_vector, i, barionic_chemical_potential);
-        gsl_vector_set(isovector_chemical_potential_vector, i, isovector_chemical_potential);
+        gsl_vector_set(barionic_chemical_potential_vector,
+                       i,
+                       barionic_chemical_potential);
+        gsl_vector_set(isovector_chemical_potential_vector,
+                       i,
+                       isovector_chemical_potential);
+
         gsl_vector_set(barionic_density_vector, i, barionic_density);
         gsl_vector_set(pressure_vector, i, pressure);
         gsl_vector_set(proton_fraction_vector, i, proton_fraction);
@@ -115,29 +120,32 @@ int SolveFiniteTemperatureEOS(){
     // Write results
     SetFilePath("output/data");
 
-    WriteVectorsToFile ("pressure_at_transition.dat",
-                        "# proton fraction, pressure at transition (MeV/fm^3)\n",
-                        2,
-                        proton_fraction_vector,
-                        pressure_vector);
+    WriteVectorsToFile("pressure_at_transition.dat",
+                       "# proton fraction, pressure at transition (MeV/fm^3)\n",
+                       2,
+                       proton_fraction_vector,
+                       pressure_vector);
 
-    WriteVectorsToFile ("barionic_chemical_potential_at_transition.dat",
-                        "# proton fraction, barionic chemical potential at transition (MeV)\n",
-                        2,
-                        proton_fraction_vector,
-                        barionic_chemical_potential_vector);
+    WriteVectorsToFile("barionic_chemical_potential_at_transition.dat",
+                       "# proton fraction, "
+                       "barionic chemical potential at transition (MeV)\n",
+                       2,
+                       proton_fraction_vector,
+                       barionic_chemical_potential_vector);
 
-    WriteVectorsToFile ("isovector_chemical_potential_at_transition.dat",
-                        "# proton fraction, isovector chemical potential at transition (MeV)\n",
-                        2,
-                        proton_fraction_vector,
-                        isovector_chemical_potential_vector);
+    WriteVectorsToFile("isovector_chemical_potential_at_transition.dat",
+                       "# proton fraction, "
+                       "isovector chemical potential at transition (MeV)\n",
+                       2,
+                       proton_fraction_vector,
+                       isovector_chemical_potential_vector);
 
-    WriteVectorsToFile ("barionic_density_at_transition.dat",
-                        "# proton fraction, barionic density at transition (fm^{-3})\n",
-                        2,
-                        proton_fraction_vector,
-                        barionic_density_vector);
+    WriteVectorsToFile("barionic_density_at_transition.dat",
+                       "# proton fraction, "
+                       "barionic density at transition (fm^{-3})\n",
+                       2,
+                       proton_fraction_vector,
+                       barionic_density_vector);
 
     if (options.verbose)
         printf("Done!\n");
