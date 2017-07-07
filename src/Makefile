@@ -1,4 +1,4 @@
-TARGET = eos
+TARGET = binodal
 LIB_DIR = -L./libdatafun/
 LIBS = -lm -lgsl -lgslcblas -ldatafun
 CC = gcc

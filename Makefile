@@ -1,5 +1,5 @@
 SHELL := /bin/bash # Use bash as shell
-TARGET = eos
+TARGET = binodal
 
 # List sets for multirun
 HADRON_MULTIRUN_SETS = eNJL1 eNJL1m
