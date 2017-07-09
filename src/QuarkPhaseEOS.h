@@ -81,6 +81,9 @@ double QuarkDensity(double mass,
                     double renormalized_chemical_potential,
                     double temperature);
 
+double QuarkProtonFraction(double up_quark_density,
+                           double down_quark_density);
+
 double QuarkScalarDensity(double temperature,
                           double mass,
                           double renormalized_chemical_potential);

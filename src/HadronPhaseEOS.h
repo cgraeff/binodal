@@ -34,6 +34,9 @@ double HadronSolveGapEquation(double proton_density,
                               double proton_fermi_momentum,
                               double neutron_fermi_momentum);
 
+double HadronProtonFraction(double proton_barionic_density,
+                            double neutron_barionic_density);
+
 double HadronScalarDensity(double mass,
                            double fermi_momentum,
                            double cutoff);

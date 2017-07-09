@@ -85,6 +85,13 @@ double HadronSolveGapEquation(double proton_density,
     return return_result;
 }
 
+double HadronProtonFraction(double proton_barionic_density,
+                            double neutron_barionic_density)
+{
+    return proton_barionic_density
+           / (proton_barionic_density + neutron_barionic_density);
+}
+
 double HadronScalarDensity(double mass,
                            double fermi_momentum,
                            double cutoff)

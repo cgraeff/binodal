@@ -48,6 +48,15 @@ double QuarkDensity(double mass,
     return constant * integral;
 }
 
+double QuarkProtonFraction(double up_quark_density,
+                           double down_quark_density)
+{
+    double proton_density = 2.0 * up_quark_density + down_quark_density;
+    double neutron_density = 2.0 * down_quark_density + up_quark_density;
+
+    return proton_density / (proton_density + neutron_density);
+}
+
 double QuarkScalarDensity(double temperature,
                           double mass,
                           double renorm_chem_pot)
