@@ -55,6 +55,7 @@ BinodalPoint DetermineBinodalPoint(double temperature,
     }
 
     // Determine results to return
+    double hadron_mass;
     double pressure;
     double proton_chemical_potential;
     double neutron_chemical_potential;
@@ -62,9 +63,10 @@ BinodalPoint DetermineBinodalPoint(double temperature,
     DetermineHadronPressureAndChemPots(barionic_density,
                                        proton_fraction,
                                        hadron_vacuum_thermodynamic_potential,
-                                       &pressure,
+                                       &hadron_mass,
                                        &proton_chemical_potential,
-                                       &neutron_chemical_potential);
+                                       &neutron_chemical_potential,
+                                       &pressure);
 
     BinodalPoint point;
 
@@ -84,6 +86,7 @@ double BinodalPointEquation(double  barionic_density,
 
     binodal_parameters * p = (binodal_parameters *)params;
 
+    double hadron_mass;
     double hadron_pressure;
     double proton_chemical_potential;
     double neutron_chemical_potential;
@@ -91,9 +94,10 @@ double BinodalPointEquation(double  barionic_density,
     DetermineHadronPressureAndChemPots(barionic_density,
                                        p->proton_fraction,
                                        p->hadron_vacuum_thermodynamic_potential,
-                                       &hadron_pressure,
+                                       &hadron_mass,
                                        &proton_chemical_potential,
-                                       &neutron_chemical_potential);
+                                       &neutron_chemical_potential,
+                                       &hadron_pressure);
 
     // From Gibbs conditions
     double up_chemical_potential =
@@ -116,9 +120,10 @@ double BinodalPointEquation(double  barionic_density,
 void DetermineHadronPressureAndChemPots(double barionic_density,
                                         double proton_fraction,
                                         double hadron_vacuum_potential,
-                                        double *return_pressure,
+                                        double *return_hadron_mass,
                                         double *return_proton_chem_pot,
-                                        double *return_neutron_chem_pot)
+                                        double *return_neutron_chem_pot,
+                                        double *return_pressure)
 {
     double proton_density = proton_fraction * barionic_density;
     double neutron_density = (1.0 - proton_fraction) * barionic_density;

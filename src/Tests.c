@@ -252,16 +252,19 @@ void RunTests()
         double barionic_density = min_barionic_density;
         for (int i = 0; i < points_number; i++){
 
+            double hadron_mass;
             double hadron_pressure;
             double proton_chemical_potential;
             double neutron_chemical_potential;
             DetermineHadronPressureAndChemPots(barionic_density,
                                                proton_fraction,
                                                hadron_vacuum_potential,
-                                               &hadron_pressure,
+                                               &hadron_mass,
                                                &proton_chemical_potential,
-                                               &neutron_chemical_potential);
+                                               &neutron_chemical_potential,
+                                               &hadron_pressure);
 
+            // TODO use function here
             double up_chemical_potential = (2.0 * proton_chemical_potential
                                             - neutron_chemical_potential) / 3.0;
 
