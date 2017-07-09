@@ -64,7 +64,7 @@ BinodalPoint DetermineBinodalPoint(double temperature,
     //      returning would require updating a series of variables inside the
     //      parameters binodal_parameters struct.
     double hadron_mass = NAN;
-    double pressure = NAN;
+    double hadron_pressure = NAN;
     double proton_chemical_potential = NAN;
     double neutron_chemical_potential = NAN;
 
@@ -74,17 +74,40 @@ BinodalPoint DetermineBinodalPoint(double temperature,
                                        &hadron_mass,
                                        &proton_chemical_potential,
                                        &neutron_chemical_potential,
-                                       &pressure);
+                                       &hadron_pressure);
+
+    double up_chemical_potential =
+    UpChemicalPotentialFromGibbsConditions(proton_chemical_potential,
+                                           neutron_chemical_potential);
+
+    double down_chemical_potential =
+    DownChemicalPotentialFromGibbsConditions(proton_chemical_potential,
+                                             neutron_chemical_potential);
+
+    double up_mass = NAN;
+    double down_mass = NAN;
+    double quark_pressure = NAN;
+    DetermineQuarkPressure(up_chemical_potential,
+                           down_chemical_potential,
+                           parameters.variables.temperature,
+                           quark_vacuum_thermodynamic_potential,
+                           &up_mass,
+                           &down_mass,
+                           &quark_pressure);
 
     BinodalPoint point;
 
     point.hadron_mass = hadron_mass;
     point.barionic_density = barionic_density;
     point.proton_chemical_potential = proton_chemical_potential;
-
     point.neutron_chemical_potential = neutron_chemical_potential;
 
-    point.pressure = pressure;
+    point.up_quark_mass = up_mass;
+    point.down_quark_mass = down_mass;
+    point.up_chemical_potential = up_chemical_potential;
+    point.down_chemical_potential = down_chemical_potential;
+
+    point.pressure = quark_pressure;
 
     return point;
 }

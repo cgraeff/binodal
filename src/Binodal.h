@@ -14,6 +14,12 @@ typedef struct _BinodalPoint{
     double barionic_density;
     double proton_chemical_potential;
     double neutron_chemical_potential;
+
+    double up_quark_mass;
+    double down_quark_mass;
+    double up_chemical_potential;
+    double down_chemical_potential;
+
     double pressure;
 } BinodalPoint;
 
