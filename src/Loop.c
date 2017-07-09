@@ -93,12 +93,20 @@ int SolveBinodalForVariablesRange(){
                               hadron_vacuum_thermodynamic_potential,
                               quark_vacuum_thermodynamic_potential);
 
+        double barionic_chemical_potential =
+        BarionicChemicalPotential(point.proton_chemical_potential,
+                                  point.neutron_chemical_potential);
+
+        double isovector_chemical_potential =
+        IsovectorChemicalPotential(point.proton_chemical_potential,
+                                   point.neutron_chemical_potential);
+
         gsl_vector_set(barionic_chemical_potential_vector,
                        i,
-                       point.barionic_chemical_potential);
+                       barionic_chemical_potential);
         gsl_vector_set(isovector_chemical_potential_vector,
                        i,
-                       point.isovector_chemical_potential);
+                       isovector_chemical_potential);
 
         gsl_vector_set(barionic_density_vector, i, point.barionic_density);
         gsl_vector_set(pressure_vector, i, point.pressure);

@@ -11,8 +11,8 @@
 
 typedef struct _BinodalPoint{
       double barionic_density;
-      double barionic_chemical_potential;
-      double isovector_chemical_potential;
+      double proton_chemical_potential;
+      double neutron_chemical_potential;
       double pressure;
 } BinodalPoint;
 
@@ -33,6 +33,12 @@ void DetermineQuarkPressure(double up_chemical_potential,
                             double temperature,
                             double quark_vacuum_thermodynamic_potential,
                             double *return_pressure);
+
+double BarionicChemicalPotential(double proton_chemical_potential,
+                                 double neutron_chemical_potential);
+
+double IsovectorChemicalPotential(double proton_chemical_potential,
+                                  double neutron_chemical_potential);
 
 #endif /* Binodal_h */
  

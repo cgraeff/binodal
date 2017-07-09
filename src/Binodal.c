@@ -69,11 +69,9 @@ BinodalPoint DetermineBinodalPoint(double temperature,
     BinodalPoint point;
 
     point.barionic_density = barionic_density;
-    point.barionic_chemical_potential =
-    (proton_chemical_potential + neutron_chemical_potential) / 2.0;
+    point.proton_chemical_potential = proton_chemical_potential;
 
-    point.isovector_chemical_potential =
-    (proton_chemical_potential - neutron_chemical_potential);
+    point.neutron_chemical_potential = neutron_chemical_potential;
 
     point.pressure = pressure;
 
@@ -213,4 +211,22 @@ void DetermineQuarkPressure(double up_chemical_potential,
     *return_pressure = quark_pressure;
 
     return;
+}
+
+double BarionicChemicalPotential(double proton_chemical_potential,
+                                 double neutron_chemical_potential)
+{
+    double barionic_chemical_potential =
+    (proton_chemical_potential + neutron_chemical_potential) / 2.0;
+
+    return barionic_chemical_potential;
+}
+
+double IsovectorChemicalPotential(double proton_chemical_potential,
+                                  double neutron_chemical_potential)
+{
+    double isovector_chemical_potential =
+    (proton_chemical_potential - neutron_chemical_potential);
+
+    return isovector_chemical_potential;
 }
