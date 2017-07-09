@@ -177,12 +177,16 @@ void RunTests()
 
             for (int j = 0; j < n_pts; j++){
 
+                double up_quark_mass;
+                double down_quark_mass;
                 double quark_pressure;
 
                 DetermineQuarkPressure(up_chemical_potential,
                                        down_chemical_potential,
                                        temperature,
                                        quark_vacuum_thermodynamic_potential,
+                                       &up_quark_mass,
+                                       &down_quark_mass,
                                        &quark_pressure);
 
                 fprintf(file,
@@ -271,12 +275,16 @@ void RunTests()
             double down_chemical_potential = (-proton_chemical_potential
                                               + 2.0 * neutron_chemical_potential) / 3.0;
 
+            double up_quark_mass;
+            double down_quark_mass;
             double quark_pressure;
 
             DetermineQuarkPressure(up_chemical_potential,
                                    down_chemical_potential,
                                    temperature,
                                    quark_vacuum_thermodynamic_potential,
+                                   &up_quark_mass,
+                                   &down_quark_mass,
                                    &quark_pressure);
 
             double barionic_chemical_potential =

@@ -33,6 +33,8 @@ BinodalPoint DetermineBinodalPoint(double temperature,
                                    double quark_vacuum_thermodynamic_potential)
 {
 
+    // Determine which value of density gives equal pressures for each phase:
+
     binodal_parameters params;
     params.temperature = temperature;
     params.proton_fraction = proton_fraction;
@@ -54,7 +56,13 @@ BinodalPoint DetermineBinodalPoint(double temperature,
         abort();
     }
 
-    // Determine results to return
+    // Determine results to return:
+    //      Note that the following calculation is the same as the one performed
+    //      in BinodalPointEquation() in the last iteration of the root finding.
+    //      We recalculate just to get the results that we are interested in,
+    //      but in a clean way. Saving the results at BinodalPointEquation and
+    //      returning would require updating a series of variables inside the
+    //      parameters binodal_parameters struct.
     double hadron_mass = NAN;
     double pressure = NAN;
     double proton_chemical_potential = NAN;
@@ -107,12 +115,16 @@ double BinodalPointEquation(double  barionic_density,
     double down_chemical_potential =
     (-proton_chemical_potential + 2.0 * neutron_chemical_potential) / 3.0;
 
+    double up_quark_mass;
+    double down_quark_mass;
     double quark_pressure;
 
     DetermineQuarkPressure(up_chemical_potential,
                            down_chemical_potential,
                            p->temperature,
                            p->quark_vacuum_thermodynamic_potential,
+                           &up_quark_mass,
+                           &down_quark_mass,
                            &quark_pressure);
 
     return hadron_pressure - quark_pressure;
@@ -187,6 +199,8 @@ void DetermineQuarkPressure(double up_chemical_potential,
                             double down_chemical_potential,
                             double temperature,
                             double quark_vacuum_thermodynamic_potential,
+                            double *return_up_mass,
+                            double *return_down_mass,
                             double *return_pressure)
 {
     double up_mass = NAN;

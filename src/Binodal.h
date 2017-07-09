@@ -34,6 +34,8 @@ void DetermineQuarkPressure(double up_chemical_potential,
                             double down_chemical_potential,
                             double temperature,
                             double quark_vacuum_thermodynamic_potential,
+                            double *return_up_mass,
+                            double *return_down_mass,
                             double *return_pressure);
 
 double BarionicChemicalPotential(double proton_chemical_potential,
