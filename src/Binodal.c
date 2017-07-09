@@ -27,14 +27,10 @@ typedef struct _binodal_parameters {
 double BinodalPointEquation(double  barionic_density,
                             void   *params);
 
-void BinodalPoint(double temperature,
-                  double proton_fraction,
-                  double hadron_vacuum_thermodynamic_potential,
-                  double quark_vacuum_thermodynamic_potential,
-                  double *return_barionic_density,
-                  double *return_barionic_chemical_potential,
-                  double *return_isovector_chemical_potential,
-                  double *return_pressure)
+BinodalPoint DetermineBinodalPoint(double temperature,
+                                   double proton_fraction,
+                                   double hadron_vacuum_thermodynamic_potential,
+                                   double quark_vacuum_thermodynamic_potential)
 {
 
     binodal_parameters params;
@@ -70,17 +66,18 @@ void BinodalPoint(double temperature,
                                        &proton_chemical_potential,
                                        &neutron_chemical_potential);
 
-    *return_barionic_density = barionic_density;
+    BinodalPoint point;
 
-    *return_barionic_chemical_potential =
+    point.barionic_density = barionic_density;
+    point.barionic_chemical_potential =
     (proton_chemical_potential + neutron_chemical_potential) / 2.0;
 
-    *return_isovector_chemical_potential =
+    point.isovector_chemical_potential =
     (proton_chemical_potential - neutron_chemical_potential);
 
-    *return_pressure = pressure;
+    point.pressure = pressure;
 
-    return;
+    return point;
 }
 
 double BinodalPointEquation(double  barionic_density,

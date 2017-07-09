@@ -87,29 +87,21 @@ int SolveBinodalForVariablesRange(){
         if (options.verbose)
             printf("\tProton fraction: %f\r", proton_fraction);
 
-        double barionic_density = NAN;
-        double barionic_chemical_potential = NAN;
-        double isovector_chemical_potential = NAN;
-        double pressure = NAN;
-
-        BinodalPoint(parameters.variables.temperature,
-                     proton_fraction,
-                     hadron_vacuum_thermodynamic_potential,
-                     quark_vacuum_thermodynamic_potential,
-                     &barionic_density,
-                     &barionic_chemical_potential,
-                     &isovector_chemical_potential,
-                     &pressure);
+        BinodalPoint point =
+        DetermineBinodalPoint(parameters.variables.temperature,
+                              proton_fraction,
+                              hadron_vacuum_thermodynamic_potential,
+                              quark_vacuum_thermodynamic_potential);
 
         gsl_vector_set(barionic_chemical_potential_vector,
                        i,
-                       barionic_chemical_potential);
+                       point.barionic_chemical_potential);
         gsl_vector_set(isovector_chemical_potential_vector,
                        i,
-                       isovector_chemical_potential);
+                       point.isovector_chemical_potential);
 
-        gsl_vector_set(barionic_density_vector, i, barionic_density);
-        gsl_vector_set(pressure_vector, i, pressure);
+        gsl_vector_set(barionic_density_vector, i, point.barionic_density);
+        gsl_vector_set(pressure_vector, i, point.pressure);
         gsl_vector_set(proton_fraction_vector, i, proton_fraction);
 
         proton_fraction += proton_fraction_step;
