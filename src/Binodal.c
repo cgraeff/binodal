@@ -55,10 +55,10 @@ BinodalPoint DetermineBinodalPoint(double temperature,
     }
 
     // Determine results to return
-    double hadron_mass;
-    double pressure;
-    double proton_chemical_potential;
-    double neutron_chemical_potential;
+    double hadron_mass = NAN;
+    double pressure = NAN;
+    double proton_chemical_potential = NAN;
+    double neutron_chemical_potential = NAN;
 
     DetermineHadronPressureAndChemPots(barionic_density,
                                        proton_fraction,
@@ -70,6 +70,7 @@ BinodalPoint DetermineBinodalPoint(double temperature,
 
     BinodalPoint point;
 
+    point.hadron_mass = hadron_mass;
     point.barionic_density = barionic_density;
     point.proton_chemical_potential = proton_chemical_potential;
 
