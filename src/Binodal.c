@@ -16,13 +16,13 @@
 
 #include "Binodal.h"
 
-typedef struct _BinodalParameters {
+typedef struct _binodal_parameters {
     double proton_fraction;
     double temperature;
 
     double hadron_vacuum_thermodynamic_potential;
     double quark_vacuum_thermodynamic_potential;
-} BinodalParameters;
+} binodal_parameters;
 
 double BinodalPointEquation(double  barionic_density,
                             void   *params);
@@ -37,7 +37,7 @@ void BinodalPoint(double temperature,
                   double *return_pressure)
 {
 
-    BinodalParameters params;
+    binodal_parameters params;
     params.temperature = temperature;
     params.proton_fraction = proton_fraction;
     params.hadron_vacuum_thermodynamic_potential = hadron_vacuum_thermodynamic_potential;
@@ -87,7 +87,7 @@ double BinodalPointEquation(double  barionic_density,
                             void   *params)
 {
 
-    BinodalParameters * p = (BinodalParameters *)params;
+    binodal_parameters * p = (binodal_parameters *)params;
 
     double hadron_pressure;
     double proton_chemical_potential;
