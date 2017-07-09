@@ -110,10 +110,12 @@ double BinodalPointEquation(double  barionic_density,
 
     // From Gibbs conditions
     double up_chemical_potential =
-    (2.0 * proton_chemical_potential - neutron_chemical_potential) / 3.0;
+    UpChemicalPotentialFromGibbsConditions(proton_chemical_potential,
+                                           neutron_chemical_potential);
 
     double down_chemical_potential =
-    (-proton_chemical_potential + 2.0 * neutron_chemical_potential) / 3.0;
+    DownChemicalPotentialFromGibbsConditions(proton_chemical_potential,
+                                             neutron_chemical_potential);
 
     double up_quark_mass;
     double down_quark_mass;
@@ -249,4 +251,22 @@ double IsovectorChemicalPotential(double proton_chemical_potential,
     (proton_chemical_potential - neutron_chemical_potential);
 
     return isovector_chemical_potential;
+}
+
+double UpChemicalPotentialFromGibbsConditions(double proton_chemical_potential,
+                                              double neutron_chemical_potential)
+{
+    double up_chemical_potential =
+    (2.0 * proton_chemical_potential - neutron_chemical_potential) / 3.0;
+
+    return up_chemical_potential;
+}
+
+double DownChemicalPotentialFromGibbsConditions(double proton_chemical_potential,
+                                                double neutron_chemical_potential)
+{
+    double down_chemical_potential =
+    (-proton_chemical_potential + 2.0 * neutron_chemical_potential) / 3.0;
+
+    return down_chemical_potential;
 }

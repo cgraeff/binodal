@@ -268,12 +268,13 @@ void RunTests()
                                                &neutron_chemical_potential,
                                                &hadron_pressure);
 
-            // TODO use function here
-            double up_chemical_potential = (2.0 * proton_chemical_potential
-                                            - neutron_chemical_potential) / 3.0;
+            double up_chemical_potential =
+            UpChemicalPotentialFromGibbsConditions(proton_chemical_potential,
+                                                   neutron_chemical_potential);
 
-            double down_chemical_potential = (-proton_chemical_potential
-                                              + 2.0 * neutron_chemical_potential) / 3.0;
+            double down_chemical_potential =
+            DownChemicalPotentialFromGibbsConditions(proton_chemical_potential,
+                                                     neutron_chemical_potential);
 
             double up_quark_mass;
             double down_quark_mass;

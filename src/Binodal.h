@@ -44,5 +44,13 @@ double BarionicChemicalPotential(double proton_chemical_potential,
 double IsovectorChemicalPotential(double proton_chemical_potential,
                                   double neutron_chemical_potential);
 
+double
+UpChemicalPotentialFromGibbsConditions(double proton_chemical_potential,
+                                       double neutron_chemical_potential);
+
+double
+DownChemicalPotentialFromGibbsConditions(double proton_chemical_potential,
+                                         double neutron_chemical_potential);
+
 #endif /* Binodal_h */
  

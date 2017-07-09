@@ -609,7 +609,6 @@ int QuarkMassAndRenormChemPotSolution(double up_chemical_potential,
     return status;
 }
 
-// TODO: Does this solves only the masses? Review what is going on here
 int QuarkMassAndRenormChemPotSolEquation(const gsl_vector   *x,
                                          void *params,
                                          gsl_vector *return_values)
