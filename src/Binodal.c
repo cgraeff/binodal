@@ -6,10 +6,14 @@
 //  Copyright © 2017 Clebson Graeff. All rights reserved.
 //
 
+#include <assert.h>
+#include <math.h>
+
 #include <gsl/gsl_vector.h>
 
 #include "libdatafun/libdatafun.h"
 
+#include "Constants.h"
 #include "QuarkPhaseEOS.h"
 #include "HadronPhaseEOS.h"
 #include "Parameters.h"
@@ -106,6 +110,12 @@ BinodalPoint DetermineBinodalPoint(double temperature,
     point.down_quark_mass = down_mass;
     point.up_chemical_potential = up_chemical_potential;
     point.down_chemical_potential = down_chemical_potential;
+
+    // TODO: Debug: sometimes the assertion fails. Probably related
+    // to the instabilities in the solution
+    printf("pressure diff: %f\n\t", fabs(quark_pressure - hadron_pressure));
+
+    //assert(fabs(quark_pressure - hadron_pressure) < ZERO_TOLERANCE);
 
     point.pressure = quark_pressure;
 
