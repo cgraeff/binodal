@@ -77,9 +77,9 @@ typedef struct _QuarkRenormChemPotSolutionParameters{
     double max_iter;
 } QuarkRenormChemPotSolutionParameters;
 
-double QuarkBarionicDensity(double mass,
-                            double renormalized_chemical_potential,
-                            double temperature);
+double QuarkDensity(double mass,
+                    double renormalized_chemical_potential,
+                    double temperature);
 
 double QuarkScalarDensity(double temperature,
                           double mass,

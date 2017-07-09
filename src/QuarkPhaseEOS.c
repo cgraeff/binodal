@@ -26,9 +26,9 @@ double QuarkFermiMomentum(double mass, double renormalized_chemical_potential)
     return sqrt(pow(renormalized_chemical_potential, 2.0) - pow(mass, 2.0));
 }
 
-double QuarkBarionicDensity(double mass,
-                            double renormalized_chemical_potential,
-                            double temperature)
+double QuarkDensity(double mass,
+                    double renormalized_chemical_potential,
+                    double temperature)
 {
     double constant = NUM_Q_COLORS / (pow(M_PI, 2.0) * pow(CONST_HBAR_C, 3.0));
 
@@ -280,14 +280,14 @@ double QuarkThermodynamicPotential(double up_mass,
                          * pow(up_scalar_density + down_scalar_density, 2.0);
 
     double up_barionic_density =
-    QuarkBarionicDensity(up_mass,
-                         up_renormalized_chemical_potential,
-                         temperature);
+    QuarkDensity(up_mass,
+                 up_renormalized_chemical_potential,
+                 temperature);
 
     double down_barionic_density =
-    QuarkBarionicDensity(down_mass,
-                         down_renormalized_chemical_potential,
-                         temperature);
+    QuarkDensity(down_mass,
+                 down_renormalized_chemical_potential,
+                 temperature);
 
     double vector_term =
     - parameters.quark.model.G_V * CONST_HBAR_C
@@ -500,12 +500,12 @@ int ZeroedRenormalizedQuarkChemPotEquation(const gsl_vector   *x,
 
     double term =
     2.0 * parameters.quark.model.G_V * CONST_HBAR_C
-    * (QuarkBarionicDensity(p->up_quark_mass,
-                            up_renormalized_chemical_potential,
-                            p->temperature)
-       + QuarkBarionicDensity(p->down_quark_mass,
-                              down_renormalized_chemical_potential,
-                              p->temperature)
+    * (QuarkDensity(p->up_quark_mass,
+                    up_renormalized_chemical_potential,
+                    p->temperature)
+       + QuarkDensity(p->down_quark_mass,
+                      down_renormalized_chemical_potential,
+                      p->temperature)
        );
 
     double up_mu_zeroed_eq = up_renormalized_chemical_potential
