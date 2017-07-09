@@ -11,7 +11,7 @@
 
 #define CONST_HBAR_C 197.326
 #define ZERO_MASS_TOL 1.0E-2
-#define ZERO_TOLERANCE 1.0
+#define ZERO_TOLERANCE 1.0E-2
 
 #define NUM_Q_COLORS 3.0
 #define NUM_Q_FLAVORS 2.0

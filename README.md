@@ -83,8 +83,8 @@ results can be plotted with included gnuplot scripts:
 * Plot tests with `make tgraph`;
 
 ## Known limitations
-*TODO: describe limitations here*
-
+* Due to numerical instabilities, the pressures are not equal at some points.
+  This must be further investigated.
 
 ## Code structure
 
