@@ -65,6 +65,9 @@ int SolveBinodalForVariablesRange(){
     gsl_vector * proton_fraction_vector =
     gsl_vector_alloc(parameters.variables.num_points);
 
+    gsl_vector * quark_to_hadron_proton_fraction_ratio_vector =
+    gsl_vector_alloc(parameters.variables.num_points);
+
     gsl_vector * barionic_density_vector =
     gsl_vector_alloc(parameters.variables.num_points);
 
@@ -101,6 +104,28 @@ int SolveBinodalForVariablesRange(){
         IsovectorChemicalPotential(point.proton_chemical_potential,
                                    point.neutron_chemical_potential);
 
+        double up_renormalized_chemical_potential = NAN;
+        double down_renormalized_chemical_potential = NAN;
+        QuarkSelfConsistentRenormChemPot(point.up_quark_mass,
+                                         point.down_quark_mass,
+                                         point.up_chemical_potential,
+                                         point.down_chemical_potential,
+                                         parameters.variables.temperature,
+                                         &up_renormalized_chemical_potential,
+                                         &down_renormalized_chemical_potential);
+        double up_quark_density =
+        QuarkDensity(point.up_quark_mass,
+                     up_renormalized_chemical_potential,
+                     parameters.variables.temperature);
+
+        double down_quark_density =
+        QuarkDensity(point.down_quark_mass,
+                     down_renormalized_chemical_potential,
+                     parameters.variables.temperature);
+
+        double quark_proton_fraction = QuarkProtonFraction(up_quark_density,
+                                                           down_quark_density);
+
         gsl_vector_set(barionic_chemical_potential_vector,
                        i,
                        barionic_chemical_potential);
@@ -111,6 +136,9 @@ int SolveBinodalForVariablesRange(){
         gsl_vector_set(barionic_density_vector, i, point.barionic_density);
         gsl_vector_set(pressure_vector, i, point.pressure);
         gsl_vector_set(proton_fraction_vector, i, proton_fraction);
+        gsl_vector_set(quark_to_hadron_proton_fraction_ratio_vector,
+                       i,
+                       quark_proton_fraction / proton_fraction);
 
         proton_fraction += proton_fraction_step;
     }
@@ -146,6 +174,12 @@ int SolveBinodalForVariablesRange(){
                        2,
                        proton_fraction_vector,
                        barionic_density_vector);
+
+    WriteVectorsToFile("quark_to_hadron_proton_fraction_ratio.dat",
+                       "# proton fraction, y_p^Q / y_p^H \n",
+                       2,
+                       proton_fraction_vector,
+                       quark_to_hadron_proton_fraction_ratio_vector);
 
     if (options.verbose)
         printf("Done!\n");

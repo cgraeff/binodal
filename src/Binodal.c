@@ -263,6 +263,8 @@ void DetermineQuarkPressure(double up_chemical_potential,
     QuarkPressure(omega - quark_vacuum_thermodynamic_potential,
                   temperature);
 
+    *return_up_mass = up_mass;
+    *return_down_mass = down_mass;
     *return_pressure = quark_pressure;
 
     return;

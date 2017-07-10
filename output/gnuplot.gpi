@@ -23,3 +23,9 @@ plot "data/barionic_chemical_potential_at_transition.dat" w l
 set out "isovector_chemical_potential_at_transition.png"
 
 plot "data/isovector_chemical_potential_at_transition.dat" w l
+
+###
+
+set out "quark_to_hadron_proton_fraction_ratio.png"
+
+plot "data/quark_to_hadron_proton_fraction_ratio.dat" w l
