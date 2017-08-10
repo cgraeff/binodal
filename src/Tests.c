@@ -336,6 +336,8 @@ void RunTests()
         fprintf(equal_mass_view,
                 "# mass (MeV), zeroed gap equation (MeV)\n");
 
+        FILE * intersection_file = OpenFile ("intersection.dat");
+
         double mass_step = Step (min_mass, max_mass, n_pts);
 
         gsl_vector * x = gsl_vector_alloc(2);
@@ -358,6 +360,17 @@ void RunTests()
                 QuarkVacuumMassDeterminationEquation(x,
                                                      NULL,
                                                      return_values);
+
+                if (gsl_vector_get(return_values, 0)
+                    == gsl_vector_get(return_values, 1)){
+
+                        fprintf(intersection_file,
+                                "%20.15E\t%20.15E\t%20.15E\n",
+                                up_mass,
+                                down_mass,
+                                gsl_vector_get(return_values, 0));
+                }
+
                 fprintf(file,
                         "%20.15E\t%20.15E\t%20.15E\t%20.15E\n",
                         up_mass,
