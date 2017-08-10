@@ -30,12 +30,23 @@ typedef struct _QuarkModelParameters{
     double bare_mass;               // (MeV)
 } QuarkModelParameters;
 
+typedef struct _QuarkMassGuess{
+
+    double height;
+    double width;
+    double transition_width;
+
+} QuarkMassGuess;
+
 typedef struct _QuarkMassAndRenormChemPotSolPar{
-    double up_mass_guess;
-    double down_mass_guess;
+
     double abs_error;
     double rel_error;
     int max_iter;
+
+    QuarkMassGuess up_mass_guess;
+    QuarkMassGuess down_mass_guess;
+
 } QuarkMassAndRenormChemPotSolParams;
 
 // Parameters for the determination of
@@ -75,6 +86,7 @@ typedef struct _QuarkRenormChemPotSolutionParameters{
     double abs_error;
     double rel_error;
     double max_iter;
+
 } QuarkRenormChemPotSolutionParameters;
 
 double QuarkDensity(double mass,

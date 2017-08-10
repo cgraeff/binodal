@@ -543,6 +543,46 @@ int QuarkMassAndRenormChemPotSolEquation(const gsl_vector   *x,
                                          void *params,
                                          gsl_vector *return_values);
 
+double QuarkMassGuessFunctionalForm(double height,
+                                    double width,
+                                    double transition_width,
+                                    double chemical_potential)
+{
+    return height / (1 + exp((chemical_potential - width) / transition_width));
+}
+
+double UpQuarkMassGuess(double up_chemical_potential,
+                        double down_chemical_potential)
+{
+    // This value o chemical_potential is just a parameter
+    // to determine a reasonable value of the mass guess
+    double chemical_potential = (up_chemical_potential
+                                 + down_chemical_potential) / 2.0;
+    QuarkMassGuess guess =
+    parameters.quark.mass_and_renorm_chem_pot_solution.up_mass_guess;
+
+    return QuarkMassGuessFunctionalForm(guess.height,
+                                        guess.width,
+                                        guess.transition_width,
+                                        chemical_potential);
+}
+
+double DownQuarkMassGuess(double up_chemical_potential,
+                          double down_chemical_potential)
+{
+    // This value o chemical_potential is just a parameter
+    // to determine a reasonable value of the mass guess
+    double chemical_potential = (up_chemical_potential
+                                 + down_chemical_potential) / 2.0;
+    QuarkMassGuess guess =
+    parameters.quark.mass_and_renorm_chem_pot_solution.down_mass_guess;
+
+    return QuarkMassGuessFunctionalForm(guess.height,
+                                        guess.width,
+                                        guess.transition_width,
+                                        chemical_potential);
+}
+
 int QuarkMassAndRenormChemPotSolution(double up_chemical_potential,
                                       double down_chemical_potential,
                                       double * return_up_mass,
@@ -571,12 +611,17 @@ int QuarkMassAndRenormChemPotSolution(double up_chemical_potential,
     gsl_vector * initial_guess = gsl_vector_alloc(dimension);
     gsl_vector * return_results = gsl_vector_alloc(dimension);
 
+    double up_mass_guess = UpQuarkMassGuess(up_chemical_potential,
+                                            down_chemical_potential);
+
+    double down_mass_guess = DownQuarkMassGuess(up_chemical_potential,
+                                                down_chemical_potential);
     gsl_vector_set(initial_guess,
                    0,
-                   sqrt(params.up_mass_guess));
+                   sqrt(up_mass_guess));
     gsl_vector_set(initial_guess,
                    1,
-                   sqrt(params.down_mass_guess));
+                   sqrt(down_mass_guess));
 
     int status =
         MultidimensionalRootFinder(dimension,

@@ -664,7 +664,7 @@ void NumericalParameters()
     parameters.variables.num_points = 100;
     parameters.variables.temperature = 0.0; // (MeV)
     parameters.variables.min_proton_fraction = 0.35;
-    parameters.variables.max_proton_fraction = 0.5;
+    parameters.variables.max_proton_fraction = 0.6;
 
     // Low lower_bound but not zero, as it may be problematic if bare_mass == 0
     // upper_bound near the value of the nucleon mass.
@@ -719,8 +719,32 @@ void NumericalParameters()
     parameters.hadron.gap_eq_solution_params.abs_error = 1E-5;
     parameters.hadron.gap_eq_solution_params.rel_error = 1E-5;
 
-    parameters.quark.mass_and_renorm_chem_pot_solution.up_mass_guess = 300.0;
-    parameters.quark.mass_and_renorm_chem_pot_solution.down_mass_guess = 300.0;
+    // Due to the chiral restoration, for higher values of quark
+    // chemical potentials, the determination of the quark masses
+    // and renormalized chemical potentials may be quit problematic:
+    // At low values, we must use a guess of around 300 to 350, but
+    // at high values the chiral restoration takes place and we need
+    // to use zero as a guess. To accomplish that, we use
+    //      m = h / (1 + exp((mu - w) / t))
+    // (h = height, w = width, t = transition width). Here mu is the
+    // mean of the chemical potentials of the quarks.
+    //
+    // This functional form may be more complex than necessary, but
+    // at least it is quite smooth. The guesses are working better with
+    // widths that exceed the values of chiral restoration; maybe the
+    // values of
+    QuarkMassGuess up_mass_guess;
+    up_mass_guess.height = 350.0;
+    up_mass_guess.width = 600.0;
+    up_mass_guess.transition_width = 20.0;
+
+    QuarkMassGuess down_mass_guess;
+    down_mass_guess.height = 350.0;
+    down_mass_guess.width = 600.0;
+    down_mass_guess.transition_width = 20.0;
+
+    parameters.quark.mass_and_renorm_chem_pot_solution.up_mass_guess = up_mass_guess;
+    parameters.quark.mass_and_renorm_chem_pot_solution.down_mass_guess = down_mass_guess;
     parameters.quark.mass_and_renorm_chem_pot_solution.abs_error = 1.0E-8;
     parameters.quark.mass_and_renorm_chem_pot_solution.rel_error = 1.0E-8;
     parameters.quark.mass_and_renorm_chem_pot_solution.max_iter = 1000;
