@@ -207,12 +207,12 @@ void RunTests()
         SetParametersSet(NULL, NULL);
     }
 
-    // Determine pressures for hadron and quark phaes for the special case of
-    // symmetric matter (mu_p = mu_n, mu_up = mu_down)
+    // Determine pressures for hadron and quark phases for a
+    // particular value of proton fraction
     if(true)
     {
-        SetParametersSet("Buballa_1", "eNJL1");
-        SetFilePath("tests/symmetric_matter_binodal/data");
+        SetParametersSet("PCP-0.0", "eNJL1");
+        SetFilePath("tests/binodal_point_graph/data");
 
         FILE * file_h = OpenFile("hadron_pressure.dat");
         FILE * file_q = OpenFile("quark_pressure.dat");
@@ -225,7 +225,7 @@ void RunTests()
                 "# barionic_chemical_potential (MeV), "
                 "quark pressure (MeV/fm^3)\n");
 
-        int points_number = 1000;
+        int points_number = 3000;
 
         double min_barionic_density = 0.0;
         double max_barionic_density = 0.8;
