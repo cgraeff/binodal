@@ -719,20 +719,6 @@ void NumericalParameters()
     parameters.hadron.gap_eq_solution_params.abs_error = 1E-5;
     parameters.hadron.gap_eq_solution_params.rel_error = 1E-5;
 
-    // Due to the chiral restoration, for higher values of quark
-    // chemical potentials, the determination of the quark masses
-    // and renormalized chemical potentials may be quit problematic:
-    // At low values, we must use a guess of around 300 to 350, but
-    // at high values the chiral restoration takes place and we need
-    // to use zero as a guess. To accomplish that, we use
-    //      m = h / (1 + exp((mu - w) / t))
-    // (h = height, w = width, t = transition width). Here mu is the
-    // mean of the chemical potentials of the quarks.
-    //
-    // This functional form may be more complex than necessary, but
-    // at least it is quite smooth. The guesses are working better with
-    // widths that exceed the values of chiral restoration; maybe the
-    // values of
     QuarkMassGuess up_mass_guess;
     up_mass_guess.height = 350.0;
     up_mass_guess.width = 600.0;

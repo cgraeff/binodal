@@ -219,6 +219,7 @@ void DetermineHadronPressureAndChemPots(double barionic_density,
 
     double hadron_pressure = HadronPressure(potential);
 
+    *return_hadron_mass = mass;
     *return_pressure = hadron_pressure;
     *return_proton_chem_pot = proton_chemical_potential;
     *return_neutron_chem_pot = neutron_chemical_potential;
