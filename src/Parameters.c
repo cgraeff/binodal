@@ -663,8 +663,8 @@ void NumericalParameters()
 {
     parameters.variables.num_points = 100;
     parameters.variables.temperature = 0.0; // (MeV)
-    parameters.variables.min_proton_fraction = 0.4;
-    parameters.variables.max_proton_fraction = 0.6;
+    parameters.variables.min_proton_fraction = 0.35;
+    parameters.variables.max_proton_fraction = 0.5;
 
     // Low lower_bound but not zero, as it may be problematic if bare_mass == 0
     // upper_bound near the value of the nucleon mass.

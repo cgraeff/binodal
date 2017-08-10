@@ -8,6 +8,12 @@ plot "data/pressure_at_transition.dat" w l
 
 ###
 
+set out "pressure_at_transition_asymmetry.png"
+
+plot "data/pressure_by_asymmetry.dat" w l
+
+###
+
 set out "barionic_density_at_transition.png"
 
 plot "data/barionic_density_at_transition.dat" w l

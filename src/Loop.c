@@ -15,6 +15,11 @@
 #include "HadronPhaseEOS.h"
 #include "Binodal.h"
 
+double asymmetry(double proton_fraction)
+{
+    return 1.0 - 2.0 * proton_fraction;
+}
+
 int SolveBinodalForVariablesRange(){
 
     // Print name of parametrization
@@ -65,6 +70,9 @@ int SolveBinodalForVariablesRange(){
     gsl_vector * proton_fraction_vector =
     gsl_vector_alloc(parameters.variables.num_points);
 
+    gsl_vector * asymmetry_vector =
+    gsl_vector_alloc (parameters.variables.num_points);
+
     gsl_vector * quark_to_hadron_proton_fraction_ratio_vector =
     gsl_vector_alloc(parameters.variables.num_points);
 
@@ -89,6 +97,8 @@ int SolveBinodalForVariablesRange(){
 
         if (options.verbose)
             printf("\tProton fraction: %f\r", proton_fraction);
+
+        gsl_vector_set(asymmetry_vector, i, asymmetry(proton_fraction));
 
         BinodalPoint point =
         DetermineBinodalPoint(parameters.variables.temperature,
@@ -152,6 +162,12 @@ int SolveBinodalForVariablesRange(){
                        "# proton fraction, pressure at transition (MeV/fm^3)\n",
                        2,
                        proton_fraction_vector,
+                       pressure_vector);
+
+    WriteVectorsToFile("pressure_by_asymmetry.dat",
+                       "# asymmetry, pressure at transition (MeV/fm^3) \n",
+                       2,
+                       asymmetry_vector,
                        pressure_vector);
 
     WriteVectorsToFile("barionic_chemical_potential_at_transition.dat",
