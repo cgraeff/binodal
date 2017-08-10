@@ -404,6 +404,101 @@ void RunTests()
         SetParametersSet(NULL, NULL);
     }
 
+    // Maps for determination of quark masses
+    // and renormalized chemical potentials
+    if (true)
+    {
+        SetParametersSet("PCP-0.0", NULL);
+        SetFilePath("tests/quark_mass_maps/data");
+
+        int n_pts = 100;
+
+        double min_up_mass = 0.0;
+        double max_up_mass = 600.0;
+        double min_down_mass = 0.0;
+        double max_down_mass = 600.0;
+
+        double temperature = 0.0;
+
+        double up_chemical_potential = 4.068543850286816E+02;
+        double down_chemical_potential = 3.821859585511042E+02;
+
+        FILE * output = OpenFile("maps.dat");
+        FILE * line = OpenFile("line.dat");
+
+        double up_mass_step = Step (min_up_mass, max_up_mass, n_pts);
+        double down_mass_step = Step (min_down_mass, max_down_mass, n_pts);
+
+        double down_mass = min_down_mass;
+
+        for (int i = 0; i < n_pts; i++){
+
+            double up_mass = min_up_mass;
+
+            for (int j = 0; j < n_pts; j++){
+
+                double up_renorm_chem_pot;
+                double down_renorm_chem_pot;
+
+                // for given parameters, determine the renormalized
+                // chemical potentials
+                QuarkSelfConsistentRenormChemPot(up_mass,
+                                                 down_mass,
+                                                 up_chemical_potential,
+                                                 down_chemical_potential,
+                                                 temperature,
+                                                 &up_renorm_chem_pot,
+                                                 &down_renorm_chem_pot);
+
+                // Gap equations:
+                double up_scalar_density =
+                    QuarkScalarDensity(parameters.variables.temperature,
+                                       up_mass,
+                                       up_renorm_chem_pot);
+
+                double down_scalar_density =
+                    QuarkScalarDensity(parameters.variables.temperature,
+                                       down_mass,
+                                       down_renorm_chem_pot);
+
+                double up_quark_zeroed_gap_eq =
+                    QuarkZeroedGapEquation(up_mass,
+                                           up_scalar_density,
+                                           down_scalar_density);
+
+                double down_quark_zeroed_gap_eq =
+                    QuarkZeroedGapEquation(down_mass,
+                                           up_scalar_density,
+                                           down_scalar_density);
+
+                fprintf(output,
+                        "%20.15E\t%20.15E\t%20.15E\t%20.15E\n",
+                        up_mass,
+                        down_mass,
+                        up_quark_zeroed_gap_eq,
+                        down_quark_zeroed_gap_eq);
+
+                if (up_quark_zeroed_gap_eq == down_quark_zeroed_gap_eq)
+                    fprintf(line,
+                            "%20.15E\t%20.15E\t%20.15E\n",
+                            up_mass,
+                            down_mass,
+                            up_quark_zeroed_gap_eq);
+
+                up_mass += up_mass_step;
+            }
+            fprintf(output, "\n"); // separate scanlines
+
+            down_mass += down_mass_step;
+        }
+
+        fclose(output);
+        fclose(line);
+
+        SetParametersSet(NULL, NULL);
+    }
+
+
     return;
 }
 

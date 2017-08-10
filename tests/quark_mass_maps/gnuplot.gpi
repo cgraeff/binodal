@@ -1,0 +1,13 @@
+set term pngcairo size 1920, 1080
+
+set out "quark_mass_maps.png"
+
+set multiplot layout 1,2
+
+set view 89, 177
+
+splot "data/maps.dat" u 1:2:3 w l, "" u 1:2:4 w l, "data/line.dat" w l lc rgb "black", 0
+
+set view 89, 173
+
+replot
