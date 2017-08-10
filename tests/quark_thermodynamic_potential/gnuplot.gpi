@@ -1,4 +1,4 @@
-set term png
+set term pngcairo
 
 unset key
 

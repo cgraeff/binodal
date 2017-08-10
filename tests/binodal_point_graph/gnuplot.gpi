@@ -1,4 +1,4 @@
-set term png
+set term pngcairo
 
 set out "binodal.png"
 
