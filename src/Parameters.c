@@ -721,8 +721,8 @@ void NumericalParameters()
 
     parameters.quark.mass_and_renorm_chem_pot_solution.up_mass_guess = 300.0;
     parameters.quark.mass_and_renorm_chem_pot_solution.down_mass_guess = 300.0;
-    parameters.quark.mass_and_renorm_chem_pot_solution.abs_error = 1.0E-5;
-    parameters.quark.mass_and_renorm_chem_pot_solution.rel_error = 1.0E-5;
+    parameters.quark.mass_and_renorm_chem_pot_solution.abs_error = 1.0E-8;
+    parameters.quark.mass_and_renorm_chem_pot_solution.rel_error = 1.0E-8;
     parameters.quark.mass_and_renorm_chem_pot_solution.max_iter = 1000;
 
     parameters.binodal_rootfinding_params.max_iterations = 2000;
