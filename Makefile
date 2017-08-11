@@ -2,11 +2,11 @@ SHELL := /bin/bash # Use bash as shell
 TARGET = binodal
 
 # List sets for multirun
-HADRON_MULTIRUN_SETS = eNJL1 eNJL1m
+HADRON_MULTIRUN_SETS = eNJL2mSigmaRho1 eNJL3SigmaRho1
 
 QUARK_MULTIRUN_SETS = Buballa_1 \
 		      BuballaR_2 \
-		      PCP-0.0
+		      PCP-0.0 PCP-0.1 PCP-0.2
 
 .PHONY: all debug run graph tests tgraph clean
 
@@ -35,6 +35,7 @@ multirun:
 				rm -r multioutput/"$$quark_set-$$hadron_set"; \
 			fi; \
 			cp -r output multioutput/"$$quark_set-$$hadron_set"; \
+			echo " "; \
 		done; \
 	done
 	@echo "[done.]"
