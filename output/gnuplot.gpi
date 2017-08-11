@@ -8,9 +8,15 @@ plot "data/pressure_at_transition.dat" w l
 
 ###
 
-set out "pressure_at_transition_asymmetry.png"
+set out "pressure_at_transition_by_hadron_asymmetry.png"
 
-plot "data/pressure_by_asymmetry.dat" w l
+plot "data/pressure_at_transition_by_hadron_asymmetry.dat" w l
+
+###
+
+set out "pressure_at_transition_by_quark_asymmetry.png"
+
+plot "data/pressure_at_transition_by_quark_asymmetry.dat" w l
 
 ###
 

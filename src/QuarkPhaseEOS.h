@@ -169,4 +169,7 @@ int QuarkMassAndRenormChemPotSolution(double up_chemical_potential,
                                       double * return_down_mass,
                                       double * return_up_renorm_chem_pot,
                                       double * return_down_renorm_chem_pot);
+
+double QuarkPhaseAsymmetry(double up_quark_density,
+                           double down_quark_density);
 #endif /* QuarkPhaseEOS_h */

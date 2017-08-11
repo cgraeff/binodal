@@ -705,3 +705,11 @@ int QuarkMassAndRenormChemPotSolEquation(const gsl_vector   *x,
 
     return GSL_SUCCESS;
 }
+
+double QuarkPhaseAsymmetry(double up_quark_density,
+                           double down_quark_density)
+{
+    return 3.0 * (down_quark_density - up_quark_density)
+           / (up_quark_density + down_quark_density);
+}
+

@@ -83,4 +83,6 @@ double HadronThermodynamicPotential(double scalar_density,
 
 double HadronFermiMomentum(double density);
 
+double HadronPhaseAsymmetry(double proton_fraction);
+
 #endif /* HadronPhaseEOS_h */

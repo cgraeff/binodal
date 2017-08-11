@@ -252,3 +252,9 @@ double HadronFermiMomentum(double density)
     return CONST_HBAR_C * pow(3.0 * pow(M_PI, 2.0) * density, 1.0 / 3.0);
 }
 
+// TODO: (future) redefine in termos of density inputs
+double HadronPhaseAsymmetry(double proton_fraction)
+{
+    return 1.0 - 2.0 * proton_fraction;
+}
+
