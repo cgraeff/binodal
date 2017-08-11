@@ -664,7 +664,7 @@ void NumericalParameters()
     parameters.variables.num_points = 100;
     parameters.variables.temperature = 0.0; // (MeV)
     parameters.variables.min_proton_fraction = 0.35;
-    parameters.variables.max_proton_fraction = 0.6;
+    parameters.variables.max_proton_fraction = 0.5;
 
     // Low lower_bound but not zero, as it may be problematic if bare_mass == 0
     // upper_bound near the value of the nucleon mass.
@@ -736,7 +736,7 @@ void NumericalParameters()
     parameters.quark.mass_and_renorm_chem_pot_solution.max_iter = 1000;
 
     parameters.binodal_rootfinding_params.max_iterations = 2000;
-    parameters.binodal_rootfinding_params.lower_bound = 0.35;
+    parameters.binodal_rootfinding_params.lower_bound = 0.35;      // This must be decreased
     parameters.binodal_rootfinding_params.upper_bound = 1.0;
     parameters.binodal_rootfinding_params.abs_error = 1E-5;
     parameters.binodal_rootfinding_params.rel_error = 1E-5;
