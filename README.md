@@ -8,6 +8,11 @@ by the NJLv model (M. Buballa, Physics Reports 407 (2005) 205-376) and the
 hadron phase is described by the eNJL model (Pais, Menezes, and Providência
 Physical Review C 93, 065805 (2016)).
 
+## running variable
+The chempot branch is work in progress to calculate running in the barionic
+chemical potential and in the isovector chemical potential. The idea is to have
+a bidimensional binodal.
+
 ## Obtaining this program
 The latest version of this code is available at
 [github.com/cgraeff/binodal](https://github.com/cgraeff/binodal).
