@@ -26,8 +26,16 @@ typedef struct _HadronModelParameters{
     double bare_mass;       // (MeV)
 } HadronModelParameters;
 
-double HadronZeroedGapEquation(double mass,
-                               void * params);
+typedef struct _HadronMassAndDensitiesSolutionParams{
+    double mass_guess;
+    double zero_mass_chem_pot;
+    double proton_density_guess;
+    double neutron_density_guess;
+
+    int max_iter;
+    double abs_error;
+    double rel_error;
+} HadronMassAndDensitiesSolutionParams;
 
 double HadronSolveGapEquation(double proton_density,
                               double neutron_density,
@@ -43,19 +51,17 @@ double HadronScalarDensity(double mass,
 
 double HadronVacuumScalarDensity();
 
-double ProtonChemicalPotential(double proton_fermi_momentum,
-                               double scalar_density,
-                               double mass,
-                               double barionic_density,
-                               double proton_density,
-                               double neutron_density);
+double ProtonChemicalPotentialEquation(double proton_fermi_momentum,
+                                       double scalar_density,
+                                       double mass,
+                                       double proton_density,
+                                       double neutron_density);
 
-double NeutronChemicalPotential(double neutron_fermi_momentum,
-                                double scalar_density,
-                                double mass,
-                                double barionic_density,
-                                double proton_density,
-                                double neutron_density);
+double NeutronChemicalPotentialEquation(double neutron_fermi_momentum,
+                                        double scalar_density,
+                                        double mass,
+                                        double proton_density,
+                                        double neutron_density);
 
 double HadronKinecticEnergyDensity(double mass,
                                    double proton_fermi_momentum,
@@ -83,6 +89,17 @@ double HadronThermodynamicPotential(double scalar_density,
 
 double HadronFermiMomentum(double density);
 
-double HadronPhaseAsymmetry(double proton_fraction);
+int HadronMassAndDensitiesSolution(double proton_chemical_potential,
+                                   double neutron_chemical_potential,
+                                   double * return_mass,
+                                   double * return_proton_density,
+                                   double * return_neutron_density);
+
+double ProtonChemicalPotential(double barionic_chemical_potential,
+                               double isovector_chemical_potential);
+double NeutronChemicalPotential(double barionic_chemical_potential,
+                                double isovector_chemical_potential);
+
+double HadronPhaseAsymmetry(double proton_density, double neutron_density);
 
 #endif /* HadronPhaseEOS_h */

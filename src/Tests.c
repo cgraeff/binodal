@@ -208,7 +208,7 @@ void RunTests()
     }
 
     // Determine pressures for hadron and quark phases for a
-    // particular value of proton fraction
+    // particular value of the isovector chemical potential
     if(true)
     {
         SetParametersSet("PCP-0.0", "eNJL1");
@@ -227,10 +227,10 @@ void RunTests()
 
         int points_number = 3000;
 
-        double min_barionic_density = 0.0;
-        double max_barionic_density = 0.8;
+        double min_barionic_chemical_potential = 950.0;
+        double max_barionic_chemical_potential = 2000.0;
 
-        double proton_fraction = 0.5;
+        double isovector_chemical_potential = 0.0;
         double temperature = 0.0;
 
         double hadron_vacuum_potential = HadronVacuumEnergyDensity();
@@ -249,24 +249,33 @@ void RunTests()
                                     0.0,
                                     0.0);
 
-        double bar_dens_step = Step(min_barionic_density,
-                                    max_barionic_density,
-                                    points_number);
+        double barionic_chemical_potential_step =
+        Step(min_barionic_chemical_potential,
+             max_barionic_chemical_potential,
+             points_number);
 
-        double barionic_density = min_barionic_density;
+        double barionic_chemical_potential = min_barionic_chemical_potential;
         for (int i = 0; i < points_number; i++){
 
-            double hadron_mass;
-            double hadron_pressure;
-            double proton_chemical_potential;
-            double neutron_chemical_potential;
-            DetermineHadronPressureAndChemPots(barionic_density,
-                                               proton_fraction,
-                                               hadron_vacuum_potential,
-                                               &hadron_mass,
-                                               &proton_chemical_potential,
-                                               &neutron_chemical_potential,
-                                               &hadron_pressure);
+            double proton_chemical_potential =
+            ProtonChemicalPotential(barionic_chemical_potential,
+                                    isovector_chemical_potential);
+
+            double neutron_chemical_potential =
+            NeutronChemicalPotential(barionic_chemical_potential,
+                                     isovector_chemical_potential);
+
+            double hadron_mass = NAN;
+            double hadron_pressure = NAN;
+            double proton_density = NAN;
+            double neutron_density = NAN;
+            DetermineHadronPressureAndDensities(proton_chemical_potential,
+                                                neutron_chemical_potential,
+                                                hadron_vacuum_potential,
+                                                &hadron_mass,
+                                                &proton_density,
+                                                &neutron_density,
+                                                &hadron_pressure);
 
             double up_chemical_potential =
             UpChemicalPotentialFromGibbsConditions(proton_chemical_potential,
@@ -288,9 +297,6 @@ void RunTests()
                                    &down_quark_mass,
                                    &quark_pressure);
 
-            double barionic_chemical_potential =
-            (proton_chemical_potential + neutron_chemical_potential) / 2.0;
-
             fprintf(file_h,
                     "%20.15E\t%20.15E\n",
                     barionic_chemical_potential,
@@ -301,7 +307,151 @@ void RunTests()
                     barionic_chemical_potential,
                     quark_pressure);
 
-            barionic_density += bar_dens_step;
+            barionic_chemical_potential += barionic_chemical_potential_step;
+        }
+
+        fclose(file_h);
+        fclose(file_q);
+
+        SetParametersSet(NULL, NULL);
+    }
+
+    // Determine pressures for hadron and quark phases as
+    // functions of barionic and isovector chemical potentials
+    if(true)
+    {
+        SetParametersSet("PCP-0.0", "eNJL1");
+        SetFilePath("tests/pressure_surfaces_graph/data");
+
+        FILE * file_h = OpenFile("hadron_pressure.dat");
+        FILE * file_q = OpenFile("quark_pressure.dat");
+        FILE * file_t = OpenFile("transition.dat");
+
+        // printf file headers
+        fprintf(file_h,
+                "# barionic_chemical_potential (MeV), "
+                "isovector chemical potential (MeV), "
+                "hadron pressure (MeV/fm^3)\n");
+        fprintf(file_q,
+                "# barionic_chemical_potential (MeV), "
+                "isovector chemical potential (MeV), "
+                "quark pressure (MeV/fm^3)\n");
+        fprintf(file_t,
+                "# barionic_chemical_potential (MeV), "
+                "isovector chemical potential (MeV), "
+                "transition pressure pressure (MeV/fm^3)\n");
+
+        int points_number = 100;
+
+        double min_barionic_chemical_potential = 950.0;
+        double max_barionic_chemical_potential = 1350.0;
+
+        double min_isovector_chemical_potential = 0.0;
+        double max_isovector_chemical_potential = 200.0;
+
+        double temperature = 0.0;
+
+        double pressure_tol = 5.0E-1;
+
+        double hadron_vacuum_potential = HadronVacuumEnergyDensity();
+
+        double up_vacuum_mass;
+        double down_vacuum_mass;
+
+        QuarkVacuumMassDetermination(&up_vacuum_mass, &down_vacuum_mass);
+
+        double quark_vacuum_thermodynamic_potential =
+        QuarkThermodynamicPotential(up_vacuum_mass,
+                                    down_vacuum_mass,
+                                    0.0,
+                                    0.0,
+                                    0.0,
+                                    0.0,
+                                    0.0);
+
+        double barionic_chemical_potential_step =
+        Step(min_barionic_chemical_potential,
+             max_barionic_chemical_potential,
+             points_number);
+
+        double isovector_chemical_potential_step =
+        Step(min_isovector_chemical_potential,
+             max_isovector_chemical_potential,
+             points_number);
+
+        double isovector_chemical_potential = min_isovector_chemical_potential;
+        for (int i = 0; i < points_number; i++){
+
+            double barionic_chemical_potential = min_barionic_chemical_potential;
+
+            for (int j = 0; j < points_number; j++){
+
+                double proton_chemical_potential =
+                ProtonChemicalPotential(barionic_chemical_potential,
+                                        isovector_chemical_potential);
+
+                double neutron_chemical_potential =
+                NeutronChemicalPotential(barionic_chemical_potential,
+                                         isovector_chemical_potential);
+
+                double hadron_mass = NAN;
+                double hadron_pressure = NAN;
+                double proton_density = NAN;
+                double neutron_density = NAN;
+                DetermineHadronPressureAndDensities(proton_chemical_potential,
+                                                    neutron_chemical_potential,
+                                                    hadron_vacuum_potential,
+                                                    &hadron_mass,
+                                                    &proton_density,
+                                                    &neutron_density,
+                                                    &hadron_pressure);
+
+                double up_chemical_potential =
+                UpChemicalPotentialFromGibbsConditions(proton_chemical_potential,
+                                                       neutron_chemical_potential);
+
+                double down_chemical_potential =
+                DownChemicalPotentialFromGibbsConditions(proton_chemical_potential,
+                                                         neutron_chemical_potential);
+
+                double up_quark_mass;
+                double down_quark_mass;
+                double quark_pressure;
+
+                DetermineQuarkPressure(up_chemical_potential,
+                                       down_chemical_potential,
+                                       temperature,
+                                       quark_vacuum_thermodynamic_potential,
+                                       &up_quark_mass,
+                                       &down_quark_mass,
+                                       &quark_pressure);
+
+                fprintf(file_h,
+                        "%20.15E\t%20.15E\t%20.15E\n",
+                        barionic_chemical_potential,
+                        isovector_chemical_potential,
+                        hadron_pressure);
+
+                fprintf(file_q,
+                        "%20.15E\t%20.15E\t%20.15E\n",
+                        barionic_chemical_potential,
+                        isovector_chemical_potential,
+                        quark_pressure);
+
+                if (fabs(quark_pressure - hadron_pressure) < pressure_tol){
+                    fprintf(file_t,
+                            "%20.15E\t%20.15E\t%20.15E\n",
+                            barionic_chemical_potential,
+                            isovector_chemical_potential,
+                            hadron_pressure);
+                }
+
+                barionic_chemical_potential += barionic_chemical_potential_step;
+            }
+            fprintf(file_h, "\n");
+            fprintf(file_q, "\n");
+
+            isovector_chemical_potential += isovector_chemical_potential_step;
         }
 
         fclose(file_h);

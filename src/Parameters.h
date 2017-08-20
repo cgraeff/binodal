@@ -14,22 +14,22 @@
 #include "HadronPhaseEOS.h"
 #include "QuarkPhaseEOS.h"
 
-// Parameters for the variables for which we are
-// performing the calculation of the EOS
-typedef struct _VariableParameters{
-    double temperature;             // (MeV)
-    double min_proton_fraction;     // (no dimension)
-    double max_proton_fraction;
-    int num_points;
-} VariableParameters;
-
 typedef struct _parameters
 {
-    VariableParameters variables;
+    // Parameters for the variables for which we are
+    // performing the calculation of the EOS
+    struct _VariableParameters{
+        double temperature;                         // (MeV)
+        double min_barionic_chemical_potential;     // (MeV)
+        double max_barionic_chemical_potential;     // (MeV)
+        double min_isovector_chemical_potential;    // (MeV)
+        double max_isovector_chemical_potential;    // (MeV)
+        int num_points;
+    } variables;
 
     struct _hadron {
         HadronModelParameters model;
-        UnidimensionalRootFindingParameters gap_eq_solution_params;
+        HadronMassAndDensitiesSolutionParams mass_and_densities_solution;
     } hadron;
 
     struct _quark {

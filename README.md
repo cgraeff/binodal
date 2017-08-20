@@ -88,8 +88,19 @@ results can be plotted with included gnuplot scripts:
 * Plot tests with `make tgraph`;
 
 ## Known limitations
-* Due to numerical instabilities, the pressures are not equal at some points.
-  This must be further investigated.
+* The chiral restoration makes guessing good starting values of mass somewhat
+difficult. I have implemented two approaches:
+	* Hadrons: a cut value on proton or neutron chemical potentials
+	  beyond which the hadron mass guess is assumed to be zero.
+	* a smooth function with the form
+		$m = h / (1 + exp((\mu - w) / t_w)$
+	  where
+		$mu = (\mu_u + \mu_d) / 2.0
+	  It seams to be more complex than necessary, but is working most
+	  of time.
+	* Both approaches may fail producing spikes in tests in
+	  `binodal_point_graph` dir (deppending of choice of parameters sets).
+	  Tweaking parameters may help with those problems.
 
 ## Code structure
 

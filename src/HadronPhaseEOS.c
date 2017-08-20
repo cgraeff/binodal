@@ -23,7 +23,7 @@ typedef struct _hadron_gap_eq_input_params{
     double neutron_fermi_momentum;
     double proton_density;
     double neutron_density;
-    double renormalized_chemical_potential;
+    double renormalized_chemical_potential; // TODO: is this necessary?
 } hadron_gap_eq_input_params;
 
 double HadronZeroedGapEquation(double mass,
@@ -56,35 +56,6 @@ double HadronZeroedGapEquation(double mass,
            - parameters.hadron.model.bare_mass;
 }
 
-double HadronSolveGapEquation(double proton_density,
-                              double neutron_density,
-                              double proton_fermi_momentum,
-                              double neutron_fermi_momentum)
-{
-    hadron_gap_eq_input_params p;
-    p.proton_density = proton_density;
-    p.neutron_density = neutron_density;
-    p.proton_fermi_momentum = proton_fermi_momentum;
-    p.neutron_fermi_momentum= neutron_fermi_momentum;
-
-    gsl_function func;
-    func.function = &HadronZeroedGapEquation;
-    func.params = &p;
-
-    double return_result;
-    int status = UnidimensionalRootFinder(&func,
-                                          parameters.hadron.gap_eq_solution_params,
-                                          &return_result);
-
-    if (status != 0){
-
-        // If no root could be found, that means
-        // we've reached chiral restoration
-        return 0.0;
-    }
-    return return_result;
-}
-
 double HadronProtonFraction(double proton_barionic_density,
                             double neutron_barionic_density)
 {
@@ -114,15 +85,15 @@ double HadronVacuumScalarDensity()
                    parameters.hadron.model.cutoff));
 }
 
-double ProtonChemicalPotential(double proton_fermi_momentum,
-                               double scalar_density,
-                               double mass,
-                               double barionic_density,
-                               double proton_density,
-                               double neutron_density)
+double ProtonChemicalPotentialEquation(double proton_fermi_momentum,
+                                       double scalar_density,
+                                       double mass,
+                                       double proton_density,
+                                       double neutron_density)
 {
     double E = sqrt(pow(mass, 2.0) + pow(proton_fermi_momentum, 2.0));
 
+    double barionic_density = proton_density + neutron_density;
     double rho_3 = (proton_density - neutron_density);
 
     double rho_terms = (parameters.hadron.model.G_V * barionic_density
@@ -140,16 +111,16 @@ double ProtonChemicalPotential(double proton_fermi_momentum,
     return E + rho_terms;
 }
 
-double NeutronChemicalPotential(double neutron_fermi_momentum,
-                                double scalar_density,
-                                double mass,
-                                double barionic_density,
-                                double proton_density,
-                                double neutron_density)
+double NeutronChemicalPotentialEquation(double neutron_fermi_momentum,
+                                        double scalar_density,
+                                        double mass,
+                                        double proton_density,
+                                        double neutron_density)
 {
     double E = sqrt(pow(mass, 2.0)
                     + pow(neutron_fermi_momentum, 2.0));
 
+    double barionic_density = proton_density + neutron_density;
     double rho_3 = (proton_density - neutron_density);
 
     double rho_terms = (parameters.hadron.model.G_V * barionic_density
@@ -252,9 +223,165 @@ double HadronFermiMomentum(double density)
     return CONST_HBAR_C * pow(3.0 * pow(M_PI, 2.0) * density, 1.0 / 3.0);
 }
 
-// TODO: (future) redefine in termos of density inputs
-double HadronPhaseAsymmetry(double proton_fraction)
+double HadronPhaseAsymmetry(double proton_density, double neutron_density)
 {
+    double barionic_density = proton_density + neutron_density;
+    double proton_fraction = proton_density / barionic_density;
+
     return 1.0 - 2.0 * proton_fraction;
 }
 
+
+// Solve for chempot
+typedef struct _hadron_mass_and_renorm_chem_pot_input_params{
+
+    double proton_chemical_potential;
+    double neutron_chemical_potential;
+
+} hadron_mass_and_renorm_chem_pot_input_params;
+
+int HadronMassAndDensitiesSolutionEquation(const gsl_vector   *x,
+                                           void *params,
+                                           gsl_vector *return_values);
+
+int HadronMassAndDensitiesSolution(double proton_chemical_potential,
+                                   double neutron_chemical_potential,
+                                   double * return_mass,
+                                   double * return_proton_density,
+                                   double * return_neutron_density)
+{
+    HadronMassAndDensitiesSolutionParams params =
+    parameters.hadron.mass_and_densities_solution;
+
+    hadron_mass_and_renorm_chem_pot_input_params p;
+    p.proton_chemical_potential = proton_chemical_potential;
+    p.neutron_chemical_potential = neutron_chemical_potential;
+
+    // Set dimension (number of equations|variables to solve|find)
+    const int dimension = 3;
+
+    gsl_multiroot_function f;
+    f.f = &HadronMassAndDensitiesSolutionEquation;
+    f.n = dimension;
+    f.params = (void *)&p;
+
+    gsl_vector * initial_guess = gsl_vector_alloc(dimension);
+    gsl_vector * return_results = gsl_vector_alloc(dimension);
+
+    if (proton_chemical_potential > params.zero_mass_chem_pot
+        || neutron_chemical_potential > params.zero_mass_chem_pot){
+
+        gsl_vector_set(initial_guess,
+                       0,
+                       0.0);
+    }
+    else {
+        gsl_vector_set(initial_guess,
+                       0,
+                       sqrt(params.mass_guess));
+    }
+
+    gsl_vector_set(initial_guess,
+                   1,
+                   sqrt(params.proton_density_guess));
+    gsl_vector_set(initial_guess,
+                   2,
+                   sqrt(params.neutron_density_guess));
+
+    int status =
+        MultidimensionalRootFinder(dimension,
+                                   &f,
+                                   initial_guess,
+                                   params.abs_error,
+                                   params.rel_error,
+                                   params.max_iter,
+                                   return_results);
+
+    if (status != 0){
+        printf("%s:%d: Something is wrong with the rootfinding.\n",
+               __FILE__,
+               __LINE__);
+        abort();
+    }
+
+    // Save results in return variables,
+    // taking care of the mappinps
+    *return_mass = pow(gsl_vector_get(return_results, 0), 2.0);
+    *return_proton_density = pow(gsl_vector_get(return_results, 1), 2.0);
+    *return_neutron_density = pow(gsl_vector_get(return_results, 2), 2.0);
+
+    // Free vectors
+    gsl_vector_free(initial_guess);
+    gsl_vector_free(return_results);
+
+    return status;
+}
+
+int HadronMassAndDensitiesSolutionEquation(const gsl_vector   *x,
+                                           void *params,
+                                           gsl_vector *return_values)
+{
+    const double mass = pow(gsl_vector_get(x, 0), 2.0);
+    const double proton_density = pow(gsl_vector_get(x, 1), 2.0);
+    const double neutron_density = pow (gsl_vector_get(x, 2), 2.0);
+
+    hadron_mass_and_renorm_chem_pot_input_params * p =
+    (hadron_mass_and_renorm_chem_pot_input_params *) params;
+
+    double proton_fermi_momentum = HadronFermiMomentum(proton_density);
+    double neutron_fermi_momentum = HadronFermiMomentum(neutron_density);
+
+    hadron_gap_eq_input_params  gap_params;
+    gap_params.proton_fermi_momentum = proton_fermi_momentum;
+    gap_params.neutron_fermi_momentum = neutron_fermi_momentum;
+    gap_params.proton_density = proton_density;
+    gap_params.neutron_density = neutron_density;
+
+    double gap_equation = HadronZeroedGapEquation(mass,
+                                                  (void *)&gap_params);
+
+    //calculate scalar densities
+    double proton_scalar_density =
+    HadronScalarDensity(mass,
+                        proton_fermi_momentum,
+                        parameters.hadron.model.cutoff);
+
+    double neutron_scalar_density =
+    HadronScalarDensity(mass,
+                        neutron_fermi_momentum,
+                        parameters.hadron.model.cutoff);
+
+    double proton_chem_pot_gap =
+    ProtonChemicalPotentialEquation(proton_fermi_momentum,
+                                    proton_scalar_density,
+                                    mass,
+                                    proton_density,
+                                    neutron_density)
+    - p->proton_chemical_potential;
+
+    double neutron_chem_pot_gap =
+    NeutronChemicalPotentialEquation(neutron_fermi_momentum,
+                                    neutron_scalar_density,
+                                    mass,
+                                    proton_density,
+                                    neutron_density)
+    - p->neutron_chemical_potential;
+
+    gsl_vector_set(return_values, 0, gap_equation);
+    gsl_vector_set(return_values, 1, proton_chem_pot_gap);
+    gsl_vector_set(return_values, 2, neutron_chem_pot_gap);
+
+    return GSL_SUCCESS;
+}
+
+double ProtonChemicalPotential(double barionic_chemical_potential,
+                               double isovector_chemical_potential)
+{
+    return barionic_chemical_potential + 0.5 * isovector_chemical_potential;
+}
+
+double NeutronChemicalPotential(double barionic_chemical_potential,
+                                double isovector_chemical_potential)
+{
+    return barionic_chemical_potential - 0.5 * isovector_chemical_potential;
+}

@@ -11,12 +11,15 @@
 
 typedef struct _BinodalPoint{
     double hadron_mass;
-    double barionic_density;
+    double proton_density;
+    double neutron_density;
     double proton_chemical_potential;
     double neutron_chemical_potential;
 
     double up_quark_mass;
     double down_quark_mass;
+    double up_quark_density;
+    double down_quark_density;
     double up_chemical_potential;
     double down_chemical_potential;
 
@@ -28,13 +31,13 @@ BinodalPoint DetermineBinodalPoint(double temperature,
                                    double hadron_vacuum_thermodynamic_potential,
                                    double quark_vacuum_thermodynamic_potential);
 
-void DetermineHadronPressureAndChemPots(double barionic_density,
-                                        double proton_fraction,
-                                        double hadron_vacuum_potential,
-                                        double *return_hadron_mass,
-                                        double *return_proton_chem_pot,
-                                        double *return_neutron_chem_pot,
-                                        double *return_pressure);
+void DetermineHadronPressureAndDensities(double proton_chemical_potential,
+                                         double neutron_chemical_potential,
+                                         double hadron_vacuum_potential,
+                                         double *return_hadron_mass,
+                                         double *return_proton_density,
+                                         double *return_neutron_density,
+                                         double *return_pressure);
 
 void DetermineQuarkPressure(double up_chemical_potential,
                             double down_chemical_potential,
