@@ -20,8 +20,6 @@ typedef struct _parameters
     // performing the calculation of the EOS
     struct _VariableParameters{
         double temperature;                         // (MeV)
-        double min_barionic_chemical_potential;     // (MeV)
-        double max_barionic_chemical_potential;     // (MeV)
         double min_isovector_chemical_potential;    // (MeV)
         double max_isovector_chemical_potential;    // (MeV)
         int num_points;

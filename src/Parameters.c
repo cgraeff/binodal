@@ -663,10 +663,8 @@ void NumericalParameters()
 {
     parameters.variables.num_points = 100;
     parameters.variables.temperature = 0.0; // (MeV)
-    parameters.variables.min_barionic_chemical_potential = 850.0;     // (MeV)
-    parameters.variables.max_barionic_chemical_potential = 2000.0;     // (MeV)
-    parameters.variables.min_isovector_chemical_potential = 0.0;    // (MeV)
-    parameters.variables.max_isovector_chemical_potential = 100.0;    // (MeV)
+    parameters.variables.min_isovector_chemical_potential = -120.0;    // (MeV)
+    parameters.variables.max_isovector_chemical_potential = 120.0;    // (MeV)
 
     // Low lower_bound but not zero, as it may be problematic if bare_mass == 0
     // upper_bound near the value of the nucleon mass.

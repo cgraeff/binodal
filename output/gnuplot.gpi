@@ -1,43 +1,55 @@
-set term png
+set term pngcairo
 
 ###
 
-set out "pressure_at_transition.png"
+set out "pressure_vs_isovector_chemical_potential.png"
 
-plot "data/pressure_at_transition.dat" w l
-
-###
-
-set out "pressure_at_transition_by_hadron_asymmetry.png"
-
-plot "data/pressure_at_transition_by_hadron_asymmetry.dat" w l
+plot "data/pressure_vs_isovector_chemical_potential.dat" w l
 
 ###
 
-set out "pressure_at_transition_by_quark_asymmetry.png"
+set out "pressure_vs_hadron_proton_fraction.png"
 
-plot "data/pressure_at_transition_by_quark_asymmetry.dat" w l
-
-###
-
-set out "barionic_density_at_transition.png"
-
-plot "data/barionic_density_at_transition.dat" w l
+plot "data/pressure_vs_hadron_proton_fraction.dat" w l
 
 ###
 
-set out "barionic_chemical_potential_at_transition.png"
+set out "pressure_vs_quark_proton_fraction.png"
 
-plot "data/barionic_chemical_potential_at_transition.dat" w l
-
-###
-
-set out "isovector_chemical_potential_at_transition.png"
-
-plot "data/isovector_chemical_potential_at_transition.dat" w l
+plot "data/pressure_vs_quark_proton_fraction.dat" w l
 
 ###
 
-set out "quark_to_hadron_proton_fraction_ratio.png"
+set out "pressure_vs_hadron_asymmetry.png"
 
-plot "data/quark_to_hadron_proton_fraction_ratio.dat" w l
+plot "data/pressure_vs_hadron_asymmetry.dat" w l
+
+###
+
+set out "pressure_vs_quark_asymmetry.png"
+
+plot "data/pressure_vs_quark_asymmetry.dat" w l
+
+###
+
+set out "barionic_density_vs_isovector_chemical_potential.png"
+
+plot "data/barionic_density_vs_isovector_chemical_potential.dat" w l
+
+###
+
+set out "barionic_chemical_potential_vs_isovector_chemical_potential.png"
+
+plot "data/barionic_chemical_potential_vs_isovector_chemical_potential.dat" w l
+
+###
+
+set out "hadron_proton_fraction_vs_isovector_chemical_potential.png"
+
+plot "data/hadron_proton_fraction_vs_isovector_chemical_potential.dat" w l
+
+###
+
+set out "quark_proton_fraction_vs_isovector_chemical_potential.png"
+
+plot "data/quark_proton_fraction_vs_isovector_chemical_potential.dat" w l

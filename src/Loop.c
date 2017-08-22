@@ -62,7 +62,7 @@ int SolveBinodalForVariablesRange(){
 
     // LOOP STARTS
 
-    gsl_vector * proton_fraction_vector =
+    gsl_vector * hadron_proton_fraction_vector =
     gsl_vector_alloc(parameters.variables.num_points);
 
     gsl_vector * quark_proton_fraction_vector =
@@ -136,7 +136,7 @@ int SolveBinodalForVariablesRange(){
                        i,
                        barionic_density);
         gsl_vector_set(pressure_vector, i, point.pressure);
-        gsl_vector_set(proton_fraction_vector,
+        gsl_vector_set(hadron_proton_fraction_vector,
                        i,
                        point.proton_density / barionic_density);
         gsl_vector_set(quark_proton_fraction_vector,
@@ -151,44 +151,67 @@ int SolveBinodalForVariablesRange(){
     // Write results
     SetFilePath("output/data");
 
-    WriteVectorsToFile("pressure_at_transition.dat",
-                       "# isovector chemical potential (MeV), pressure at transition (MeV/fm^3)\n",
+    WriteVectorsToFile("pressure_vs_isovector_chemical_potential.dat",
+                       "# isovector chemical potential (MeV), "
+                       "pressure at transition (MeV/fm^3)\n",
                        2,
                        isovector_chemical_potential_vector,
                        pressure_vector);
 
-    WriteVectorsToFile("pressure_at_transition_by_hadron_asymmetry.dat",
+    WriteVectorsToFile("pressure_vs_hadron_proton_fraction.dat",
+                       "# hadron proton fraction, "
+                       "pressure at transition (MeV/fm^3) \n",
+                       2,
+                       hadron_proton_fraction_vector,
+                       pressure_vector);
+
+    WriteVectorsToFile("pressure_vs_quark_proton_fraction.dat",
+                       "# hadron proton fraction, "
+                       "pressure at transition (MeV/fm^3) \n",
+                       2,
+                       quark_proton_fraction_vector,
+                       pressure_vector);
+
+    WriteVectorsToFile("pressure_vs_hadron_asymmetry.dat",
                        "# asymmetry, pressure at transition (MeV/fm^3) \n",
                        2,
                        hadron_asymmetry_vector,
                        pressure_vector);
 
-    WriteVectorsToFile("pressure_at_transition_by_quark_asymmetry.dat",
+    WriteVectorsToFile("pressure_vs_quark_asymmetry.dat",
                        "# asymmetry, pressure at transition (MeV/fm^3) \n",
                        2,
                        quark_asymmetry_vector,
                        pressure_vector);
 
-    WriteVectorsToFile("barionic_chemical_potential_at_transition.dat",
-                       "# proton fraction, "
-                       "barionic chemical potential at transition (MeV)\n",
-                       2,
-                       proton_fraction_vector,
-                       barionic_chemical_potential_vector);
-
-    WriteVectorsToFile("isovector_chemical_potential_at_transition.dat",
-                       "# proton fraction, "
-                       "isovector chemical potential at transition (MeV)\n",
-                       2,
-                       proton_fraction_vector,
-                       isovector_chemical_potential_vector);
-
-    WriteVectorsToFile("barionic_density_at_transition.dat",
-                       "# proton fraction, "
+    WriteVectorsToFile("barionic_density_vs_isovector_chemical_potential.dat",
+                       "# isovector chemical potential (MeV), "
                        "barionic density at transition (fm^{-3})\n",
                        2,
-                       proton_fraction_vector,
+                       isovector_chemical_potential_vector,
                        barionic_density_vector);
+
+    WriteVectorsToFile("barionic_chemical_potential_vs_isovector_chemical_potential.dat",
+                       "# isovector chemical potential (MeV), "
+                       "barionic chemical potential at transition (MeV)\n",
+                       2,
+                       isovector_chemical_potential_vector,
+                       barionic_chemical_potential_vector);
+
+    WriteVectorsToFile("hadron_proton_fraction_vs_isovector_chemical_potential.dat",
+                       "# isovector chemical potential (MeV), "
+                       "hadron proton fraction at transition (MeV)\n",
+                       2,
+                       isovector_chemical_potential_vector,
+                       hadron_proton_fraction_vector);
+
+    WriteVectorsToFile("quark_proton_fraction_vs_isovector_chemical_potential.dat",
+                       "# isovector chemical potential (MeV), "
+                       "quark proton fraction at transition (MeV)\n",
+                       2,
+                       isovector_chemical_potential_vector,
+                       quark_proton_fraction_vector);
+
 
     if (options.verbose)
         printf("Done!\n");

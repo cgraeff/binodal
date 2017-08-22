@@ -341,12 +341,12 @@ void RunTests()
                 "isovector chemical potential (MeV), "
                 "transition pressure pressure (MeV/fm^3)\n");
 
-        int points_number = 100;
+        int points_number = 200;
 
         double min_barionic_chemical_potential = 950.0;
         double max_barionic_chemical_potential = 1350.0;
 
-        double min_isovector_chemical_potential = 0.0;
+        double min_isovector_chemical_potential = -200.0;
         double max_isovector_chemical_potential = 200.0;
 
         double temperature = 0.0;
