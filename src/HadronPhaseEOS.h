@@ -27,10 +27,11 @@ typedef struct _HadronModelParameters{
 } HadronModelParameters;
 
 typedef struct _HadronMassAndDensitiesSolutionParams{
-    double mass_guess;
-    double zero_mass_chem_pot;
-    double proton_density_guess;
-    double neutron_density_guess;
+    double initial_mass_guess;
+    double initial_proton_density_guess;
+    double initial_neutron_density_guess;
+
+    double zero_mass_tolerance;
 
     int max_iter;
     double abs_error;
@@ -91,6 +92,9 @@ double HadronFermiMomentum(double density);
 
 int HadronMassAndDensitiesSolution(double proton_chemical_potential,
                                    double neutron_chemical_potential,
+                                   double hadron_mass_guess,
+                                   double proton_density_guess,
+                                   double neutron_density_guess,
                                    double * return_mass,
                                    double * return_proton_density,
                                    double * return_neutron_density);

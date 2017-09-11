@@ -26,6 +26,14 @@ typedef struct _binodal_parameters {
 
     double hadron_vacuum_thermodynamic_potential;
     double quark_vacuum_thermodynamic_potential;
+
+    double hadron_mass_guess;
+    double proton_density_guess;
+    double neutron_density_guess;
+
+    double up_mass_guess;
+    double down_mass_guess;
+
 } binodal_parameters;
 
 double BinodalPointEquation(double  barionic_density,
@@ -37,13 +45,157 @@ BinodalPoint DetermineBinodalPoint(double temperature,
                                    double quark_vacuum_thermodynamic_potential)
 {
 
+    double min_barionic_chemical_potential =
+    parameters.binodal_rootfinding_params.lower_bound;
+    double max_barionic_chemical_potential =
+    parameters.binodal_rootfinding_params.upper_bound;
+
+    double barionic_chemical_potential_step =
+    parameters.binodal_rootfinding_params.step_size;
+
+    double barionic_chemical_potential = min_barionic_chemical_potential;
+    double transition_bar_chem_pot_lower_bound =
+    min_barionic_chemical_potential;
+
+    double hadron_mass_guess =
+    parameters.hadron.mass_and_densities_solution.initial_mass_guess;
+
+    double proton_density_guess =
+    parameters.hadron.mass_and_densities_solution.initial_proton_density_guess;
+
+    double neutron_density_guess =
+    parameters.hadron.mass_and_densities_solution.initial_neutron_density_guess;
+
+    double up_mass_guess =
+    parameters.quark.mass_and_renorm_chem_pot_solution.initial_up_mass_guess;
+
+    double down_mass_guess =
+    parameters.quark.mass_and_renorm_chem_pot_solution.initial_down_mass_guess;
+
+    while (barionic_chemical_potential <= max_barionic_chemical_potential){
+
+        double proton_chemical_potential =
+        ProtonChemicalPotential(barionic_chemical_potential,
+                                isovector_chemical_potential);
+
+        double neutron_chemical_potential =
+        NeutronChemicalPotential(barionic_chemical_potential,
+                                 isovector_chemical_potential);
+
+        double hadron_mass = NAN;
+        double hadron_pressure = NAN;
+        double proton_density = NAN;
+        double neutron_density = NAN;
+        DetermineHadronPressureAndDensities(proton_chemical_potential,
+                                            neutron_chemical_potential,
+                                            hadron_vacuum_thermodynamic_potential,
+                                            hadron_mass_guess,
+                                            proton_density_guess,
+                                            neutron_density_guess,
+                                            &hadron_mass,
+                                            &proton_density,
+                                            &neutron_density,
+                                            &hadron_pressure);
+
+        double up_chemical_potential =
+        UpChemicalPotentialFromGibbsConditions(proton_chemical_potential,
+                                               neutron_chemical_potential);
+
+        double down_chemical_potential =
+        DownChemicalPotentialFromGibbsConditions(proton_chemical_potential,
+                                                 neutron_chemical_potential);
+
+        double up_quark_mass;
+        double down_quark_mass;
+        double quark_pressure;
+
+        DetermineQuarkPressure(up_chemical_potential,
+                               down_chemical_potential,
+                               temperature,
+                               quark_vacuum_thermodynamic_potential,
+                               up_mass_guess,
+                               down_mass_guess,
+                               &up_quark_mass,
+                               &down_quark_mass,
+                               &quark_pressure);
+
+        if ((hadron_pressure - quark_pressure) > 0.0){
+
+            transition_bar_chem_pot_lower_bound =
+            barionic_chemical_potential;
+
+            // For masses with values below ZERO_MASS_TOL,
+            // just assume zero.
+            hadron_mass_guess =
+            hadron_mass < parameters.hadron.mass_and_densities_solution.zero_mass_tolerance? 0.0 : hadron_mass;
+            proton_density_guess = proton_density;
+            neutron_density_guess = neutron_density;
+
+            double zero_mass_tolerance =
+            parameters.quark.mass_and_renorm_chem_pot_solution.zero_mass_tolerance;
+
+            up_mass_guess = up_quark_mass < zero_mass_tolerance? 0.0 : up_quark_mass;
+            down_mass_guess = down_quark_mass < zero_mass_tolerance? 0.0 : down_quark_mass;
+
+        }
+        else{
+
+            BinodalPoint point =
+            DetermineBinodalPointByBissection(temperature,
+                                              isovector_chemical_potential,
+                                              hadron_vacuum_thermodynamic_potential,
+                                              quark_vacuum_thermodynamic_potential,
+                                              transition_bar_chem_pot_lower_bound,
+                                              barionic_chemical_potential,
+                                              hadron_mass_guess,
+                                              proton_density_guess,
+                                              neutron_density_guess,
+                                              up_mass_guess,
+                                              down_mass_guess);
+
+            return point;
+
+        }
+
+        barionic_chemical_potential += barionic_chemical_potential_step;
+
+    }
+
+    printf("No transition could be found in the [%f,%f] range.\n",
+           min_barionic_chemical_potential,
+           max_barionic_chemical_potential);
+
+    exit(0);
+}
+
+BinodalPoint
+DetermineBinodalPointByBissection(double temperature,
+                                  double isovector_chemical_potential,
+                                  double hadron_vacuum_thermodynamic_potential,
+                                  double quark_vacuum_thermodynamic_potential,
+                                  double transition_bar_chem_pot_lower_bound,
+                                  double transition_bar_chem_pot_upper_bound,
+                                  double hadron_mass_guess,
+                                  double proton_density_guess,
+                                  double neutron_density_guess,
+                                  double up_mass_guess,
+                                  double down_mass_guess)
+{
+
     // Determine which value of density gives equal pressures for each phase:
 
     binodal_parameters params;
     params.temperature = temperature;
     params.isovector_chemical_potential = isovector_chemical_potential;
-    params.hadron_vacuum_thermodynamic_potential = hadron_vacuum_thermodynamic_potential;
-    params.quark_vacuum_thermodynamic_potential = quark_vacuum_thermodynamic_potential;
+    params.hadron_vacuum_thermodynamic_potential =
+    hadron_vacuum_thermodynamic_potential;
+    params.quark_vacuum_thermodynamic_potential =
+    quark_vacuum_thermodynamic_potential;
+    params.hadron_mass_guess = hadron_mass_guess;
+    params.proton_density_guess = proton_density_guess;
+    params.neutron_density_guess = neutron_density_guess;
+    params.up_mass_guess = up_mass_guess;
+    params.down_mass_guess = down_mass_guess;
 
     gsl_function F;
     F.function = &BinodalPointEquation;
@@ -51,8 +203,15 @@ BinodalPoint DetermineBinodalPoint(double temperature,
 
     double barionic_chemical_potential;
 
+    UnidimensionalRootFindingParameters p;
+    p.lower_bound = transition_bar_chem_pot_lower_bound;
+    p.upper_bound = transition_bar_chem_pot_upper_bound;
+    p.max_iterations = parameters.binodal_rootfinding_params.max_iterations;
+    p.abs_error = parameters.binodal_rootfinding_params.abs_error;
+    p.rel_error = parameters.binodal_rootfinding_params.rel_error;
+
     int status = UnidimensionalRootFinder(&F,
-                                          parameters.binodal_rootfinding_params,
+                                          p,
                                           &barionic_chemical_potential);
 
     if (status != 0){
@@ -84,6 +243,9 @@ BinodalPoint DetermineBinodalPoint(double temperature,
     DetermineHadronPressureAndDensities(proton_chemical_potential,
                                         neutron_chemical_potential,
                                         hadron_vacuum_thermodynamic_potential,
+                                        hadron_mass_guess,
+                                        proton_density_guess,
+                                        neutron_density_guess,
                                         &hadron_mass,
                                         &proton_density,
                                         &neutron_density,
@@ -104,6 +266,8 @@ BinodalPoint DetermineBinodalPoint(double temperature,
                            down_chemical_potential,
                            parameters.variables.temperature,
                            quark_vacuum_thermodynamic_potential,
+                           up_mass_guess,
+                           down_mass_guess,
                            &up_mass,
                            &down_mass,
                            &quark_pressure);
@@ -169,6 +333,9 @@ double BinodalPointEquation(double  barionic_chemical_potential,
     DetermineHadronPressureAndDensities(proton_chemical_potential,
                                         neutron_chemical_potential,
                                         p->hadron_vacuum_thermodynamic_potential,
+                                        p->hadron_mass_guess,
+                                        p->proton_density_guess,
+                                        p->neutron_density_guess,
                                         &hadron_mass,
                                         &proton_density,
                                         &neutron_density,
@@ -191,6 +358,8 @@ double BinodalPointEquation(double  barionic_chemical_potential,
                            down_chemical_potential,
                            p->temperature,
                            p->quark_vacuum_thermodynamic_potential,
+                           p->up_mass_guess,
+                           p->down_mass_guess,
                            &up_quark_mass,
                            &down_quark_mass,
                            &quark_pressure);
@@ -201,6 +370,9 @@ double BinodalPointEquation(double  barionic_chemical_potential,
 void DetermineHadronPressureAndDensities(double proton_chemical_potential,
                                          double neutron_chemical_potential,
                                          double hadron_vacuum_potential,
+                                         double hadron_mass_guess,
+                                         double proton_density_guess,
+                                         double neutron_density_guess,
                                          double *return_hadron_mass,
                                          double *return_proton_density,
                                          double *return_neutron_density,
@@ -211,6 +383,9 @@ void DetermineHadronPressureAndDensities(double proton_chemical_potential,
 
     HadronMassAndDensitiesSolution(proton_chemical_potential,
                                    neutron_chemical_potential,
+                                   hadron_mass_guess,
+                                   proton_density_guess,
+                                   neutron_density_guess,
                                    &mass,
                                    &proton_density,
                                    &neutron_density);
@@ -255,6 +430,8 @@ void DetermineQuarkPressure(double up_chemical_potential,
                             double down_chemical_potential,
                             double temperature,
                             double quark_vacuum_thermodynamic_potential,
+                            double up_mass_guess,
+                            double down_mass_guess,
                             double *return_up_mass,
                             double *return_down_mass,
                             double *return_pressure)
@@ -266,6 +443,8 @@ void DetermineQuarkPressure(double up_chemical_potential,
 
     QuarkMassAndRenormChemPotSolution(up_chemical_potential,
                                       down_chemical_potential,
+                                      up_mass_guess,
+                                      down_mass_guess,
                                       &up_mass,
                                       &down_mass,
                                       &up_renorm_chem_pot,

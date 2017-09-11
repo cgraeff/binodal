@@ -661,10 +661,13 @@ void SetParametersSet(char * quark_set_identifier, char * hadron_set_identifier)
 
 void NumericalParameters()
 {
-    parameters.variables.num_points = 100;
+    parameters.variables.num_points = 200;
     parameters.variables.temperature = 0.0; // (MeV)
-    parameters.variables.min_isovector_chemical_potential = -120.0;    // (MeV)
-    parameters.variables.max_isovector_chemical_potential = 120.0;    // (MeV)
+    parameters.variables.min_isovector_chemical_potential = -200.0;    // (MeV)
+    parameters.variables.max_isovector_chemical_potential = 200.0;    // (MeV)
+    parameters.variables.min_barionic_chemical_potential = 950.0;
+    parameters.variables.max_barionic_chemical_potential = 1350.0;
+    parameters.variables.pressure_tolerance = 1.0E-1;
 
     // Low lower_bound but not zero, as it may be problematic if bare_mass == 0
     // upper_bound near the value of the nucleon mass.
@@ -713,52 +716,27 @@ void NumericalParameters()
     parameters.therm_pot_free_gas_integral.abs_error = 1.0E-10;
     parameters.therm_pot_free_gas_integral.rel_error = 1.0E-10;
 
-    // Due to the "cliff" like transition on chiral restoration,
-    // the determination of solutions will have problems for heigh
-    // values of proton or neutron chemical potentials. We work
-    // around this problem by choosing a mass_guess of zero
-    // when the values of proton or neutron chemical potentials
-    // exceed the value of zero_mass_chem_pot. When problems occur
-    // at determination of hadron mass and densities, try to
-    // test with different values of zero_mass_chem_pot around
-    // 1000.0 MeV.
-    parameters.hadron.mass_and_densities_solution.zero_mass_chem_pot = 1000.0;
-    parameters.hadron.mass_and_densities_solution.mass_guess = 1100.0; // MeV
-    parameters.hadron.mass_and_densities_solution.proton_density_guess = 0.05; // fm^{-3}
-    parameters.hadron.mass_and_densities_solution.neutron_density_guess = 0.05;
+    parameters.hadron.mass_and_densities_solution.initial_mass_guess = 1000.0; // MeV
+    parameters.hadron.mass_and_densities_solution.initial_proton_density_guess = 0.05; // fm^{-3}
+    parameters.hadron.mass_and_densities_solution.initial_neutron_density_guess = 0.05;
     parameters.hadron.mass_and_densities_solution.max_iter = 2000;
     parameters.hadron.mass_and_densities_solution.abs_error = 1.0E-8;
     parameters.hadron.mass_and_densities_solution.rel_error = 1.0E-8;
+    parameters.hadron.mass_and_densities_solution.zero_mass_tolerance = 1.0;
 
-    // The calculation of mass and renormalized chemical potential for
-    // quarks is sensitive to parameters due to the "cliff" transition
-    // on the chiral restoration. Instead of simply choosing a mass guess
-    // value, we use a smooth function with the form
-    //      m = height / (1 + exp((mu - width) / transition_width)
-    // where
-    //      mu = (up_chemical_potential + down_chemical_potential) / 2.0
-    // It seams to be more complex than necessary, but is working most
-    // of time. Playing with the parameters below will help when it
-    // doesn't  work.
-    QuarkMassGuess up_mass_guess;
-    up_mass_guess.height = 350.0;
-    up_mass_guess.width = 600.0;
-    up_mass_guess.transition_width = 20.0;
-
-    QuarkMassGuess down_mass_guess;
-    down_mass_guess.height = 350.0;
-    down_mass_guess.width = 600.0;
-    down_mass_guess.transition_width = 20.0;
-
-    parameters.quark.mass_and_renorm_chem_pot_solution.up_mass_guess = up_mass_guess;
-    parameters.quark.mass_and_renorm_chem_pot_solution.down_mass_guess = down_mass_guess;
+    parameters.quark.mass_and_renorm_chem_pot_solution.initial_up_mass_guess =
+    313.0;
+    parameters.quark.mass_and_renorm_chem_pot_solution.initial_down_mass_guess =
+    313.0;
     parameters.quark.mass_and_renorm_chem_pot_solution.abs_error = 1.0E-8;
     parameters.quark.mass_and_renorm_chem_pot_solution.rel_error = 1.0E-8;
     parameters.quark.mass_and_renorm_chem_pot_solution.max_iter = 1000;
+    parameters.quark.mass_and_renorm_chem_pot_solution.zero_mass_tolerance = 1.0;
 
     parameters.binodal_rootfinding_params.max_iterations = 2000;
     parameters.binodal_rootfinding_params.lower_bound = 950.0;
     parameters.binodal_rootfinding_params.upper_bound = 2000.0;
+    parameters.binodal_rootfinding_params.step_size = 1.0;
     parameters.binodal_rootfinding_params.abs_error = 1E-5;
     parameters.binodal_rootfinding_params.rel_error = 1E-5;
 }

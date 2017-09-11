@@ -9,6 +9,7 @@
 #ifndef Loop_h
 #define Loop_h
 
-int SolveBinodalForVariablesRange();
+int SolveBinodalForBarionicChemicalPotentialRange();
+int SolveBinodalForBarionicAndIsovectorChemicalPotentialGrid();
 
 #endif /* Loop_h */

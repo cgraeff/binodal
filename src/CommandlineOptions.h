@@ -18,6 +18,7 @@ typedef struct _options{
     bool dirs;
     bool tests;
     bool list_available_parameterizations;
+    bool solution_for_barionic_chemical_potential_range;
     char * quark_parameterization;
     char * hadron_parameterization;
     double temp;

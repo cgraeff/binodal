@@ -16,7 +16,7 @@
 
 // Default values for options and flags that will be acessible
 // during the execution (specified in order of declaration).
-Options options = {true, false, false, false, NULL, NULL, -1.0, -1.0};
+Options options = {true, false, false, false, false, NULL, NULL, -1.0, -1.0};
 
 int CommandlineOptionsParse(int argc, char * argv[])
 {
@@ -33,13 +33,16 @@ int CommandlineOptionsParse(int argc, char * argv[])
     // the arguments after the first will be misinterpreted as unknown, or unclaimed.
     // This particular implementation will stop if there are any unprocessed arguments.
 
-    char * short_options = "q:h:t:lsdau";
+    char * short_options = "rq:h:t:lsdau";
 
     int opt;
     while ((opt = getopt(argc, argv, short_options)) != -1){
 
         // If an option have an argument, it is accessed through 'optarg'
         switch (opt){
+            case 'r':
+                options.solution_for_barionic_chemical_potential_range = true;
+                break;
             case 'q':
                 options.quark_parameterization = optarg;
                 break;
@@ -112,6 +115,7 @@ void CommandlineOptionsPrintUsage()
            "using NJL and eNJL models\n\n");
     printf("Usage: eos [options]\n");
     printf("Options:\n"
+           "\t-r: Solve for range of barionic chemical potential;\n"
            "\t-q par: Chooses a builtin quark parameterization;\n"
            "\t-h par: Chooses a builtin hadron parameterization;\n"
            "\t-t temp: Chooses a temperature;\n"

@@ -13,6 +13,7 @@
 
 #include "HadronPhaseEOS.h"
 #include "QuarkPhaseEOS.h"
+#include "Binodal.h"
 
 typedef struct _parameters
 {
@@ -22,6 +23,9 @@ typedef struct _parameters
         double temperature;                         // (MeV)
         double min_isovector_chemical_potential;    // (MeV)
         double max_isovector_chemical_potential;    // (MeV)
+        double min_barionic_chemical_potential;     // (MeV)
+        double max_barionic_chemical_potential;     // (MeV)
+        double pressure_tolerance;                  // (MeV)
         int num_points;
     } variables;
 
@@ -46,7 +50,7 @@ typedef struct _parameters
     IntegratorParameters fermi_dirac_integrals;
     IntegratorParameters therm_pot_free_gas_integral;
 
-    UnidimensionalRootFindingParameters binodal_rootfinding_params;
+    BinodalBissectionParameters binodal_rootfinding_params;
 
 } Parameters;
 

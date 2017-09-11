@@ -24,7 +24,7 @@ int main(int argc, char * argv[])
         exit(EXIT_SUCCESS);
     }
 
-    // If option -p is used, set parameters set accordingly,
+    // If options -q or -h are used, set parameters set accordingly,
     // otherwise, use default set (the options will be NULL
     // when not set, which corresponds to set the default set
     // [the first parsed of each type]).
@@ -46,7 +46,14 @@ int main(int argc, char * argv[])
         }
     }
 
-    SolveBinodalForVariablesRange();
+    if (options.solution_for_barionic_chemical_potential_range){
+
+        SolveBinodalForBarionicChemicalPotentialRange();
+
+        return 0;
+    }
+
+    SolveBinodalForBarionicAndIsovectorChemicalPotentialGrid();
 
     return 0;
 }

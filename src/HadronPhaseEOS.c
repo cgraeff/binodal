@@ -243,9 +243,16 @@ typedef struct _hadron_mass_and_renorm_chem_pot_input_params{
 int HadronMassAndDensitiesSolutionEquation(const gsl_vector   *x,
                                            void *params,
                                            gsl_vector *return_values);
+int
+HadronMassAndDensitiesSolutionEquationZeroMassCase(const gsl_vector   *x,
+                                                   void *params,
+                                                   gsl_vector *return_values);
 
 int HadronMassAndDensitiesSolution(double proton_chemical_potential,
                                    double neutron_chemical_potential,
+                                   double hadron_mass_guess,
+                                   double proton_density_guess,
+                                   double neutron_density_guess,
                                    double * return_mass,
                                    double * return_proton_density,
                                    double * return_neutron_density)
@@ -257,47 +264,86 @@ int HadronMassAndDensitiesSolution(double proton_chemical_potential,
     p.proton_chemical_potential = proton_chemical_potential;
     p.neutron_chemical_potential = neutron_chemical_potential;
 
+    // Handle mass != 0 first as it is the least common case
+    // and the one we start with. If no progress is made, we
+    // probably reached chiral restoration (mass tends to zero),
+    // so we just try to solve with a mass = 0 zero guess. For
+    // mass values below ZERO_MASS_TOL, we don't even try the
+    // non zero mass solution
+    if (hadron_mass_guess > params.zero_mass_tolerance){
+
+        // Set dimension (number of equations|variables to solve|find)
+        const int dimension = 3;
+
+        gsl_multiroot_function f;
+        f.f = &HadronMassAndDensitiesSolutionEquation;
+        f.n = dimension;
+        f.params = (void *)&p;
+
+        gsl_vector * initial_guess = gsl_vector_alloc(dimension);
+        gsl_vector * return_results = gsl_vector_alloc(dimension);
+
+        gsl_vector_set(initial_guess,
+                       0,
+                       sqrt(hadron_mass_guess));
+
+        gsl_vector_set(initial_guess,
+                       1,
+                       sqrt(proton_density_guess));
+        gsl_vector_set(initial_guess,
+                       2,
+                       sqrt(neutron_density_guess));
+
+        int status =
+            MultidimensionalRootFinder(dimension,
+                                       &f,
+                                       initial_guess,
+                                       params.abs_error,
+                                       params.rel_error,
+                                       params.max_iter,
+                                       return_results);
+
+        if (status == 0){
+
+            // Save results in return variables,
+            // taking care of the mappinps
+            *return_mass = pow(gsl_vector_get(return_results, 0), 2.0);
+            *return_proton_density = pow(gsl_vector_get(return_results, 1), 2.0);
+            *return_neutron_density = pow(gsl_vector_get(return_results, 2), 2.0);
+
+            // Free vectors
+            gsl_vector_free(initial_guess);
+            gsl_vector_free(return_results);
+
+            return status;
+
+        }
+    }
+
     // Set dimension (number of equations|variables to solve|find)
-    const int dimension = 3;
+    const int dimension = 2;
 
     gsl_multiroot_function f;
-    f.f = &HadronMassAndDensitiesSolutionEquation;
+    f.f = &HadronMassAndDensitiesSolutionEquationZeroMassCase;
     f.n = dimension;
     f.params = (void *)&p;
 
     gsl_vector * initial_guess = gsl_vector_alloc(dimension);
     gsl_vector * return_results = gsl_vector_alloc(dimension);
 
-    if (proton_chemical_potential > params.zero_mass_chem_pot
-        || neutron_chemical_potential > params.zero_mass_chem_pot){
-
-        gsl_vector_set(initial_guess,
-                       0,
-                       0.0);
-    }
-    else {
-        gsl_vector_set(initial_guess,
-                       0,
-                       sqrt(params.mass_guess));
-    }
-
-    gsl_vector_set(initial_guess,
-                   1,
-                   sqrt(params.proton_density_guess));
-    gsl_vector_set(initial_guess,
-                   2,
-                   sqrt(params.neutron_density_guess));
+    gsl_vector_set(initial_guess, 0, sqrt(proton_density_guess));
+    gsl_vector_set(initial_guess, 1, sqrt(neutron_density_guess));
 
     int status =
-        MultidimensionalRootFinder(dimension,
-                                   &f,
-                                   initial_guess,
-                                   params.abs_error,
-                                   params.rel_error,
-                                   params.max_iter,
-                                   return_results);
+    MultidimensionalRootFinder(dimension,
+                               &f,
+                               initial_guess,
+                               params.abs_error,
+                               params.rel_error,
+                               params.max_iter,
+                               return_results);
 
-    if (status != 0){
+   if (status != 0){
         printf("%s:%d: Something is wrong with the rootfinding.\n",
                __FILE__,
                __LINE__);
@@ -306,15 +352,42 @@ int HadronMassAndDensitiesSolution(double proton_chemical_potential,
 
     // Save results in return variables,
     // taking care of the mappinps
-    *return_mass = pow(gsl_vector_get(return_results, 0), 2.0);
-    *return_proton_density = pow(gsl_vector_get(return_results, 1), 2.0);
-    *return_neutron_density = pow(gsl_vector_get(return_results, 2), 2.0);
+    *return_mass = 0.0;
+    *return_proton_density = pow(gsl_vector_get(return_results, 0), 2.0);
+    *return_neutron_density = pow(gsl_vector_get(return_results, 1), 2.0);
 
     // Free vectors
     gsl_vector_free(initial_guess);
     gsl_vector_free(return_results);
 
     return status;
+}
+
+int
+HadronMassAndDensitiesSolutionEquationZeroMassCase(const gsl_vector   *x,
+                                                   void *params,
+                                                   gsl_vector *return_values)
+{
+    gsl_vector * guesses = gsl_vector_alloc(x->size + 1);
+    gsl_vector * results = gsl_vector_alloc(x->size + 1);
+
+    double mass = 0.0;
+
+    gsl_vector_set(guesses, 0, mass);
+    gsl_vector_set(guesses, 1, gsl_vector_get(x, 0));
+    gsl_vector_set(guesses, 2, gsl_vector_get(x, 1));
+
+    HadronMassAndDensitiesSolutionEquation(guesses,
+                                           params,
+                                           results);
+
+    gsl_vector_set(return_values, 0, gsl_vector_get(results, 1));
+    gsl_vector_set(return_values, 1, gsl_vector_get(results, 2));
+
+    gsl_vector_free(guesses);
+    gsl_vector_free(results);
+
+    return 0;
 }
 
 int HadronMassAndDensitiesSolutionEquation(const gsl_vector   *x,
