@@ -30,12 +30,12 @@ multirun:
 	@echo "[Running for multiple parameterizations...]"
 	@for hadron_set in $(HADRON_MULTIRUN_SETS); do \
 		for quark_set in $(QUARK_MULTIRUN_SETS); do \
+			echo "	$$hadron_set-$$quark_set"; \
 			./$(TARGET) -d -h "$$hadron_set" -q "$$quark_set" $(ARGS); \
 			if [ -d multioutput/"$$quark_set-$$hadron_set" ]; then \
 				rm -r multioutput/"$$quark_set-$$hadron_set"; \
 			fi; \
 			cp -r output multioutput/"$$quark_set-$$hadron_set"; \
-			echo " "; \
 		done; \
 	done
 	@echo "[done.]"

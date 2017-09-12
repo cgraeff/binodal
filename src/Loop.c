@@ -221,11 +221,14 @@ int SolveBinodalForBarionicChemicalPotentialRange(){
 
 int SolveBinodalForBarionicAndIsovectorChemicalPotentialGrid()
 {
+    // Set path to write results
+    SetFilePath("output/data");
+
     FILE * file_h = OpenFile("hadron_pressure.dat");
     FILE * file_q = OpenFile("quark_pressure.dat");
     FILE * file_t = OpenFile("transition.dat");
 
-    // printf file headers
+    // Print file headers
     fprintf(file_h,
             "# barionic_chemical_potential (MeV), "
             "isovector chemical potential (MeV), "
@@ -268,23 +271,30 @@ int SolveBinodalForBarionicAndIsovectorChemicalPotentialGrid()
     double isovector_chemical_potential =
     parameters.variables.min_isovector_chemical_potential;
 
+    HadronMassAndDensitiesSolutionParams ph =
+    parameters.hadron.mass_and_densities_solution;
+
+    QuarkMassAndRenormChemPotSolParams pq =
+    parameters.quark.mass_and_renorm_chem_pot_solution;
+
+    double hadron_mass_initial_guess = ph.initial_mass_guess;
+    double proton_density_initial_guess = ph.initial_proton_density_guess;
+    double neutron_density_initial_guess = ph.initial_neutron_density_guess;
+
+    double up_mass_initial_guess = pq.initial_up_mass_guess;
+    double down_mass_initial_guess = pq.initial_down_mass_guess;
+
     for (int i = 0; i < parameters.variables.num_points; i++){
-
-        HadronMassAndDensitiesSolutionParams ph =
-        parameters.hadron.mass_and_densities_solution;
-
-        QuarkMassAndRenormChemPotSolParams pq =
-        parameters.quark.mass_and_renorm_chem_pot_solution;
-
-        double hadron_mass_guess = ph.initial_mass_guess;
-        double proton_density_guess = ph.initial_proton_density_guess;
-        double neutron_density_guess = ph.initial_neutron_density_guess;
-
-        double up_mass_guess = pq.initial_up_mass_guess;
-        double down_mass_guess = pq.initial_down_mass_guess;
 
         double barionic_chemical_potential =
         parameters.variables.min_barionic_chemical_potential;
+
+        double hadron_mass_guess = hadron_mass_initial_guess;
+        double proton_density_guess = proton_density_initial_guess;
+        double neutron_density_guess = neutron_density_initial_guess;
+
+        double up_mass_guess = up_mass_initial_guess;
+        double down_mass_guess = down_mass_initial_guess;
 
         for (int j = 0; j < parameters.variables.num_points; j++){
 
@@ -354,13 +364,24 @@ int SolveBinodalForBarionicAndIsovectorChemicalPotentialGrid()
                         hadron_pressure);
             }
 
-            // Update guesses
+            // Update guesses for next point in the scanline
             hadron_mass_guess = hadron_mass;
             proton_density_guess = proton_density;
             neutron_density_guess = neutron_density;
 
             up_mass_guess = up_quark_mass;
             down_mass_guess = down_quark_mass;
+
+            // Store solution of first point for use as initial guess in the
+            // next scanline
+            if (j == 0){
+                hadron_mass_initial_guess = hadron_mass;
+                proton_density_initial_guess = proton_density;
+                neutron_density_initial_guess = neutron_density;
+
+                up_mass_initial_guess = up_quark_mass;
+                down_mass_initial_guess = down_quark_mass;
+            }
 
             barionic_chemical_potential += barionic_chemical_potential_step;
         }

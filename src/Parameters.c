@@ -661,12 +661,12 @@ void SetParametersSet(char * quark_set_identifier, char * hadron_set_identifier)
 
 void NumericalParameters()
 {
-    parameters.variables.num_points = 200;
+    parameters.variables.num_points = 100;
     parameters.variables.temperature = 0.0; // (MeV)
-    parameters.variables.min_isovector_chemical_potential = -200.0;    // (MeV)
-    parameters.variables.max_isovector_chemical_potential = 200.0;    // (MeV)
+    parameters.variables.min_isovector_chemical_potential = 0.0;    // (MeV)
+    parameters.variables.max_isovector_chemical_potential = 160.0;    // (MeV)
     parameters.variables.min_barionic_chemical_potential = 950.0;
-    parameters.variables.max_barionic_chemical_potential = 1350.0;
+    parameters.variables.max_barionic_chemical_potential = 1850.0;
     parameters.variables.pressure_tolerance = 1.0E-1;
 
     // Low lower_bound but not zero, as it may be problematic if bare_mass == 0
@@ -717,12 +717,12 @@ void NumericalParameters()
     parameters.therm_pot_free_gas_integral.rel_error = 1.0E-10;
 
     parameters.hadron.mass_and_densities_solution.initial_mass_guess = 1000.0; // MeV
-    parameters.hadron.mass_and_densities_solution.initial_proton_density_guess = 0.05; // fm^{-3}
-    parameters.hadron.mass_and_densities_solution.initial_neutron_density_guess = 0.05;
-    parameters.hadron.mass_and_densities_solution.max_iter = 2000;
-    parameters.hadron.mass_and_densities_solution.abs_error = 1.0E-8;
-    parameters.hadron.mass_and_densities_solution.rel_error = 1.0E-8;
-    parameters.hadron.mass_and_densities_solution.zero_mass_tolerance = 1.0;
+    parameters.hadron.mass_and_densities_solution.initial_proton_density_guess = 0.07; // fm^{-3}
+    parameters.hadron.mass_and_densities_solution.initial_neutron_density_guess = 0.07;
+    parameters.hadron.mass_and_densities_solution.max_iter = 4000;
+    parameters.hadron.mass_and_densities_solution.abs_error = 1.0E-10;
+    parameters.hadron.mass_and_densities_solution.rel_error = 1.0E-10;
+    parameters.hadron.mass_and_densities_solution.zero_mass_tolerance = 10.0;
 
     parameters.quark.mass_and_renorm_chem_pot_solution.initial_up_mass_guess =
     313.0;

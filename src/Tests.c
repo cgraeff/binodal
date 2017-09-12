@@ -223,7 +223,7 @@ void RunTests()
     // particular value of the isovector chemical potential
     if(true)
     {
-        SetParametersSet("PCP-0.0", "eNJL1");
+        SetParametersSet("BuballaR_2", "eNJL2mSigmaRho1");
         SetFilePath("tests/binodal_point_graph/data");
 
         FILE * file_h = OpenFile("hadron_pressure.dat");
