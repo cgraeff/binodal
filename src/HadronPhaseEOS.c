@@ -233,16 +233,7 @@ double HadronPhaseAsymmetry(double proton_density, double neutron_density)
 
 
 // Solve for chempot
-typedef struct _hadron_mass_and_renorm_chem_pot_input_params{
 
-    double proton_chemical_potential;
-    double neutron_chemical_potential;
-
-} hadron_mass_and_renorm_chem_pot_input_params;
-
-int HadronMassAndDensitiesSolutionEquation(const gsl_vector   *x,
-                                           void *params,
-                                           gsl_vector *return_values);
 int
 HadronMassAndDensitiesSolutionEquationZeroMassCase(const gsl_vector   *x,
                                                    void *params,
@@ -302,6 +293,18 @@ int HadronMassAndDensitiesSolution(double proton_chemical_potential,
                                        params.rel_error,
                                        params.max_iter,
                                        return_results);
+
+        if (status == -1){
+            // Save results in return variables,
+            // taking care of the mappinps
+            *return_mass = NAN;
+            *return_proton_density = NAN;
+            *return_neutron_density = NAN;
+
+            // Free vectors
+            gsl_vector_free(initial_guess);
+            gsl_vector_free(return_results);
+        }
 
         if (status == 0){
 

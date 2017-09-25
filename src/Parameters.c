@@ -661,12 +661,12 @@ void SetParametersSet(char * quark_set_identifier, char * hadron_set_identifier)
 
 void NumericalParameters()
 {
-    parameters.variables.num_points = 100;
+    parameters.variables.num_points = 1000;
     parameters.variables.temperature = 0.0; // (MeV)
     parameters.variables.min_isovector_chemical_potential = 0.0;    // (MeV)
-    parameters.variables.max_isovector_chemical_potential = 160.0;    // (MeV)
+    parameters.variables.max_isovector_chemical_potential = 250.0;    // (MeV)
     parameters.variables.min_barionic_chemical_potential = 950.0;
-    parameters.variables.max_barionic_chemical_potential = 1850.0;
+    parameters.variables.max_barionic_chemical_potential = 2000.0;
     parameters.variables.pressure_tolerance = 1.0E-1;
 
     // Low lower_bound but not zero, as it may be problematic if bare_mass == 0
@@ -716,13 +716,14 @@ void NumericalParameters()
     parameters.therm_pot_free_gas_integral.abs_error = 1.0E-10;
     parameters.therm_pot_free_gas_integral.rel_error = 1.0E-10;
 
+    // Nerver use a guess for mass that is below the zero mass tolerance
     parameters.hadron.mass_and_densities_solution.initial_mass_guess = 1000.0; // MeV
-    parameters.hadron.mass_and_densities_solution.initial_proton_density_guess = 0.07; // fm^{-3}
-    parameters.hadron.mass_and_densities_solution.initial_neutron_density_guess = 0.07;
-    parameters.hadron.mass_and_densities_solution.max_iter = 4000;
-    parameters.hadron.mass_and_densities_solution.abs_error = 1.0E-10;
-    parameters.hadron.mass_and_densities_solution.rel_error = 1.0E-10;
-    parameters.hadron.mass_and_densities_solution.zero_mass_tolerance = 10.0;
+    parameters.hadron.mass_and_densities_solution.zero_mass_tolerance = 35.0;
+    parameters.hadron.mass_and_densities_solution.initial_proton_density_guess = 0.15; // fm^{-3}
+    parameters.hadron.mass_and_densities_solution.initial_neutron_density_guess = 0.15;
+    parameters.hadron.mass_and_densities_solution.max_iter = 2000;
+    parameters.hadron.mass_and_densities_solution.abs_error = 1.0E-6;
+    parameters.hadron.mass_and_densities_solution.rel_error = 1.0E-6;
 
     parameters.quark.mass_and_renorm_chem_pot_solution.initial_up_mass_guess =
     313.0;
@@ -734,11 +735,11 @@ void NumericalParameters()
     parameters.quark.mass_and_renorm_chem_pot_solution.zero_mass_tolerance = 1.0;
 
     parameters.binodal_rootfinding_params.max_iterations = 2000;
-    parameters.binodal_rootfinding_params.lower_bound = 950.0;
-    parameters.binodal_rootfinding_params.upper_bound = 2000.0;
+    parameters.binodal_rootfinding_params.lower_bound = 1100.0;
+    parameters.binodal_rootfinding_params.upper_bound = 1400.0;
     parameters.binodal_rootfinding_params.step_size = 1.0;
-    parameters.binodal_rootfinding_params.abs_error = 1E-5;
-    parameters.binodal_rootfinding_params.rel_error = 1E-5;
+    parameters.binodal_rootfinding_params.abs_error = 1E-2;
+    parameters.binodal_rootfinding_params.rel_error = 1E-2;
 }
 
 void AppendQuarkParametersSetToList(QuarkModelParameters a_set)

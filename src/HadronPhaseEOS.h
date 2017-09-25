@@ -38,6 +38,13 @@ typedef struct _HadronMassAndDensitiesSolutionParams{
     double rel_error;
 } HadronMassAndDensitiesSolutionParams;
 
+typedef struct _hadron_mass_and_renorm_chem_pot_input_params{
+
+    double proton_chemical_potential;
+    double neutron_chemical_potential;
+
+} hadron_mass_and_renorm_chem_pot_input_params;
+
 double HadronSolveGapEquation(double proton_density,
                               double neutron_density,
                               double proton_fermi_momentum,
@@ -98,6 +105,10 @@ int HadronMassAndDensitiesSolution(double proton_chemical_potential,
                                    double * return_mass,
                                    double * return_proton_density,
                                    double * return_neutron_density);
+
+int HadronMassAndDensitiesSolutionEquation(const gsl_vector   *x,
+                                           void *params,
+                                           gsl_vector *return_values);
 
 double ProtonChemicalPotential(double barionic_chemical_potential,
                                double isovector_chemical_potential);

@@ -4,8 +4,7 @@ TARGET = binodal
 # List sets for multirun
 HADRON_MULTIRUN_SETS = eNJL2mSigmaRho1 eNJL3SigmaRho1
 
-QUARK_MULTIRUN_SETS = Buballa_1 \
-		      BuballaR_2 \
+QUARK_MULTIRUN_SETS = BuballaR_2 \
 		      PCP-0.0 PCP-0.1 PCP-0.2
 
 .PHONY: all debug run graph tests tgraph clean

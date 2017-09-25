@@ -29,7 +29,7 @@ void RunTests()
     //          set contour
     //          set cntrparam levels 15
     //          splot "quark_thermodynamic_potential_mass_map.dat" w pm3d
-    if(true)
+    if(false)
     {
         SetParametersSet("Buballa_1", NULL);
         SetFilePath("tests/quark_thermodynamic_potential/data");
@@ -128,7 +128,7 @@ void RunTests()
     //          set contour
     //          set cntrparam levels 15
     //          splot "quark_pressure_map.dat" w pm3d
-    if(true)
+    if(false)
     {
         SetParametersSet("Buballa_1", NULL);
         SetFilePath("tests/quark_pressure/data");
@@ -221,9 +221,9 @@ void RunTests()
 
     // Determine pressures for hadron and quark phases for a
     // particular value of the isovector chemical potential
-    if(true)
+    if(false)
     {
-        SetParametersSet("BuballaR_2", "eNJL2mSigmaRho1");
+        SetParametersSet("PCP-0.2", "eNJL2mSigmaRho1");
         SetFilePath("tests/binodal_point_graph/data");
 
         FILE * file_h = OpenFile("hadron_pressure.dat");
@@ -363,7 +363,7 @@ void RunTests()
     //          set contour
     //          set cntrparam levels 15
     //          splot "quark_vacuum_mass_map.dat" w pm3d
-    if (true)
+    if (false)
     {
         SetParametersSet("PCP-0.0", NULL);
         SetFilePath("tests/quark_vacuum_mass_maps/data");
@@ -464,7 +464,7 @@ void RunTests()
 
     // Maps for determination of quark masses
     // and renormalized chemical potentials
-    if (true)
+    if (false)
     {
         SetParametersSet("PCP-0.0", NULL);
         SetFilePath("tests/quark_mass_maps/data");
@@ -556,6 +556,198 @@ void RunTests()
         SetParametersSet(NULL, NULL);
     }
 
+    // Maps of hadron simultaneous equations
+    if (true)
+    {
+        SetParametersSet(NULL, "eNJL2mSigmaRho1");
+        SetFilePath("tests/hadron_simultaneous_equations/data");
+
+        const int num_pts_mass = 180;
+        const double min_mass = 0.0;
+        const double max_mass = 1000;
+
+        const int num_pts_dens = 200;
+        const double min_density = 0.0;
+        const double max_density = 1.5;
+
+        const double barionic_chemical_potential = 1800.0;
+        const double isovector_chemical_potential = 150.0;
+
+        const double zero_tol = 5.0;
+
+        ///
+
+        hadron_mass_and_renorm_chem_pot_input_params p;
+        p.proton_chemical_potential =
+        ProtonChemicalPotential(barionic_chemical_potential,
+                                isovector_chemical_potential);
+
+        p.neutron_chemical_potential =
+        NeutronChemicalPotential(barionic_chemical_potential,
+                                 isovector_chemical_potential);
+
+        const double hadron_mass_step = Step(min_mass, max_mass, num_pts_mass);
+        const double density_step = Step(min_density, max_density, num_pts_dens);
+
+        const int dimension = 3;
+
+  //      FILE * output_file[3];
+        FILE * zero_region_file[3];
+        FILE * intersection_file;
+
+        gsl_vector * input = gsl_vector_alloc(dimension);
+        gsl_vector * output = gsl_vector_alloc(dimension);
+
+        int max_num_near = 0;
+        double radius_near = 0.05;
+        double best_mass = 1000;
+
+        double hadron_mass = min_mass;
+        for(int i = 0; i < num_pts_mass; i++){
+
+            double best_pt_n = NAN;
+            double best_pt_p = NAN;
+            double least_dist = 1E200;
+
+            double eq_0_pt_p[num_pts_dens * num_pts_dens];
+            double eq_0_pt_n[num_pts_dens * num_pts_dens];
+            int eq_0_pts = 0;
+
+            char filename[256];
+            sprintf(filename, "mass_%d.dat", i);
+            FILE * mass_file = OpenFile (filename);
+            fprintf(mass_file, "\"m = %1.4f\"", hadron_mass);
+            fclose(mass_file);
+
+            sprintf(filename, "intersection_%d.dat", i);
+            intersection_file = OpenFile(filename);
+
+            for (int index = 0; index < dimension; index++){
+  /*              sprintf(filename, "equation_%d_%d.dat", index, i);
+                output_file[index] = OpenFile(filename);
+*/
+                sprintf(filename, "zero_reg_%d_%d.dat", index, i);
+                zero_region_file[index] = OpenFile(filename);
+            }
+
+            double proton_density = min_density;
+            for(int j = 0; j < num_pts_dens; j++){
+
+                double sum_ndens[dimension];
+                int pts[dimension];
+
+                for (int n = 0; n < dimension; n++){
+                    sum_ndens[n] = 0;
+                    pts[n] = 0;
+                }
+
+                double neutron_density = min_density;
+                for (int k = 0; k < num_pts_dens; k++){
+
+                    gsl_vector_set(input,
+                                   0,
+                                   sqrt(hadron_mass));
+
+                    gsl_vector_set(input,
+                                   1,
+                                   sqrt(proton_density));
+
+                    gsl_vector_set(input,
+                                   2,
+                                   sqrt(neutron_density));
+
+                    HadronMassAndDensitiesSolutionEquation(input,
+                                                           (void *)&p,
+                                                           output);
+
+                    for (int index = 0; index < dimension; index++){
+
+                        double val = gsl_vector_get(output, index);
+
+                        /*fprintf(output_file[index],
+                                "%20.15E\t%20.15E\t%20.15E\n",
+                                proton_density,
+                                neutron_density,
+                                val);
+                         */
+
+                        if (fabs(val) < zero_tol){
+                            fprintf(zero_region_file[index],
+                                    "%20.15E\t%20.15E\t%20.15E\n",
+                                    proton_density,
+                                    neutron_density,
+                                    val);
+
+                            sum_ndens[index] += neutron_density;
+                            pts[index] += 1;
+
+                            if (index == 0){
+                                eq_0_pt_p[eq_0_pts] = proton_density;
+                                eq_0_pt_n[eq_0_pts] = neutron_density;
+                                eq_0_pts++;
+                            }
+
+                        //    printf("neutron dens[%d]: %f\n", index, neutron_density);
+
+                        }
+                    }
+
+                    neutron_density += density_step;
+                }
+
+                if (pts[1] > 0 && pts[2] > 0){
+                    double mean[dimension];
+                    mean[0] = NAN;
+                    mean[1] = NAN;
+                    mean[2] = NAN;
+
+                    for (int index = 0; index < dimension; index++){
+                        mean[index] = sum_ndens[index] / (double)pts[index];
+                       // printf("%d: sum = %f, pts = %d, mean = %f\n", index, sum_ndens[index], pts[index], mean[index]);
+                    }
+
+                    double dist = mean[1] - mean[2];
+                   // printf("dist: %f\n", dist);
+
+                    if (pow(dist, 2.0) < least_dist){
+                        least_dist = dist;
+                        best_pt_p = proton_density;
+                        best_pt_n = (mean[1] + mean[2]) / 2.0;
+                    }
+                }
+
+               // printf("*\n");
+                proton_density += density_step;
+            }
+
+            fprintf(intersection_file,
+                    "%20.15E\t%20.15E\n",
+                    best_pt_p,
+                    best_pt_n);
+
+            int count = 0;
+            for (int n = 0; n < eq_0_pts; n++)
+                if ((pow(eq_0_pt_n[n] - best_pt_n, 2.0) + pow(eq_0_pt_p[n] - best_pt_p, 2.0))
+                    < pow(radius_near, 2.0))
+                    count++;
+
+            if (count > max_num_near){
+                max_num_near = count;
+                best_mass = hadron_mass;
+            }
+
+            hadron_mass += hadron_mass_step;
+
+            for (int index = 0; index < dimension; index++){
+              //  fclose(output_file[index]);
+                fclose(zero_region_file[index]);
+            }
+        }
+
+        printf("best_mass_guess: %f\n", best_mass);
+
+        SetParametersSet(NULL, NULL);
+    }
 
     return;
 }

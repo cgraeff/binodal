@@ -2,54 +2,48 @@ set term pngcairo
 
 ###
 
-set out "pressure_vs_isovector_chemical_potential.png"
+#set out "pressure_vs_isovector_chemical_potential.png"
 
-plot "data/pressure_vs_isovector_chemical_potential.dat" w l
-
-###
-
-set out "pressure_vs_hadron_proton_fraction.png"
-
-plot "data/pressure_vs_hadron_proton_fraction.dat" w l
+#plot "data/pressure_vs_isovector_chemical_potential.dat" w l
 
 ###
 
-set out "pressure_vs_quark_proton_fraction.png"
+#set out "pressure_vs_hadron_proton_fraction.png"
 
-plot "data/pressure_vs_quark_proton_fraction.dat" w l
-
-###
-
-set out "pressure_vs_hadron_asymmetry.png"
-
-plot "data/pressure_vs_hadron_asymmetry.dat" w l
+#plot "data/pressure_vs_hadron_proton_fraction.dat" w l
 
 ###
 
-set out "pressure_vs_quark_asymmetry.png"
+#set out "pressure_vs_quark_proton_fraction.png"
 
-plot "data/pressure_vs_quark_asymmetry.dat" w l
+#plot "data/pressure_vs_quark_proton_fraction.dat" w l
 
 ###
 
-set out "barionic_density_vs_isovector_chemical_potential.png"
+set out "pressure_vs_asymmetry.png"
 
-plot "data/barionic_density_vs_isovector_chemical_potential.dat" w l
+plot "data/pressure_vs_hadron_asymmetry.dat", "data/pressure_vs_quark_asymmetry.dat"
+
+###
+
+#set out "barionic_density_vs_isovector_chemical_potential.png"
+
+#plot "data/barionic_density_vs_isovector_chemical_potential.dat" w l
 
 ###
 
 set out "barionic_chemical_potential_vs_isovector_chemical_potential.png"
 
-plot "data/barionic_chemical_potential_vs_isovector_chemical_potential.dat" w l
+plot "data/barionic_chemical_potential_vs_isovector_chemical_potential.dat" u 2:1
 
 ###
 
-set out "hadron_proton_fraction_vs_isovector_chemical_potential.png"
+#set out "hadron_proton_fraction_vs_isovector_chemical_potential.png"
 
-plot "data/hadron_proton_fraction_vs_isovector_chemical_potential.dat" w l
+#plot "data/hadron_proton_fraction_vs_isovector_chemical_potential.dat" w l
 
 ###
 
-set out "quark_proton_fraction_vs_isovector_chemical_potential.png"
+#set out "quark_proton_fraction_vs_isovector_chemical_potential.png"
 
-plot "data/quark_proton_fraction_vs_isovector_chemical_potential.dat" w l
+#plot "data/quark_proton_fraction_vs_isovector_chemical_potential.dat" w l
