@@ -1,0 +1,13 @@
+set term pngcairo
+
+do for [i=0:29]{
+
+    data_file = sprintf("data/hadron_zeroed_gap_eq_%d.dat", i);
+    
+    output_file = sprintf("graph/hadron_zeroed_gap_eq_%d.png", i);
+    
+    set out output_file
+    
+    plot data_file w l, 0
+}
+    
