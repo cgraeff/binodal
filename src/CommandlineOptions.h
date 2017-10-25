@@ -14,6 +14,7 @@
 typedef struct _options{
     // List options and flags that will be acessible
     // during the execution
+    bool abort_on_error;
     bool verbose;
     bool dirs;
     bool tests;

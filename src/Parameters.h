@@ -32,6 +32,7 @@ typedef struct _parameters
     struct _hadron {
         HadronModelParameters model;
         HadronMassAndDensitiesSolutionParams mass_and_densities_solution;
+        GridRootFinderParameters grid_root_finder;
     } hadron;
 
     struct _quark {
@@ -41,6 +42,8 @@ typedef struct _parameters
         QuarkRenormChemPotSolutionParameters renorm_chem_pot_solution;
 
         QuarkMassAndRenormChemPotSolParams mass_and_renorm_chem_pot_solution;
+        QuarkMassAndRenormChemPotSolParBissec
+            quark_mass_and_renorm_chem_pot_bissec_params;
 
         QuarkThermodynamicPotMinDetermParams therm_pot_minimum;
 

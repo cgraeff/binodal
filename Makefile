@@ -19,6 +19,8 @@ debug:
 	@echo "[done]"
 run:
 	@./$(TARGET) -d $(ARGS)
+drun:
+	@./$(TARGET) -d -e $(ARGS)
 graph:
 	@echo "[Plotting...]"
 	@cd output; \
@@ -29,8 +31,23 @@ multirun:
 	@echo "[Running for multiple parameterizations...]"
 	@for hadron_set in $(HADRON_MULTIRUN_SETS); do \
 		for quark_set in $(QUARK_MULTIRUN_SETS); do \
-			echo "	$$hadron_set-$$quark_set"; \
+			echo ""; \
+			echo "[$$hadron_set-$$quark_set]"; \
 			./$(TARGET) -d -h "$$hadron_set" -q "$$quark_set" $(ARGS); \
+			if [ -d multioutput/"$$quark_set-$$hadron_set" ]; then \
+				rm -r multioutput/"$$quark_set-$$hadron_set"; \
+			fi; \
+			cp -r output multioutput/"$$quark_set-$$hadron_set"; \
+		done; \
+	done
+	@echo "[done.]"
+multidrun:
+	@echo "[Running for multiple parameterizations...]"
+	@for hadron_set in $(HADRON_MULTIRUN_SETS); do \
+		for quark_set in $(QUARK_MULTIRUN_SETS); do \
+			echo ""; \
+			echo "[$$hadron_set-$$quark_set]"; \
+			./$(TARGET) -d  -e -h "$$hadron_set" -q "$$quark_set" $(ARGS); \
 			if [ -d multioutput/"$$quark_set-$$hadron_set" ]; then \
 				rm -r multioutput/"$$quark_set-$$hadron_set"; \
 			fi; \
@@ -44,7 +61,10 @@ mgraph:
 	for dir in `echo */`; do \
 		echo "$$dir"; \
 		cd "$$dir"; \
-		gnuplot gnuplot.gpi; \
+		if [ -e gnuplot.gpi ]; \
+		then \
+			gnuplot gnuplot.gpi; \
+		fi; \
 		cd ..; \
 	done;
 	@echo "[done.]"
@@ -58,7 +78,18 @@ tgraph:
 	for dir in `echo */`; do \
 		cd "$$dir"; \
 		echo "$$dir"; \
-		gnuplot gnuplot.gpi; \
+		if [ -e gnuplot.gpi ]; \
+		then \
+			gnuplot gnuplot.gpi; \
+		fi; \
+		if [ -e script.sh ]; \
+		then \
+			bash script.sh; \
+		fi; \
+		if [ -e script.py ]; \
+		then \
+			python3 script.py; \
+		fi; \
 		cd ../; \
 	done;
 	@echo "[done.]"

@@ -17,6 +17,9 @@
 
 int main(int argc, char * argv[])
 {
+    // Turn off abort on error for GSL
+    gsl_set_error_handler_off();
+
     CommandlineOptionsParse(argc, argv);
     ParseModelParametersSets();
 
@@ -31,9 +34,6 @@ int main(int argc, char * argv[])
     // [the first parsed of each type]).
     SetParametersSet(options.quark_parameterization,
                      options.hadron_parameterization);
-
-    // Turn off abort on error for GSL
-    gsl_set_error_handler_off();
 
     // If the temperature was chosen using
     // commandline options, use it
@@ -57,7 +57,7 @@ int main(int argc, char * argv[])
         return 0;
     }
 
-    SolveBinodalForBarionicAndIsovectorChemicalPotentialGrid();
+    SolveBinodalForBarionicAndIsovectorChemicalPotentialsGrid();
 
     return 0;
 }

@@ -14,6 +14,9 @@
 double F0(double mass,
           double momentum)
 {
+    if (mass < CONST_ZERO_MASS_TOL)
+        return pow(momentum, 2.0) / 2.0;
+
     double E = sqrt(pow(mass, 2.0) + pow(momentum, 2.0));
 
     double first_term = momentum * E;
@@ -28,13 +31,13 @@ double F0(double mass,
     if (third_term != third_term)
         third_term = 0;
 
-    return (1.0 / 2.0) * (first_term +second_term + third_term);
+    return (1.0 / 2.0) * (first_term + second_term + third_term);
 }
 
 double F2(double mass,
           double momentum)
 {
-    if (mass == 0.0){
+    if (mass < CONST_ZERO_MASS_TOL){
         return pow(momentum, 4.0) / 4.0;
     }
 
@@ -47,7 +50,7 @@ double F2(double mass,
 
 double F_E(double mass, double momentum)
 {
-    if (mass == 0)
+    if (mass < CONST_ZERO_MASS_TOL)
         return pow(momentum, 4.0) / 4.0;
 
     double E = sqrt(pow(mass, 2.0) + pow(momentum, 2.0));

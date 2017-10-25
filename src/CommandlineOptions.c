@@ -16,7 +16,7 @@
 
 // Default values for options and flags that will be acessible
 // during the execution (specified in order of declaration).
-Options options = {true, false, false, false, false, NULL, NULL, -1.0, -1.0};
+Options options = {false, true, false, false, false, false, NULL, NULL, -1.0, -1.0};
 
 int CommandlineOptionsParse(int argc, char * argv[])
 {
@@ -33,7 +33,7 @@ int CommandlineOptionsParse(int argc, char * argv[])
     // the arguments after the first will be misinterpreted as unknown, or unclaimed.
     // This particular implementation will stop if there are any unprocessed arguments.
 
-    char * short_options = "rq:h:t:lsdau";
+    char * short_options = "rq:h:t:lsedau";
 
     int opt;
     while ((opt = getopt(argc, argv, short_options)) != -1){
@@ -52,14 +52,14 @@ int CommandlineOptionsParse(int argc, char * argv[])
             case 't':
                 options.temp = atof(optarg);
                 break;
-            case 'y':
-                options.proton_fraction = atof(optarg);
-                break;
             case 'l':
                 options.list_available_parameterizations = true;
                 break;
             case 's':
                 options.verbose = false;
+                break;
+            case 'e':
+                options.abort_on_error = true;
                 break;
             case 'd':
                 options.dirs = true;
@@ -119,11 +119,11 @@ void CommandlineOptionsPrintUsage()
            "\t-q par: Chooses a builtin quark parameterization;\n"
            "\t-h par: Chooses a builtin hadron parameterization;\n"
            "\t-t temp: Chooses a temperature;\n"
-           "\t-y frac: Chooses a proton fraction;\n"
            "\t-l: Lists available builtin parameterizations;\n"
-           "\t-s: silent (supress information written to standard out);"
+           "\t-s: silent (supress information written to standard out);\n"
            "\t-d: write results using a dir structure;\n"
            "\t-a: run tests. Automatically sets -d;\n"
+           "\t-e: abort on error;\n"
            "\t-u: Prints this message;\n\n");
     printf("The source code is available at github.com/cgraeff/binodal\n");
 

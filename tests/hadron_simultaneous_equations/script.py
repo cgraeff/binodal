@@ -41,7 +41,7 @@ def run():
     
     i = 0
     while i < num_frames:
-        print('Frame: ' + str(i))
+#        print('Frame: ' + str(i))
         create_script(i)
         call(["gnuplot", "gnuplot_s.gpi"])
         call(["rm", "gnuplot_s.gpi"])

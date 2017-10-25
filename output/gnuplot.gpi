@@ -2,48 +2,23 @@ set term pngcairo
 
 ###
 
-#set out "pressure_vs_isovector_chemical_potential.png"
+set xlabel "Isovector chemical potential (MeV)"
+set ylabel "Barionic chemical potential (MeV)"
+unset key
 
-#plot "data/pressure_vs_isovector_chemical_potential.dat" w l
+set out "binodal.png"
 
-###
-
-#set out "pressure_vs_hadron_proton_fraction.png"
-
-#plot "data/pressure_vs_hadron_proton_fraction.dat" w l
-
-###
-
-#set out "pressure_vs_quark_proton_fraction.png"
-
-#plot "data/pressure_vs_quark_proton_fraction.dat" w l
+plot "data/binodal_positive_section.dat", \
+     "data/binodal_negative_section.dat"
 
 ###
 
 set out "pressure_vs_asymmetry.png"
 
-plot "data/pressure_vs_hadron_asymmetry.dat", "data/pressure_vs_quark_asymmetry.dat"
+set xlabel "alpha"
+set ylabel "Pressure (MeV)"
 
-###
-
-#set out "barionic_density_vs_isovector_chemical_potential.png"
-
-#plot "data/barionic_density_vs_isovector_chemical_potential.dat" w l
-
-###
-
-set out "barionic_chemical_potential_vs_isovector_chemical_potential.png"
-
-plot "data/barionic_chemical_potential_vs_isovector_chemical_potential.dat" u 2:1
-
-###
-
-#set out "hadron_proton_fraction_vs_isovector_chemical_potential.png"
-
-#plot "data/hadron_proton_fraction_vs_isovector_chemical_potential.dat" w l
-
-###
-
-#set out "quark_proton_fraction_vs_isovector_chemical_potential.png"
-
-#plot "data/quark_proton_fraction_vs_isovector_chemical_potential.dat" w l
+plot "data/pressure_vs_hadron_asymmetry_pos_sec.dat", \
+     "data/pressure_vs_hadron_asymmetry_neg_sec.dat", \
+     "data/pressure_vs_quark_asymmetry_pos_sec.dat", \
+     "data/pressure_vs_quark_asymmetry_neg_sec.dat"

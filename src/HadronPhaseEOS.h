@@ -45,6 +45,32 @@ typedef struct _hadron_mass_and_renorm_chem_pot_input_params{
 
 } hadron_mass_and_renorm_chem_pot_input_params;
 
+typedef struct _GridRootFinderParameters{
+    int num_pts_mass;
+    double min_mass;
+    double max_mass;
+
+    int num_pts_dens;
+    double min_density;
+    double max_density;
+
+    double zero_tol;
+} GridRootFinderParameters;
+int GridRootFinder(double proton_chemical_potential,
+                   double neutron_chemical_potential,
+                   double * return_hadron_mass,
+                   double * return_proton_density,
+                   double * return_neutron_density,
+                   int * return_num_solutions);
+
+typedef struct _hadron_gap_eq_input_params{
+    double proton_fermi_momentum;
+    double neutron_fermi_momentum;
+    double proton_density;
+    double neutron_density;
+    double renormalized_chemical_potential;
+} hadron_gap_eq_input_params;
+
 double HadronSolveGapEquation(double proton_density,
                               double neutron_density,
                               double proton_fermi_momentum,
@@ -116,5 +142,8 @@ double NeutronChemicalPotential(double barionic_chemical_potential,
                                 double isovector_chemical_potential);
 
 double HadronPhaseAsymmetry(double proton_density, double neutron_density);
+
+double HadronZeroedGapEquation(double mass,
+                               void * params);
 
 #endif /* HadronPhaseEOS_h */

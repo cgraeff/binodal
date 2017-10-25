@@ -10,6 +10,6 @@
 #define Loop_h
 
 int SolveBinodalForBarionicChemicalPotentialRange();
-int SolveBinodalForBarionicAndIsovectorChemicalPotentialGrid();
+int SolveBinodalForBarionicAndIsovectorChemicalPotentialsGrid();
 
 #endif /* Loop_h */

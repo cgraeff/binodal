@@ -104,6 +104,13 @@ void QuarkVacuumMassDetermination(double * up_vacuum_mass,
     QuarkVacuumMassDeterminationParameters params =
     parameters.quark.vacuum_mass_determination;
 
+    MultidimensionalRootFinderParams rootf_pars;
+    rootf_pars.solver_type = gsl_multiroot_fsolver_dnewton;
+    rootf_pars.abs_error = params.abs_error;
+    rootf_pars.rel_error = params.rel_error;
+    rootf_pars.max_iterations = params.max_iter;
+
+
     // Set dimension (number of equations|variables to solve|find)
     const int dimension = 2;
 
@@ -123,13 +130,11 @@ void QuarkVacuumMassDetermination(double * up_vacuum_mass,
                    sqrt(params.down_vacuum_mass_guess));
 
     int status =
-        MultidimensionalRootFinder(dimension,
-                                   &f,
-                                   initial_guess,
-                                   params.abs_error,
-                                   params.rel_error,
-                                   params.max_iter,
-                                   return_results);
+    MultidimensionalRootFinder(&f,
+                               &rootf_pars,
+                               dimension,
+                               initial_guess,
+                               return_results);
 
     if (status != 0){
         printf("%s:%d: Something is wrong with the rootfinding.\n",
@@ -423,7 +428,7 @@ typedef struct _renorm_chem_pot_equation_input{
     double temperature;
 } renorm_chem_pot_equation_input;
 
-void QuarkSelfConsistentRenormChemPot(double up_quark_mass,
+int QuarkSelfConsistentRenormChemPot(double up_quark_mass,
                                       double down_quark_mass,
                                       double up_chemical_potential,
                                       double down_chemical_potential,
@@ -431,11 +436,14 @@ void QuarkSelfConsistentRenormChemPot(double up_quark_mass,
                                       double *return_up_renorm_chem_pot,
                                       double *return_down_renorm_chem_pot)
 {
+    *return_up_renorm_chem_pot = NAN;
+    *return_down_renorm_chem_pot = NAN;
+
     if (parameters.quark.model.G_V == 0.0){
         *return_up_renorm_chem_pot = up_chemical_potential;
         *return_down_renorm_chem_pot = down_chemical_potential;
 
-        return;
+        return 0;
     }
 
     QuarkRenormChemPotSolutionParameters params =
@@ -451,6 +459,12 @@ void QuarkSelfConsistentRenormChemPot(double up_quark_mass,
 
     // Set dimension (number of equations|variables to solve|find)
     const int dimension = 2;
+
+    MultidimensionalRootFinderParams rootf_pars;
+    rootf_pars.solver_type = gsl_multiroot_fsolver_dnewton;
+    rootf_pars.abs_error = params.abs_error;
+    rootf_pars.rel_error = params.rel_error;
+    rootf_pars.max_iterations = params.max_iter;
 
     gsl_multiroot_function f;
     f.f = &ZeroedRenormalizedQuarkChemPotEquation;
@@ -468,19 +482,21 @@ void QuarkSelfConsistentRenormChemPot(double up_quark_mass,
                    sqrt(params.down_renorm_chem_pot_guess));
 
     int status =
-        MultidimensionalRootFinder(dimension,
-                                   &f,
-                                   initial_guess,
-                                   params.abs_error,
-                                   params.rel_error,
-                                   params.max_iter,
-                                   return_results);
+    MultidimensionalRootFinder(&f,
+                               &rootf_pars,
+                               dimension,
+                               initial_guess,
+                               return_results);
 
     if (status != 0){
-        printf("%s:%d: Something is wrong with the rootfinding.\n",
-               __FILE__,
-               __LINE__);
-        abort();
+        if (options.abort_on_error){
+            printf("%s:%d: Something is wrong with the rootfinding.\n",
+                   __FILE__,
+                   __LINE__);
+            abort();
+        }
+
+        return -1;
     }
 
     // Save results in return variables,
@@ -492,7 +508,7 @@ void QuarkSelfConsistentRenormChemPot(double up_quark_mass,
     gsl_vector_free(initial_guess);
     gsl_vector_free(return_results);
 
-    return;
+    return 0;
 }
 
 int ZeroedRenormalizedQuarkChemPotEquation(const gsl_vector   *x,
@@ -531,14 +547,6 @@ int ZeroedRenormalizedQuarkChemPotEquation(const gsl_vector   *x,
     return GSL_SUCCESS;
 }
 
-typedef struct _quark_mass_and_renorm_chem_pot_input_params{
-    double up_chemical_potential;
-    double down_chemical_potential;
-
-    double up_renorm_chem_pot;
-    double down_renorm_chem_pot;
-} quark_mass_and_renorm_chem_pot_input_params;
-
 int QuarkMassAndRenormChemPotSolEquation(const gsl_vector   *x,
                                          void *params,
                                          gsl_vector *return_values);
@@ -552,6 +560,11 @@ int QuarkMassAndRenormChemPotSolution(double up_chemical_potential,
                                       double * return_up_renorm_chem_pot,
                                       double * return_down_renorm_chem_pot)
 {
+    *return_up_mass = NAN;
+    *return_down_mass = NAN;
+    *return_up_renorm_chem_pot = NAN;
+    *return_down_renorm_chem_pot = NAN;
+
     QuarkMassAndRenormChemPotSolParams params =
     parameters.quark.mass_and_renorm_chem_pot_solution;
 
@@ -564,6 +577,12 @@ int QuarkMassAndRenormChemPotSolution(double up_chemical_potential,
 
     // Set dimension (number of equations|variables to solve|find)
     const int dimension = 2;
+
+    MultidimensionalRootFinderParams rootf_pars;
+    rootf_pars.solver_type = gsl_multiroot_fsolver_dnewton;
+    rootf_pars.abs_error = params.abs_error;
+    rootf_pars.rel_error = params.rel_error;
+    rootf_pars.max_iterations = params.max_iter;
 
     gsl_multiroot_function f;
     f.f = &QuarkMassAndRenormChemPotSolEquation;
@@ -581,13 +600,11 @@ int QuarkMassAndRenormChemPotSolution(double up_chemical_potential,
                    sqrt(down_mass_guess));
 
     int status =
-        MultidimensionalRootFinder(dimension,
-                                   &f,
-                                   initial_guess,
-                                   params.abs_error,
-                                   params.rel_error,
-                                   params.max_iter,
-                                   return_results);
+    MultidimensionalRootFinder(&f,
+                               &rootf_pars,
+                               dimension,
+                               initial_guess,
+                               return_results);
 
     // If no progress is made, we may have reached chiral restoration
     if (status == -1){
@@ -599,21 +616,27 @@ int QuarkMassAndRenormChemPotSolution(double up_chemical_potential,
                            0.0);
 
             status =
-            MultidimensionalRootFinder(dimension,
-                                       &f,
+            MultidimensionalRootFinder(&f,
+                                       &rootf_pars,
+                                       dimension,
                                        initial_guess,
-                                       params.abs_error,
-                                       params.rel_error,
-                                       params.max_iter,
                                        return_results);
 
     }
 
-    if (status != 0){
-        printf("%s:%d: Something is wrong with the rootfinding.\n",
-               __FILE__,
-               __LINE__);
-        abort();
+    if (status){
+        if (options.abort_on_error){
+            printf("%s:%d: Something is wrong with the rootfinding (error: %d).\n",
+                   __FILE__,
+                   __LINE__,
+                   status);
+            printf("up_chem_pot: %f, down_chem_pot: %f\n",
+                   up_chemical_potential,
+                   down_chemical_potential);
+            abort();
+        }
+
+        return -1;
     }
 
     // Save results in return variables,
@@ -644,6 +667,7 @@ int QuarkMassAndRenormChemPotSolEquation(const gsl_vector   *x,
     double up_renorm_chem_pot;
     double down_renorm_chem_pot;
 
+    int status =
     QuarkSelfConsistentRenormChemPot(up_mass,
                                      down_mass,
                                      p->up_chemical_potential,
@@ -651,6 +675,14 @@ int QuarkMassAndRenormChemPotSolEquation(const gsl_vector   *x,
                                      parameters.variables.temperature,
                                      &up_renorm_chem_pot,
                                      &down_renorm_chem_pot);
+
+    if (status){
+        printf("%s:%d: Problems in renormalized chemical "
+               "potential determination.\n",
+               __FILE__,
+               __LINE__);
+        abort();
+    }
 
     // save renormalized chemical potentials
     p->up_renorm_chem_pot = up_renorm_chem_pot;
@@ -681,6 +713,196 @@ int QuarkMassAndRenormChemPotSolEquation(const gsl_vector   *x,
     gsl_vector_set(return_values, 1, down_quark_zeroed_gap_eq);
 
     return GSL_SUCCESS;
+}
+
+double MyAdapterFunction(double val, void *params)
+{
+    const int dimension = 2;
+
+    gsl_vector * x = gsl_vector_alloc(dimension);
+    gsl_vector * return_values = gsl_vector_alloc(dimension);
+
+    const double up_mass_sq = sqrt(val);
+    const double down_mass_sq = sqrt(val);
+
+    gsl_vector_set(x, 0, up_mass_sq);
+    gsl_vector_set(x, 1, down_mass_sq);
+
+    int status =
+    QuarkMassAndRenormChemPotSolEquation(x,
+                                         params,
+                                         return_values);
+
+    if (status != GSL_SUCCESS){
+        printf("%s:%d: Problems.\n", __FILE__, __LINE__);
+        abort();
+    }
+
+    double result = gsl_vector_get(return_values, 0);
+
+    gsl_vector_free(x);
+    gsl_vector_free(return_values);
+
+    return result;
+}
+
+int MySign(double value)
+{
+    int sgn;
+    if (value < 0){
+        sgn = -1;
+    }
+    else if (value > 0){
+        sgn = 1;
+    }
+    else {
+        sgn = 0;
+    }
+
+    return sgn;
+}
+
+int QuarkMassAndRenormChemPotSolutionBissection(double up_chemical_potential,
+                                                double down_chemical_potential,
+                                                double temperature,
+                                                double * return_up_mass,
+                                                double * return_down_mass,
+                                                double * return_up_renorm_chem_pot,
+                                                double * return_down_renorm_chem_pot)
+{
+    // If no solutions are found, we probably have reached
+    // the chiral restoration, so we will calculate this solution
+    // and set it to the return variables. If another solution
+    // is found, it will be overwritten. The return status will be
+    // different from zero if no other solutions are found.
+    *return_up_mass = 0.0;
+    *return_down_mass = 0.0;
+
+    double up_renorm_chem_pot;
+    double down_renorm_chem_pot;
+
+    QuarkSelfConsistentRenormChemPot(*return_up_mass,
+                                     *return_down_mass,
+                                     up_chemical_potential,
+                                     down_chemical_potential,
+                                     temperature,
+                                     &up_renorm_chem_pot,
+                                     &down_renorm_chem_pot);
+
+    *return_up_renorm_chem_pot = up_renorm_chem_pot;
+    *return_down_renorm_chem_pot = down_renorm_chem_pot;
+
+    //
+    // Search for other solutions
+    //
+
+    QuarkMassAndRenormChemPotSolParBissec bissection_pars =
+    parameters.quark.quark_mass_and_renorm_chem_pot_bissec_params;
+
+     // Set up parameters to be passed to helper function
+    quark_mass_and_renorm_chem_pot_input_params p;
+    p.up_chemical_potential = up_chemical_potential;
+    p.down_chemical_potential = down_chemical_potential;
+    p.up_renorm_chem_pot = NAN;
+    p.down_renorm_chem_pot = NAN;
+
+    UnidimensionalRootFindingParameters params;
+    params.abs_error = 1.0E-4;
+    params.rel_error = 1.0E-4;
+    params.max_iterations = 1000;
+
+    gsl_function F;
+    F.function = &MyAdapterFunction;
+    F.params = &p;
+
+    bool no_solutions = true;
+
+    //
+    // Loop for search of multiple solutions
+    //
+
+    double min_potential = INFINITY;
+
+    double point = bissection_pars.min_mass;
+
+    while (true){
+
+        //printf("mass: %f\n", point);
+
+        int sgn = MySign(MyAdapterFunction(point, (void *)&p));
+
+        double lower_bound;
+        int next_point_sgn;
+
+        do {
+            lower_bound = point;
+            point += bissection_pars.mass_step;
+            next_point_sgn = MySign(MyAdapterFunction(point, (void *)&p));
+
+            if (point > bissection_pars.max_mass)
+                return no_solutions; // Will be false if there are solutions
+
+        }while (sgn == next_point_sgn);
+
+        no_solutions = false;
+
+        double result;
+
+        if (next_point_sgn == 0){
+            result = point;
+        }
+        else{
+            double upper_bound = point;
+
+            params.lower_bound = lower_bound;
+            params.upper_bound = upper_bound;
+
+            int status =
+            UnidimensionalRootFinder(&F,
+                                     params,
+                                     &result);
+
+            if (status){
+                printf("%s:%d: UnidimensionalRootFinder didn't work.\n",
+                       __FILE__,
+                       __LINE__);
+                abort();
+
+                return -1;
+            }
+        }
+
+        QuarkSelfConsistentRenormChemPot(result,
+                                         result,
+                                         up_chemical_potential,
+                                         down_chemical_potential,
+                                         temperature,
+                                         &up_renorm_chem_pot,
+                                         &down_renorm_chem_pot);
+
+        double potential =
+        QuarkThermodynamicPotential(result,
+                                    result,
+                                    up_chemical_potential,
+                                    down_chemical_potential,
+                                    up_renorm_chem_pot,
+                                    down_renorm_chem_pot,
+                                    temperature);
+
+        if (potential < min_potential){
+
+            min_potential = potential;
+
+            *return_up_mass = result;
+            *return_down_mass = result;
+            *return_up_renorm_chem_pot = up_renorm_chem_pot;
+            *return_down_renorm_chem_pot = down_renorm_chem_pot;
+
+        }
+    }
+
+    // Never reached
+    return 0;
 }
 
 double QuarkPhaseAsymmetry(double up_quark_density,
