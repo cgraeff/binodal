@@ -4,8 +4,8 @@ TARGET = binodal
 # List sets for multirun
 HADRON_MULTIRUN_SETS = eNJL2mSigmaRho1 eNJL3SigmaRho1
 
-QUARK_MULTIRUN_SETS = BuballaR_2 \
-		      PCP-0.0 PCP-0.1 PCP-0.2
+QUARK_MULTIRUN_SETS = Buballa_1 \
+		      PCP-0.1
 
 .PHONY: all debug run graph tests tgraph clean
 
@@ -20,6 +20,8 @@ debug:
 run:
 	@./$(TARGET) -d $(ARGS)
 drun:
+	@./$(TARGET) -d -! $(ARGS)
+arun:
 	@./$(TARGET) -d -e $(ARGS)
 graph:
 	@echo "[Plotting...]"
@@ -69,36 +71,16 @@ mgraph:
 	done;
 	@echo "[done.]"
 tests:
-	@echo "[Running tests...]"
-	@./$(TARGET) -a $(ARGS)
-	@echo "[done.]"
+	@cd tests; make
 tgraph:
-	@echo "[Plotting tests ...]"
-	@cd tests/ ; \
-	for dir in `echo */`; do \
-		cd "$$dir"; \
-		echo "$$dir"; \
-		if [ -e gnuplot.gpi ]; \
-		then \
-			gnuplot gnuplot.gpi; \
-		fi; \
-		if [ -e script.sh ]; \
-		then \
-			bash script.sh; \
-		fi; \
-		if [ -e script.py ]; \
-		then \
-			python3 script.py; \
-		fi; \
-		cd ../; \
-	done;
-	@echo "[done.]"
+	@cd tests; make graph
 clean:
 	@echo "[Cleaning...]"
 	@-rm -f $(TARGET)
 	@cd src; make clean
-	@find . -name "*.dat" -type f -delete
-	@find . -name "*.log" -type f -delete
-	@find . -name "*.png" -type f -delete
+	@cd tests; make clean
+	@find output -name "*.dat" -type f -delete
+	@find output -name "*.log" -type f -delete
+	@find output -name "*.png" -type f -delete
 	@cd multioutput; rm -rf */
 	@echo "[done.]"

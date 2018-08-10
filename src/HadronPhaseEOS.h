@@ -32,6 +32,7 @@ typedef struct _HadronMassAndDensitiesSolutionParams{
     double initial_neutron_density_guess;
 
     double zero_mass_tolerance;
+    double zero_dens_tolerance;
 
     int max_iter;
     double abs_error;

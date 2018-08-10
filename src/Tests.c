@@ -10,6 +10,8 @@
 
 #include "libdatafun/libdatafun.h"
 
+#include "CommandlineOptions.h"
+
 #include "Tests.h"
 
 #include "Parameters.h"
@@ -34,7 +36,7 @@ void RunTests()
         SetParametersSet("Buballa_1", NULL);
         SetFilePath("tests/quark_thermodynamic_potential/data");
 
-        printf("[Quark Thermodynamic Potential]\n");
+        printf("- Quark Thermodynamic Potential\n");
 
         double min_mass = 0.0;
         double max_mass = 1000.0;
@@ -135,7 +137,7 @@ void RunTests()
         SetParametersSet("Buballa_1", NULL);
         SetFilePath("tests/quark_pressure/data");
 
-        printf("[Quark pressures as functions of quark chemical potentials]\n");
+        printf("- Quark pressures as functions of quark chemical potentials\n");
 
         double min_up_chemical_potential = 0.0;
         double max_up_chemical_potential = 1000.0;
@@ -223,17 +225,201 @@ void RunTests()
         SetParametersSet(NULL, NULL);
     }
 
+    // Determine quark and hadron pressures as functions of chemical potential
+    // for a given proton fraction.
+    //
+    // Note that this will be the same graphic as the binodal point, but here
+    // we want it to cover a bigger range of values of barionic chemical
+    // potential.
+    if(true)
+    {
+        SetParametersSet("BuballaR_2", "eNJL2mSigmaRho1");
+        SetFilePath("tests/quark_and_hadron_pressures/data");
+
+        printf("- Quark and hadron pressures as functions of "
+               "chemical potential\n");
+
+        int n_pts = 100;
+
+        double min_barionic_chemical_potential = 1050.0; // Try to widen this range
+        double max_barionic_chemical_potential = 2000.0;
+        double isovector_chemical_potential = 0.0; // write in terms of
+                                                   // proton_fraction?
+        double initial_proton_density_guess = 0.1;
+        double initial_neutron_density_guess = 0.1;
+        double initial_hadron_mass_guess = 900.0;
+
+        double initial_up_mass_guess = 313.0;
+        double initial_down_mass_guess = 313.0;
+
+        double temperature = 0.0;
+
+
+        double hadron_vacuum_potential = HadronVacuumEnergyDensity();
+
+        double up_vacuum_mass;
+        double down_vacuum_mass;
+
+        QuarkVacuumMassDetermination(&up_vacuum_mass, &down_vacuum_mass);
+
+        double quark_vacuum_potential =
+        QuarkThermodynamicPotential(up_vacuum_mass,
+                                    down_vacuum_mass,
+                                    0.0,
+                                    0.0,
+                                    0.0,
+                                    0.0,
+                                    0.0);
+
+        if (options.verbose){
+            printf("\tUp quark vacuum mass: %f\n", up_vacuum_mass);
+            printf("\tDown quark vacuum mass: %f\n", down_vacuum_mass);
+            printf("\tQuark vacuum thermodynamic potential: %f\n",
+                   quark_vacuum_potential);
+            printf("\tHadron vacuum thermodynamic potential: %f\n",
+                   hadron_vacuum_potential);
+        }
+
+        if (options.verbose)
+            printf("\tSolving gap equation and equations of state ...\n");
+
+        FILE * file =
+        OpenFile("hadron_and_quark_pressure_vs_barionic_chem_pot.dat");
+        fprintf (file,
+                 "# isovector_chemical_potential: %f\n",
+                 isovector_chemical_potential);
+        fprintf (file,
+                 "# barionic chemical potential (MeV/fm^3), "
+                 "hadron pressure (MeV/fm^3), "
+                 "hadron mass (MeV), "
+                 "proton density (fm^{-3}), "
+                 "neutron density (fm^{-3}), "
+                 "quark pressure (MeV/fm^3), "
+                 "up quark mass (MeV), "
+                 "down quark mass (MeV)\n");
+
+        double barionic_chemical_potential_step =
+        Step(min_barionic_chemical_potential,
+             max_barionic_chemical_potential,
+             n_pts);
+
+
+        double hadron_mass_guess = initial_hadron_mass_guess;
+        double proton_density_guess = initial_proton_density_guess;
+        double neutron_density_guess = initial_neutron_density_guess;
+
+        double up_mass_guess = initial_up_mass_guess;
+        double down_mass_guess = initial_down_mass_guess;
+
+        double barionic_chemical_potential = min_barionic_chemical_potential;
+        for (int i = 0; i < n_pts; i++){
+
+            // Determine hadron pressure for given barionic chemical potential
+
+            double proton_chemical_potential =
+            ProtonChemicalPotential(barionic_chemical_potential,
+                                    isovector_chemical_potential);
+
+            double neutron_chemical_potential =
+            NeutronChemicalPotential(barionic_chemical_potential,
+                                     isovector_chemical_potential);
+
+            double hadron_mass;
+            double hadron_pressure;
+            double proton_density;
+            double neutron_density;
+
+            int status_h =
+            DetermineHadronPressureAndDensities(proton_chemical_potential,
+                                                neutron_chemical_potential,
+                                                hadron_vacuum_potential,
+                                                hadron_mass_guess,
+                                                proton_density_guess,
+                                                neutron_density_guess,
+                                                &hadron_mass,
+                                                &proton_density,
+                                                &neutron_density,
+                                                &hadron_pressure);
+
+            if (status_h){
+                printf("%s:%d: Problems with determination of hadron pressure.\n",
+                       __FILE__,
+                       __LINE__);
+                abort();
+            }
+
+            double up_chemical_potential =
+            UpChemicalPotentialFromGibbsConditions(proton_chemical_potential,
+                                                   neutron_chemical_potential);
+
+            double down_chemical_potential =
+            DownChemicalPotentialFromGibbsConditions(proton_chemical_potential,
+                                                     neutron_chemical_potential);
+
+
+            // Determine quark pressure for given barionic chemical potential
+
+            double up_quark_mass;
+            double down_quark_mass;
+            double quark_pressure;
+
+            int status_q =
+            DetermineQuarkPressureAndMasses(up_chemical_potential,
+                                            down_chemical_potential,
+                                            temperature,
+                                            quark_vacuum_potential,
+                                            up_mass_guess,
+                                            down_mass_guess,
+                                            &up_quark_mass,
+                                            &down_quark_mass,
+                                            &quark_pressure);
+
+            if (status_q){
+                printf("%s:%d: Problems with determination of quark pressure.\n",
+                       __FILE__,
+                       __LINE__);
+                abort();
+            }
+
+            fprintf(file,
+                    "%20.15E\t%20.15E\t%20.15E\t%20.15E"
+                    "\t%20.15E\t%20.15E\t%20.15E\t%20.15E\n",
+                    barionic_chemical_potential,
+                    hadron_pressure,
+                    hadron_mass,
+                    proton_density,
+                    neutron_density,
+                    quark_pressure,
+                    up_quark_mass,
+                    down_quark_mass);
+
+            // Use solutions as guesses for next point
+            hadron_mass_guess = hadron_mass;
+            proton_density_guess = proton_density;
+            neutron_density_guess = neutron_density;
+
+            up_mass_guess = up_quark_mass;
+            down_mass_guess = down_quark_mass;
+
+            barionic_chemical_potential += barionic_chemical_potential_step;
+        }
+
+        fclose(file);
+
+        SetParametersSet(NULL, NULL);
+    }
+
     // Determine pressures for hadron and quark phases for a
     // particular value of the isovector chemical potential
     if(true)
     {
-        printf("[Binodal point]\n");
+        printf("- Binodal point\n");
 
         int points_number = 1000;
-        int n_isovec_chem_pot_pts = 20;
+        int n_isovec_chem_pot_pts = 1;
 
         double min_isovector_chemical_potential = 0.0;
-        double max_isovector_chemical_potential = 170.0;
+        double max_isovector_chemical_potential = 0.0;
 
         double min_barionic_chemical_potential = 1050.0;
         double max_barionic_chemical_potential = 2000.0;
@@ -248,13 +434,16 @@ void RunTests()
         double starting_down_mass_guess = 313.0;
 
         const int n_h_sets = 2;
-        const int n_q_sets = 2;
+        const int n_q_sets = 6;
 
-        char quark_sets[3][256] =
+        char quark_sets[6][256] =
         {
-            "BuballaR_2",
             "PCP-0.0",
-            "PCP-0.1"
+            "PCP-0.1",
+            "PCP-0.2",
+            "BuballaR_2",
+            "Buballa_1",
+            "Buballa_2"
         };
 
         char hadron_sets[2][256] =
@@ -346,6 +535,9 @@ void RunTests()
 
                     double barionic_chemical_potential =
                     min_barionic_chemical_potential;
+
+                    bool quark_pressure_is_bigger = false;
+
                     for (int i = 0; i < points_number; i++){
 
                         BinodalPoint point;
@@ -363,36 +555,57 @@ void RunTests()
                                               down_mass_guess,
                                               &point);
 
-                        if (status){
-                            printf("%s:%d: Problems with determination of the "
-                                   "binodal point candidate.\n",
-                                   __FILE__,
-                                   __LINE__);
-                            printf("h_set: %d\nq_set: %d\nk: %d\ni: %d\n",
-                                   h_set,
-                                   q_set,
-                                   k,
-                                   i);
+                        if (options.debug)
+                            if (status){
+                                printf("%s:%d: Problems with determination of the "
+                                       "binodal point candidate.\n",
+                                       __FILE__,
+                                       __LINE__);
+                                printf("h_set: %d\nq_set: %d\nk: %d\ni: %d\n",
+                                       h_set,
+                                       q_set,
+                                       k,
+                                       i);
 
-                            printf("bar_chm_pot: %f\n", barionic_chemical_potential);
-                            printf("iso_chm_pot: %f\n", isovector_chemical_potential);
+                                printf("bar_chm_pot: %f\n", barionic_chemical_potential);
+                                printf("iso_chm_pot: %f\n", isovector_chemical_potential);
 
-                            barionic_chemical_potential +=
-                            barionic_chemical_potential_step;
-                            abort();
-                        }
+                                barionic_chemical_potential +=
+                                barionic_chemical_potential_step;
+                            }
+
+                        if (quark_pressure_is_bigger == false)
+                            if (point.quark_pressure > point.hadron_pressure){
+
+                                printf("\t\tPressure at transition: %f\n",
+                                       point.hadron_pressure);
+                                printf("\t\tChemical potential at transition: %f\n",
+                                       BarionicChemicalPotential(point.proton_chemical_potential,
+                                                                 point.neutron_chemical_potential));
+                                printf("\t\tBarionic density at transition: %f\n",
+                                       point.proton_density + point.neutron_density);
+
+                                quark_pressure_is_bigger = true;
+                            }
 
                         fprintf(file_h,
-                                "%20.15E\t%20.15E\t%20.15E\n",
+                                "%20.15E\t%20.15E\t%20.15E\t%20.15E\t%20.15E\t%20.15E\n",
                                 barionic_chemical_potential,
                                 point.hadron_pressure,
-                                isovector_chemical_potential);
+                                isovector_chemical_potential,
+                                point.hadron_mass,
+                                point.proton_density,
+                                point.neutron_density);
 
                         fprintf(file_q,
-                                "%20.15E\t%20.15E\t%20.15E\n",
+                                "%20.15E\t%20.15E\t%20.15E\t%20.15E\t%20.15E\t%20.15E\t%20.15E\n",
                                 barionic_chemical_potential,
                                 point.quark_pressure,
-                                isovector_chemical_potential);
+                                isovector_chemical_potential,
+                                point.up_quark_mass,
+                                point.down_quark_mass,
+                                point.up_quark_density,
+                                point.down_quark_density);
 
                         // Update guesses
                         hadron_mass_guess = point.hadron_mass;
@@ -444,7 +657,7 @@ void RunTests()
         SetParametersSet("BuballaR_2", NULL);
         SetFilePath("tests/quark_vacuum_mass_maps/data");
 
-        printf("[Quark gap equations]\n");
+        printf("- Quark gap equations\n");
 
         double min_mass = 0.0;
         double max_mass = 400.0;
@@ -547,7 +760,7 @@ void RunTests()
         SetParametersSet("BuballaR_2", NULL);
         SetFilePath("tests/quark_mass_maps/data");
 
-        printf("[Quark mass and renormalized chemical potentials maps]\n");
+        printf("- Quark mass and renormalized chemical potentials maps\n");
         int n_pts = 1000;
 
         double min_up_mass = 0.0;
@@ -660,7 +873,7 @@ void RunTests()
         SetParametersSet(NULL, "eNJL2mSigmaRho1");
         SetFilePath("tests/hadron_simultaneous_equations/data");
 
-        printf("[Hadron gap equations map]\n");
+        printf("- Hadron gap equations map\n");
 
         const int num_pts_mass = 180;
         const double min_mass = 0.0;
@@ -816,7 +1029,7 @@ void RunTests()
         SetParametersSet(NULL,"eNJL2mSigmaRho1");
         SetFilePath("tests/hadron_gap_equation/data");
 
-        printf("[Hadron gap equation]\n");
+        printf("- Hadron gap equation\n");
 
         int n_pts = 1000;
         int n_dens_pts = 30;
@@ -886,7 +1099,7 @@ void RunTests()
 
         SetFilePath("tests/quark_zeroed_functions_for_bissection/data/");
 
-        printf("[Quark gap equation]\n");
+        printf("- Quark gap equation\n");
 
         int num_points = 1000;
 

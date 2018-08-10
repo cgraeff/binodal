@@ -75,19 +75,8 @@ int BinodalPointCandidate(double barionic_chemical_potential,
                                         &neutron_density,
                                         &hadron_pressure);
 
-    if (status_h){
-
-        if (options.abort_on_error){
-
-            printf("%s:%d:"
-                   "Abort on error enabled, aborting due to error.\n",
-                   __FILE__, __LINE__);
-
-            abort();
-        }
-
+    if (status_h)
         return -1;
-    }
 
     double up_chemical_potential =
     UpChemicalPotentialFromGibbsConditions(proton_chemical_potential,
@@ -112,19 +101,8 @@ int BinodalPointCandidate(double barionic_chemical_potential,
                                     &down_quark_mass,
                                     &quark_pressure);
 
-    if (status_q){
-
-        if (options.abort_on_error){
-
-            printf("%s:%d:"
-                   "Abort on error enabled, aborting due to error.\n",
-                   __FILE__, __LINE__);
-
-            abort();
-        }
-
+    if (status_q)
         return -1;
-    }
 
     double up_renormalized_chemical_potential;
     double down_renormalized_chemical_potential;
@@ -138,19 +116,8 @@ int BinodalPointCandidate(double barionic_chemical_potential,
                                      &up_renormalized_chemical_potential,
                                      &down_renormalized_chemical_potential);
 
-    if (status_q){
-
-        if (options.abort_on_error){
-
-            printf("%s:%d:"
-                   "Abort on error enabled, aborting due to error.\n",
-                   __FILE__, __LINE__);
-
-            abort();
-        }
-
+    if (status_q)
         return -1;
-    }
 
     double up_quark_density =
     QuarkDensity(up_quark_mass,
@@ -186,6 +153,7 @@ int BinodalPointCandidate(double barionic_chemical_potential,
 double BinodalPointEquation(double  barionic_density,
                             void   *params);
 
+// TODO: Test, if this doesn't work, throw away
 int
 DetermineBinodalPointCandidateStepwise(double temperature,
                                        double isovector_chemical_potential,
@@ -302,6 +270,8 @@ DetermineBinodalPointCandidateStepwise(double temperature,
     return -1;
 }
 
+
+// TODO: Test, if it doesn't work, throw away
 int
 DetermineBinodalPointByBissection(double temperature,
                                   double isovector_chemical_potential,
@@ -443,19 +413,8 @@ int DetermineHadronPressureAndDensities(double proton_chemical_potential,
                                    &proton_density,
                                    &neutron_density);
 
-    if (status){
-
-        if (options.abort_on_error){
-
-            printf("%s:%d:"
-                   "Abort on error enabled, aborting due to error.\n",
-                   __FILE__, __LINE__);
-
-            abort();
-        }
-
+    if (status)
         return -1;
-    }
 
     *return_hadron_mass = mass;
     *return_proton_density = proton_density;
@@ -510,19 +469,6 @@ int DetermineQuarkPressureAndMasses(double up_chemical_potential,
     double up_renorm_chem_pot = NAN;
     double down_renorm_chem_pot = NAN;
 
-/*    int status =
-    QuarkMassAndRenormChemPotSolution(up_chemical_potential,
-                                      down_chemical_potential,
-                                      up_mass_guess,
-                                      down_mass_guess,
-                                      &up_mass,
-                                      &down_mass,
-                                      &up_renorm_chem_pot,
-                                      &down_renorm_chem_pot);
-*/
-
-    // This function is not expected to fail, but if it
-    // eventually fails, it will abort
     QuarkMassAndRenormChemPotSolutionBissection(up_chemical_potential,
                                                 down_chemical_potential,
                                                 temperature,

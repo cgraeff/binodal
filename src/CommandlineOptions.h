@@ -16,6 +16,7 @@ typedef struct _options{
     // during the execution
     bool abort_on_error;
     bool verbose;
+    bool debug;
     bool dirs;
     bool tests;
     bool list_available_parameterizations;

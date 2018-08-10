@@ -137,7 +137,7 @@ void QuarkVacuumMassDetermination(double * up_vacuum_mass,
                                return_results);
 
     if (status != 0){
-        printf("%s:%d: Something is wrong with the rootfinding.\n",
+        printf("%s:%d: Could not determine solution for quark vacuum mass.\n",
                __FILE__,
                __LINE__);
         abort();
@@ -490,7 +490,8 @@ int QuarkSelfConsistentRenormChemPot(double up_quark_mass,
 
     if (status != 0){
         if (options.abort_on_error){
-            printf("%s:%d: Something is wrong with the rootfinding.\n",
+            printf("%s:%d: Could not determine solution for quark "
+                   "renormalized chemical potential.\n",
                    __FILE__,
                    __LINE__);
             abort();
@@ -607,7 +608,42 @@ int QuarkMassAndRenormChemPotSolution(double up_chemical_potential,
                                return_results);
 
     // If no progress is made, we may have reached chiral restoration
-    if (status == -1){
+    if (!status){
+
+        if (up_mass_guess < params.zero_mass_tolerance){
+            gsl_vector_set(initial_guess,
+                           0,
+                           0.0);
+            gsl_vector_set(initial_guess,
+                           1,
+                           sqrt(down_mass_guess));
+
+            status =
+            MultidimensionalRootFinder(&f,
+                                       &rootf_pars,
+                                       dimension,
+                                       initial_guess,
+                                       return_results);
+
+        }
+        else if (down_mass_guess < params.zero_mass_tolerance){
+            gsl_vector_set(initial_guess,
+                           0,
+                           sqrt(up_mass_guess));
+            gsl_vector_set(initial_guess,
+                           1,
+                           0.0);
+
+            status =
+            MultidimensionalRootFinder(&f,
+                                       &rootf_pars,
+                                       dimension,
+                                       initial_guess,
+                                       return_results);
+
+        }
+        else if (up_mass_guess < params.zero_mass_tolerance
+            && down_mass_guess < params.zero_mass_tolerance){
             gsl_vector_set(initial_guess,
                            0,
                            0.0);
@@ -622,17 +658,28 @@ int QuarkMassAndRenormChemPotSolution(double up_chemical_potential,
                                        initial_guess,
                                        return_results);
 
+        }
+        else {
+            printf("%s:%d: Problems in management of chiral restoration cases.\n",
+                   __FILE__,
+                   __LINE__);
+
+            abort();
+        }
     }
 
     if (status){
+
+        if (options.debug)
+            printf("up_chem_pot: %f, down_chem_pot: %f\n",
+                   up_chemical_potential,
+                   down_chemical_potential);
+
         if (options.abort_on_error){
             printf("%s:%d: Something is wrong with the rootfinding (error: %d).\n",
                    __FILE__,
                    __LINE__,
                    status);
-            printf("up_chem_pot: %f, down_chem_pot: %f\n",
-                   up_chemical_potential,
-                   down_chemical_potential);
             abort();
         }
 
@@ -734,7 +781,11 @@ double MyAdapterFunction(double val, void *params)
                                          return_values);
 
     if (status != GSL_SUCCESS){
-        printf("%s:%d: Problems.\n", __FILE__, __LINE__);
+        printf("%s:%d: Problems with quark mass and renormalized "
+               "chemical potential equation calculation.\n",
+               __FILE__,
+               __LINE__);
+
         abort();
     }
 
@@ -863,7 +914,8 @@ int QuarkMassAndRenormChemPotSolutionBissection(double up_chemical_potential,
                                      &result);
 
             if (status){
-                printf("%s:%d: UnidimensionalRootFinder didn't work.\n",
+                printf("%s:%d: Could not determine quark mass and renormalized "
+                       "chemical potential.\n",
                        __FILE__,
                        __LINE__);
                 abort();

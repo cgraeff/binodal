@@ -243,6 +243,10 @@ HadronMassAndDensitiesSolutionEquationZeroNeutronDensCase(const gsl_vector   *x,
                                                          void *params,
                                                          gsl_vector *return_values);
 
+double frand()
+{
+    return (double)rand()/(double)RAND_MAX;
+}
 
 int HadronMassAndDensitiesSolution(double proton_chemical_potential,
                                    double neutron_chemical_potential,
@@ -262,12 +266,10 @@ int HadronMassAndDensitiesSolution(double proton_chemical_potential,
                               neutron_chemical_potential);
 
     double isovector_chemical_potential =
-    BarionicChemicalPotential(proton_chemical_potential,
-                              neutron_chemical_potential);
+    IsovectorChemicalPotential(proton_chemical_potential,
+                               neutron_chemical_potential);
 
-    double zero_dens_tolerance = 1.0E-4; // move to parameters
-    bool debug = false;
-
+    // TODO: Test whether this makes any difference
     // We will try with the following order of solver, until one
     // of them works
     const gsl_multiroot_fsolver_type * solver_types[4] =
@@ -295,8 +297,8 @@ int HadronMassAndDensitiesSolution(double proton_chemical_potential,
     // If all guesses are below the tolerances, there is
     // nothing to do
     if (hadron_mass_guess < params.zero_mass_tolerance
-        && proton_density_guess < zero_dens_tolerance
-        && neutron_density_guess < zero_dens_tolerance){
+        && proton_density_guess < params.zero_dens_tolerance
+        && neutron_density_guess < params.zero_dens_tolerance){
 
         *return_mass = 0.0;
         *return_proton_density = 0.0;
@@ -307,20 +309,8 @@ int HadronMassAndDensitiesSolution(double proton_chemical_potential,
 
     // Case where only mass goes to zero
     if (hadron_mass_guess < params.zero_mass_tolerance
-        && proton_density_guess > zero_dens_tolerance
-        && neutron_density_guess > zero_dens_tolerance){
-
-        if (debug)
-            printf("bar chem pot: %f\n"
-                   "iso chem pot: %f\n"
-                   "hadron mass guess: %f\n"
-                   "proton density guess: %f\n"
-                   "neutron density guess: %f\n",
-                   barionic_chemical_potential,
-                   isovector_chemical_potential,
-                   hadron_mass_guess,
-                   proton_density_guess,
-                   neutron_density_guess);
+        && proton_density_guess > params.zero_dens_tolerance
+        && neutron_density_guess > params.zero_dens_tolerance){
 
         // Set dimension (number of equations|variables to solve|find)
         const int dimension = 2;
@@ -345,7 +335,23 @@ int HadronMassAndDensitiesSolution(double proton_chemical_potential,
                                    initial_guess,
                                    return_results);
 
-       if (status != 0){
+        if (status != 0){
+
+            if (options.debug)
+                printf("\n[%s:%d: No solution for:\n"
+                           "\tbar chem pot: %f\n"
+                           "\tiso chem pot: %f\n"
+                           "\thadron mass guess: %f\n"
+                           "\tproton density guess: %f\n"
+                           "\tneutron density guess: %f]\n",
+                           __FILE__,
+                           __LINE__,
+                           barionic_chemical_potential,
+                           isovector_chemical_potential,
+                           hadron_mass_guess,
+                           proton_density_guess,
+                           neutron_density_guess);
+
             // Free vectors
             gsl_vector_free(initial_guess);
             gsl_vector_free(return_results);
@@ -353,7 +359,7 @@ int HadronMassAndDensitiesSolution(double proton_chemical_potential,
             if (options.abort_on_error){
 
                 printf("%s:%d:"
-                       "Abort on error enabled, aborting due to error.\n",
+                       "No solution found for hadron mass and densities.\n",
                        __FILE__, __LINE__);
 
                 abort();
@@ -377,20 +383,8 @@ int HadronMassAndDensitiesSolution(double proton_chemical_potential,
 
     // Handle case where proton density is below zero tolerance
     if (hadron_mass_guess > params.zero_mass_tolerance
-        && proton_density_guess < zero_dens_tolerance
-        && neutron_density_guess > zero_dens_tolerance){
-
-        if (debug)
-            printf("bar chem pot: %f\n"
-                   "iso chem pot: %f\n"
-                   "hadron mass guess: %f\n"
-                   "proton density guess: %f\n"
-                   "neutron density guess: %f\n",
-                   barionic_chemical_potential,
-                   isovector_chemical_potential,
-                   hadron_mass_guess,
-                   proton_density_guess,
-                   neutron_density_guess);
+        && proton_density_guess < params.zero_dens_tolerance
+        && neutron_density_guess > params.zero_dens_tolerance){
 
         // Set dimension (number of equations|variables to solve|find)
         const int dimension = 2;
@@ -416,6 +410,22 @@ int HadronMassAndDensitiesSolution(double proton_chemical_potential,
                                    return_results);
 
        if (status != 0){
+
+           if (options.debug)
+                printf("\n[%s:%d: No solution for:\n"
+                           "\tbar chem pot: %f\n"
+                           "\tiso chem pot: %f\n"
+                           "\thadron mass guess: %f\n"
+                           "\tproton density guess: %f\n"
+                           "\tneutron density guess: %f]\n",
+                           __FILE__,
+                           __LINE__,
+                           barionic_chemical_potential,
+                           isovector_chemical_potential,
+                           hadron_mass_guess,
+                           proton_density_guess,
+                           neutron_density_guess);
+
             // Free vectors
             gsl_vector_free(initial_guess);
             gsl_vector_free(return_results);
@@ -423,7 +433,7 @@ int HadronMassAndDensitiesSolution(double proton_chemical_potential,
             if (options.abort_on_error){
 
                 printf("%s:%d:"
-                       "Abort on error enabled, aborting due to error.\n",
+                       "No solution found for hadron mass and densities.\n",
                        __FILE__, __LINE__);
 
                 abort();
@@ -447,20 +457,8 @@ int HadronMassAndDensitiesSolution(double proton_chemical_potential,
 
     // Handle case where neutron density is below zero tolerance
     if (hadron_mass_guess > params.zero_mass_tolerance
-        && proton_density_guess > zero_dens_tolerance
-        && neutron_density_guess < zero_dens_tolerance){
-
-        if (debug)
-            printf("bar chem pot: %f\n"
-                   "iso chem pot: %f\n"
-                   "hadron mass guess: %f\n"
-                   "proton density guess: %f\n"
-                   "neutron density guess: %f\n",
-                   barionic_chemical_potential,
-                   isovector_chemical_potential,
-                   hadron_mass_guess,
-                   proton_density_guess,
-                   neutron_density_guess);
+        && proton_density_guess > params.zero_dens_tolerance
+        && neutron_density_guess < params.zero_dens_tolerance){
 
         // Set dimension (number of equations|variables to solve|find)
         const int dimension = 2;
@@ -486,6 +484,22 @@ int HadronMassAndDensitiesSolution(double proton_chemical_potential,
                                    return_results);
 
        if (status != 0){
+
+           if (options.debug)
+                printf("\n[%s:%d: No solution for:\n"
+                           "\tbar chem pot: %f\n"
+                           "\tiso chem pot: %f\n"
+                           "\thadron mass guess: %f\n"
+                           "\tproton density guess: %f\n"
+                           "\tneutron density guess: %f]\n",
+                           __FILE__,
+                           __LINE__,
+                           barionic_chemical_potential,
+                           isovector_chemical_potential,
+                           hadron_mass_guess,
+                           proton_density_guess,
+                           neutron_density_guess);
+
             // Free vectors
             gsl_vector_free(initial_guess);
             gsl_vector_free(return_results);
@@ -493,7 +507,7 @@ int HadronMassAndDensitiesSolution(double proton_chemical_potential,
             if (options.abort_on_error){
 
                 printf("%s:%d:"
-                       "Abort on error enabled, aborting due to error.\n",
+                       "No solution found for hadron mass and densities.\n",
                        __FILE__, __LINE__);
 
                 abort();
@@ -515,11 +529,11 @@ int HadronMassAndDensitiesSolution(double proton_chemical_potential,
         return 0;
     }
 
-    // Standard case where no variables are near zero
+    // Standard case, where no variables are near zero
     int status = -1;
     if (hadron_mass_guess > params.zero_mass_tolerance
-        && proton_density_guess > zero_dens_tolerance
-        && neutron_density_guess > zero_dens_tolerance){
+        && proton_density_guess > params.zero_dens_tolerance
+        && neutron_density_guess > params.zero_dens_tolerance){
 
         // Set dimension (number of equations|variables to solve|find)
         const int dimension = 3;
@@ -536,82 +550,134 @@ int HadronMassAndDensitiesSolution(double proton_chemical_potential,
         rootf_pars.solver_type = solver_types[selected_solver];
         do {
 
-            gsl_vector_set(initial_guess,
-                           0,
-                           sqrt(hadron_mass_guess));
+            int retry_count = 0;
 
-            gsl_vector_set(initial_guess,
-                           1,
-                           sqrt(proton_density_guess));
-            gsl_vector_set(initial_guess,
-                           2,
-                           sqrt(neutron_density_guess));
+            do{
 
-            status =
-            MultidimensionalRootFinder(&f,
-                                       &rootf_pars,
-                                       dimension,
-                                       initial_guess,
-                                       return_results);
+                gsl_vector_set(initial_guess,
+                               0,
+                               sqrt(hadron_mass_guess));
 
-            if (!status){
+                gsl_vector_set(initial_guess,
+                               1,
+                               sqrt(proton_density_guess));
+                gsl_vector_set(initial_guess,
+                               2,
+                               sqrt(neutron_density_guess));
 
-                // Save results in return variables,
-                // taking care of the mappinps
-                *return_mass = pow(gsl_vector_get(return_results, 0), 2.0);
-                *return_proton_density = pow(gsl_vector_get(return_results, 1), 2.0);
-                *return_neutron_density = pow(gsl_vector_get(return_results, 2), 2.0);
+                status =
+                MultidimensionalRootFinder(&f,
+                                           &rootf_pars,
+                                           dimension,
+                                           initial_guess,
+                                           return_results);
 
-                if (selected_solver){
-                    printf("mass: %f\n", *return_mass);
-                    printf("pdens: %f\n", *return_proton_density);
-                    printf("ndens: %f\n", *return_neutron_density);
+                if (!status){
+
+                    // Save results in return variables,
+                    // taking care of the mappinps
+                    *return_mass = pow(gsl_vector_get(return_results, 0), 2.0);
+
+                    *return_proton_density =
+                    pow(gsl_vector_get(return_results, 1), 2.0);
+
+                    *return_neutron_density =
+                    pow(gsl_vector_get(return_results, 2), 2.0);
+
+                    // Free vectors
+                    gsl_vector_free(initial_guess);
+                    gsl_vector_free(return_results);
+
+                    return 0;
+
                 }
 
-                // Free vectors
-                gsl_vector_free(initial_guess);
-                gsl_vector_free(return_results);
+                if (options.debug)
+                    printf("\n[%s:%d: No solution for:\n"
+                           "\tbar chem pot: %f\n"
+                           "\tiso chem pot: %f\n"
+                           "\thadron mass guess: %f\n"
+                           "\tproton density guess: %f\n"
+                           "\tneutron density guess: %f]\n",
+                           __FILE__,
+                           __LINE__,
+                           barionic_chemical_potential,
+                           isovector_chemical_potential,
+                           hadron_mass_guess,
+                           proton_density_guess,
+                           neutron_density_guess);
 
-                return 0;
+                double rand_mass_guess = hadron_mass_guess;
+                rand_mass_guess += 20.0 * (frand () - 1.0);
+                gsl_vector_set(initial_guess,
+                               0,
+                               sqrt(rand_mass_guess >= 0 ? rand_mass_guess : 0.0));
 
-            }
+                double rand_proton_dens_guess = proton_density_guess;
+                rand_proton_dens_guess += 0.25 * (frand () - 1.0);
 
-            gsl_vector_set(initial_guess, 0, hadron_mass_guess);
-            gsl_vector_set(initial_guess, 1, proton_density_guess);
-            gsl_vector_set(initial_guess, 2, neutron_density_guess);
+                gsl_vector_set(initial_guess,
+                               1,
+                               sqrt(rand_proton_dens_guess >= 0.0 ? rand_proton_dens_guess : 0.0));
+
+                double rand_neutron_dens_guess = neutron_density_guess;
+                rand_neutron_dens_guess += 0.25 * (frand () - 1.0);
+
+                gsl_vector_set(initial_guess,
+                               2,
+                               sqrt(rand_neutron_dens_guess >= 0.0 ? rand_neutron_dens_guess : 0.0));
+
+                retry_count++;
+
+            } while (retry_count <= 10);
 
             selected_solver++;
 
         } while (status && selected_solver <= 4);
 
-        printf("¡not good!\n");
-        printf("%s:%d\n", __FILE__, __LINE__);
-        printf("hadron mass guess: %f\n"
-               "proton density guess: %f\n"
-               "neutron density guess: %f\n",
-               hadron_mass_guess,
-               proton_density_guess,
-               neutron_density_guess);
-
         // Free vectors
         gsl_vector_free(initial_guess);
         gsl_vector_free(return_results);
 
+        if (options.abort_on_error){
+
+            printf("%s:%d:"
+                   "No solution found for hadron mass and densities.\n",
+                   __FILE__, __LINE__);
+
+            abort();
+        }
+
         return -1;
     }
 
+    if (hadron_mass_guess > params.zero_mass_tolerance
+        && proton_density_guess < params.zero_dens_tolerance
+        && neutron_density_guess < params.zero_dens_tolerance){
+            printf("both dens < tol\n");
+            printf("%s:%d\n", __FILE__, __LINE__);
+            abort();
+    }
+
+    if (hadron_mass_guess < params.zero_mass_tolerance
+        && proton_density_guess < params.zero_dens_tolerance
+        && neutron_density_guess > params.zero_dens_tolerance){
+            printf("m, p < tol\n");
+            printf("%s:%d\n", __FILE__, __LINE__);
+            abort();
+    }
+
+    if (hadron_mass_guess < params.zero_mass_tolerance
+        && proton_density_guess > params.zero_dens_tolerance
+        && neutron_density_guess > params.zero_dens_tolerance){
+            printf("m, n < tol\n");
+            printf("%s:%d\n", __FILE__, __LINE__);
+            abort();
+    }
+
+    // This return point should not be reached
     printf("%s:%d ", __FILE__, __LINE__);
     printf("Problems in management of possible calculation scenarios.\n");
-    printf("bar chem pot: %f\n"
-           "iso chem pot: %f\n"
-           "hadron mass guess: %f\n"
-           "proton density guess: %f\n"
-           "neutron density guess: %f\n",
-           barionic_chemical_potential,
-           isovector_chemical_potential,
-           hadron_mass_guess,
-           proton_density_guess,
-           neutron_density_guess);
 
     abort();
 
@@ -756,6 +822,7 @@ int HadronMassAndDensitiesSolutionEquation(const gsl_vector   *x,
     return GSL_SUCCESS;
 }
 
+// TODO: If not used, throw away
 int GridRootFinder(double proton_chemical_potential,
                    double neutron_chemical_potential,
                    double * return_hadron_mass,

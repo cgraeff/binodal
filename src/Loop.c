@@ -661,8 +661,8 @@ int GridLoop(double initial_mass_guess,
 
 
             // Update guesses for next point in the scanline.
-            // The masses are not suposed to go bigger values than
-            // it initial guess provided to the function. If this happens,
+            // The masses are not supposed to have bigger values than
+            // the initial guess provided to the function. If this happens,
             // reject the guess (maybe even the solution should be discarded
             // as I see no reason for that to happen). The update is performed
             // only if we have a successfull binodal point candidate calculation
@@ -712,3 +712,4 @@ int GridLoop(double initial_mass_guess,
 
     return 0;
 }
+

@@ -16,7 +16,7 @@
 
 // Default values for options and flags that will be acessible
 // during the execution (specified in order of declaration).
-Options options = {false, true, false, false, false, false, NULL, NULL, -1.0, -1.0};
+Options options = {false, true, false, false, false, false, false, NULL, NULL, -1.0, -1.0};
 
 int CommandlineOptionsParse(int argc, char * argv[])
 {
@@ -33,7 +33,7 @@ int CommandlineOptionsParse(int argc, char * argv[])
     // the arguments after the first will be misinterpreted as unknown, or unclaimed.
     // This particular implementation will stop if there are any unprocessed arguments.
 
-    char * short_options = "rq:h:t:lsedau";
+    char * short_options = "rq:h:t:ls!edau";
 
     int opt;
     while ((opt = getopt(argc, argv, short_options)) != -1){
@@ -57,6 +57,9 @@ int CommandlineOptionsParse(int argc, char * argv[])
                 break;
             case 's':
                 options.verbose = false;
+                break;
+            case '!':
+                options.debug = true;
                 break;
             case 'e':
                 options.abort_on_error = true;
@@ -124,6 +127,7 @@ void CommandlineOptionsPrintUsage()
            "\t-d: write results using a dir structure;\n"
            "\t-a: run tests. Automatically sets -d;\n"
            "\t-e: abort on error;\n"
+           "\t-!: print debug messages;\n"
            "\t-u: Prints this message;\n\n");
     printf("The source code is available at github.com/cgraeff/binodal\n");
 
