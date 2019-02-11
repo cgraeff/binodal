@@ -15,180 +15,7 @@
 #include "HadronPhaseEOS.h"
 #include "Binodal.h"
 
-int SolveBinodalForBarionicChemicalPotentialRange(){
-
-    // Print name of parametrization
-    if (options.verbose){
-        printf("Calculation performed with %s quark phase parameters set\n"
-               "and %s hadron phase paarameters set.\n"
-               "\ttemperature: %4.2f (MeV)\n",
-               parameters.quark.model.parameters_set_identifier,
-               parameters.hadron.model.parameters_set_identifier,
-               parameters.variables.temperature);
-    }
-
-    // Vacuum mass and potential determination
-    if (options.verbose)
-        printf("Determining the vacuum mass and bag constant ...\n");
-
-    double hadron_vacuum_potential =
-    HadronVacuumEnergyDensity();
-
-    double up_vacuum_mass;
-    double down_vacuum_mass;
-
-    QuarkVacuumMassDetermination(&up_vacuum_mass, &down_vacuum_mass);
-
-    double quark_vacuum_potential =
-    QuarkThermodynamicPotential(up_vacuum_mass,
-                                down_vacuum_mass,
-                                0.0,
-                                0.0,
-                                0.0,
-                                0.0,
-                                0.0);
-
-    if (options.verbose){
-        printf("\tUp quark vacuum mass: %f\n", up_vacuum_mass);
-        printf("\tDown quark vacuum mass: %f\n", down_vacuum_mass);
-        printf("\tQuark vacuum thermodynamic potential: %f\n",
-               quark_vacuum_potential);
-        printf("\tHadron vacuum thermodynamic potential: %f\n",
-               hadron_vacuum_potential);
-    }
-
-    if (options.verbose)
-        printf("Solving gap equation and equations of state ...\n");
-
-    // LOOP STARTS
-
-    gsl_vector * hadron_asymmetry_vector =
-    gsl_vector_alloc(parameters.variables.num_points);
-
-    gsl_vector * quark_asymmetry_vector =
-    gsl_vector_alloc(parameters.variables.num_points);
-
-    gsl_vector * barionic_chemical_potential_vector =
-    gsl_vector_alloc(parameters.variables.num_points);
-
-    gsl_vector * isovector_chemical_potential_vector =
-    gsl_vector_alloc(parameters.variables.num_points);
-
-    gsl_vector * pressure_vector =
-    gsl_vector_alloc(parameters.variables.num_points);
-
-    double isovector_chemical_potential =
-    parameters.variables.min_isovector_chemical_potential;
-
-    double isovector_chemical_potential_step =
-    Step(parameters.variables.min_isovector_chemical_potential,
-         parameters.variables.max_isovector_chemical_potential,
-         parameters.variables.num_points);
-
-    for (int i = 0; i < parameters.variables.num_points; i++){
-
-        if (options.verbose)
-            printf("\tIsovector chemical potential: %f\r",
-                   isovector_chemical_potential);
-
-        BinodalPoint point;
-
-        double barionic_chem_pot_lower_bound;
-        double barionic_chem_pot_upper_bound;
-
-        int status =
-        DetermineBinodalPointCandidateStepwise(parameters.variables.temperature,
-                                               isovector_chemical_potential,
-                                               hadron_vacuum_potential,
-                                               quark_vacuum_potential,
-                                               &barionic_chem_pot_lower_bound,
-                                               &barionic_chem_pot_upper_bound,
-                                               &point);
-
-        if (status){
-            if (options.verbose)
-                printf("%s:%d: No candidate solution could be found.\n",
-                       __FILE__, __LINE__);
-
-            abort();
-        }
-
-        DetermineBinodalPointByBissection(parameters.variables.temperature,
-                                          isovector_chemical_potential,
-                                          hadron_vacuum_potential,
-                                          quark_vacuum_potential,
-                                          barionic_chem_pot_lower_bound,
-                                          barionic_chem_pot_upper_bound,
-                                          point.hadron_mass,
-                                          point.proton_density,
-                                          point.neutron_density,
-                                          point.up_quark_mass,
-                                          point.down_quark_mass,
-                                          &point);
-
-        double barionic_chemical_potential =
-        BarionicChemicalPotential(point.proton_density,
-                                  point.neutron_chemical_potential);
-
-        gsl_vector_set(hadron_asymmetry_vector,
-                       i,
-                       HadronPhaseAsymmetry(point.proton_density,
-                                            point.neutron_density));
-
-        gsl_vector_set(quark_asymmetry_vector,
-                       i,
-                       QuarkPhaseAsymmetry(point.up_quark_density,
-                                           point.down_quark_density));
-
-        gsl_vector_set(barionic_chemical_potential_vector,
-                       i,
-                       barionic_chemical_potential);
-        gsl_vector_set(isovector_chemical_potential_vector,
-                       i,
-                       isovector_chemical_potential);
-
-        gsl_vector_set(pressure_vector, i, point.hadron_pressure);
-
-        isovector_chemical_potential += isovector_chemical_potential_step;
-    }
-    printf("\n");
-
-
-    // Write results
-    SetFilePath("output/data");
-
-    WriteVectorsToFile("pressure_vs_isovector_chemical_potential.dat",
-                       "# isovector chemical potential (MeV), "
-                       "pressure at transition (MeV/fm^3)\n",
-                       2,
-                       isovector_chemical_potential_vector,
-                       pressure_vector);
-
-    WriteVectorsToFile("pressure_vs_hadron_asymmetry.dat",
-                       "# asymmetry, pressure at transition (MeV/fm^3) \n",
-                       2,
-                       hadron_asymmetry_vector,
-                       pressure_vector);
-
-    WriteVectorsToFile("pressure_vs_quark_asymmetry.dat",
-                       "# asymmetry, pressure at transition (MeV/fm^3) \n",
-                       2,
-                       quark_asymmetry_vector,
-                       pressure_vector);
-
-    WriteVectorsToFile("barionic_vs_isovector_chemical_potential.dat",
-                       "# isovector chemical potential (MeV), "
-                       "barionic chemical potential at transition (MeV)\n",
-                       2,
-                       isovector_chemical_potential_vector,
-                       barionic_chemical_potential_vector);
-
-    if (options.verbose)
-        printf("Done!\n");
-
-    return 0;
-}
-
+static
 int GridLoop(double initial_mass_guess,
              double initial_proton_density_guess,
              double initial_neutron_density_guess,
@@ -436,6 +263,7 @@ int SolveBinodalForBarionicAndIsovectorChemicalPotentialsGrid()
     return 0;
 }
 
+static
 int GridLoop(double initial_mass_guess,
              double initial_proton_density_guess,
              double initial_neutron_density_guess,
@@ -467,7 +295,6 @@ int GridLoop(double initial_mass_guess,
 
     double isovector_chemical_potential = min_isovector_chemical_potential;
     *binodal_count = 0;
-//    double count = 0;
     for (int i = 0; i < isovector_chem_pot_num_pts; i++){
 
         double barionic_chemical_potential = min_barionic_chemical_potential;
@@ -479,8 +306,6 @@ int GridLoop(double initial_mass_guess,
         double up_mass_guess = up_mass_scanline_initial_guess;
         double down_mass_guess = down_mass_scanline_initial_guess;
 
-//        FILE * teste = fopen("test.dat", "w");
-
         for (int j = 0; j < barionic_chem_pot_num_pts; j++){
 
             if (options.verbose){
@@ -490,10 +315,6 @@ int GridLoop(double initial_mass_guess,
                 fflush(stdout);
             }
 
-/*            if (i == 533 && j == 665){
-                printf("stop.\n");
-            }
-*/
             BinodalPoint point;
 
             int status =
@@ -509,118 +330,6 @@ int GridLoop(double initial_mass_guess,
                                   down_mass_guess,
                                   &point);
 
- /*           // If the rootfinder give up,
-            // try to find a guess in a grid
-            // and try again
-            if (status){
-
-                if (options.verbose)
-                    printf("\nNo solution found for:\n"
-                           "\tbarionic chemical potential: %f\n"
-                           "\tisovector chemical potential %f\n",
-                           barionic_chemical_potential,
-                           isovector_chemical_potential);
-
-                if (options.verbose)
-                    printf("Trying to determine solution "
-                           "using grid for guesses ...\n");
-
-                double proton_chemical_potential =
-                ProtonChemicalPotential(barionic_chemical_potential,
-                                        isovector_chemical_potential);
-
-                double neutron_chemical_potential =
-                NeutronChemicalPotential(barionic_chemical_potential,
-                                         isovector_chemical_potential);
-
-                int num_sols = 0;
-                status =
-                GridRootFinder(proton_chemical_potential,
-                               neutron_chemical_potential,
-                               &hadron_mass_guess,
-                               &proton_density_guess,
-                               &neutron_density_guess,
-                               &num_sols);
-
-                if (status == -1){
-
-                    if (options.verbose)
-                        printf("\nNo solution on grid, skipping.\n"
-                               "[barionic_chemical_potential: %f]\n"
-                               "[isovector_chemical_potential: %f]\n",
-                               barionic_chemical_potential,
-                               isovector_chemical_potential);
-
-                    continue;
-                }
-
-                BinodalPoint point;
-
-                status =
-                BinodalPointCandidate(barionic_chemical_potential,
-                                      isovector_chemical_potential,
-                                      parameters.variables.temperature,
-                                      hadron_vacuum_thermodynamic_potential,
-                                      hadron_mass_guess,
-                                      proton_density_guess,
-                                      neutron_density_guess,
-                                      quark_vacuum_thermodynamic_potential,
-                                      up_mass_guess,
-                                      down_mass_guess,
-                                      &point);
-
-                if (status){
-
-                    if (options.verbose)
-                        printf("\nNo solution after trying with guess "
-                               "from grid, skipping.\n"
-                               "[barionic_chemical_potential: %f]\n"
-                               "[isovector_chemical_potential: %f]\n",
-                               barionic_chemical_potential,
-                               isovector_chemical_potential);
-                }
-            }
-*/
-/*            fprintf(teste,
-                    "%20.15E\t%20.15E\t%20.15E\n",
-                    barionic_chemical_potential,
-                    point.hadron_pressure,
-                    point.quark_pressure);
-*/
-            // Store all pressure values
-/*
-            gsl_matrix_set(hadron_pressure_on_grid,
-                           count,
-                           0,
-                           isovector_chemical_potential);
-
-            gsl_matrix_set(hadron_pressure_on_grid,
-                           count,
-                           1,
-                           barionic_chemical_potential);
-
-            gsl_matrix_set(hadron_pressure_on_grid,
-                           count,
-                           2,
-                           point.hadron_pressure);
-
-            gsl_matrix_set(quark_pressure_on_grid,
-                           count,
-                           0,
-                           isovector_chemical_potential);
-
-            gsl_matrix_set(quark_pressure_on_grid,
-                           count,
-                           1,
-                           barionic_chemical_potential);
-
-            gsl_matrix_set(quark_pressure_on_grid,
-                           count,
-                           2,
-                           point.quark_pressure);
-
-            count++;
-*/
             // When BinodalPointCandidate returns zero, we have a successfull
             // calculation. In this case, we will test if the pressure tolerance
             // is met. If it's not, the point is skipped. If the calculation is
@@ -668,21 +377,6 @@ int GridLoop(double initial_mass_guess,
             // only if we have a successfull binodal point candidate calculation
             if (!status){
 
-/*                hadron_mass_guess =
-                point.hadron_mass < initial_mass_guess?
-                point.hadron_mass : initial_mass_guess;
-
-                proton_density_guess = point.proton_density;
-                neutron_density_guess = point.neutron_density;
-
-                down_mass_guess =
-                point.down_quark_mass < initial_down_mass_guess?
-                point.down_quark_mass : initial_down_mass_guess;
-
-                up_mass_guess =
-                point.up_quark_mass < initial_up_mass_guess?
-                point.up_quark_mass : initial_down_mass_guess;
-*/
                 hadron_mass_guess = point.hadron_mass;
                 proton_density_guess = point.proton_density;
                 neutron_density_guess = point.neutron_density;
@@ -703,7 +397,7 @@ int GridLoop(double initial_mass_guess,
 
             barionic_chemical_potential += barionic_chemical_potential_step;
         }
-//        abort();
+
         isovector_chemical_potential += isovector_chemical_potential_step;
     }
 

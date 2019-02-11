@@ -662,7 +662,7 @@ void SetParametersSet(char * quark_set_identifier, char * hadron_set_identifier)
 void NumericalParameters()
 {
     parameters.variables.num_points = 1000;
-    parameters.variables.temperature = 0.0; // (MeV)
+    parameters.variables.temperature = 100.0; // (MeV)
     parameters.variables.min_isovector_chemical_potential = 0.0;    // (MeV)
     parameters.variables.max_isovector_chemical_potential = 160.0;    // (MeV)
     parameters.variables.min_barionic_chemical_potential = 1050.0;
@@ -708,6 +708,22 @@ void NumericalParameters()
     parameters.fermi_dirac_integrals.abs_error = 1.0E-10;
     parameters.fermi_dirac_integrals.rel_error = 1.0E-10;
 
+/*    parameters.quark_fermi_dirac_integrals.lower_limit = 0.0; // (MeV)
+    parameters.quark_fermi_dirac_integrals.upper_limit = 2000.0; // (MeV)
+    parameters.quark_fermi_dirac_integrals.max_interval_num = 8000;
+    parameters.quark_fermi_dirac_integrals.integration_key = GSL_INTEG_GAUSS61;
+    parameters.quark_fermi_dirac_integrals.max_sub_interval = 8000;
+    parameters.quark_fermi_dirac_integrals.abs_error = 1.0E-10;
+    parameters.quark_fermi_dirac_integrals.rel_error = 1.0E-10;
+
+    parameters.hadron_fermi_dirac_integrals.lower_limit = 0.0; // (MeV)
+    parameters.hadron_fermi_dirac_integrals.upper_limit = 2000.0; // (MeV)
+    parameters.hadron_fermi_dirac_integrals.max_interval_num = 8000;
+    parameters.hadron_fermi_dirac_integrals.integration_key = GSL_INTEG_GAUSS61;
+    parameters.hadron_fermi_dirac_integrals.max_sub_interval = 8000;
+    parameters.hadron_fermi_dirac_integrals.abs_error = 1.0E-10;
+    parameters.hadron_fermi_dirac_integrals.rel_error = 1.0E-10;
+*/
     parameters.therm_pot_free_gas_integral.lower_limit = 0.0; // (MeV)
     parameters.therm_pot_free_gas_integral.upper_limit = 2000.0; // (MeV)
     parameters.therm_pot_free_gas_integral.max_interval_num = 8000;

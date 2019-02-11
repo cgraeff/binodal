@@ -476,7 +476,7 @@ void RunTests()
 
                 SetParametersSet(quark_sets[q_set], hadron_sets[h_set]);
 
-                char dir_name[256];
+                char dir_name[1024];
                 sprintf(dir_name,
                         "tests/binodal_point_graph/data/%s-%s",
                         quark_sets[q_set],
@@ -582,8 +582,11 @@ void RunTests()
                                 printf("\t\tChemical potential at transition: %f\n",
                                        BarionicChemicalPotential(point.proton_chemical_potential,
                                                                  point.neutron_chemical_potential));
-                                printf("\t\tBarionic density at transition: %f\n",
+                                printf("\t\tHadron barionic density at transition: %f\n",
                                        point.proton_density + point.neutron_density);
+
+                                printf("\t\tQuark barionic density at transition: %f\n",
+                                       (point.down_quark_density + point.up_quark_density) / 3.0);
 
                                 quark_pressure_is_bigger = true;
                             }
@@ -1060,20 +1063,28 @@ void RunTests()
                 double neutron_density = (1.0 - proton_fraction) * dens;
 
                 double proton_fermi_momentum =
-                HadronFermiMomentum(proton_density);
+                HadronFermiMomentumFromBarionicDensity(proton_density);
 
                 double neutron_fermi_momentum =
-                HadronFermiMomentum(neutron_density);
+                HadronFermiMomentumFromBarionicDensity(neutron_density);
 
-                hadron_gap_eq_input_params  gap_params;
-                gap_params.proton_fermi_momentum = proton_fermi_momentum;
-                gap_params.neutron_fermi_momentum = neutron_fermi_momentum;
-                gap_params.proton_density = proton_density;
-                gap_params.neutron_density = neutron_density;
+                double proton_scalar_density =
+                HadronZeroTemperatureScalarDensity(mass,
+                                                   proton_fermi_momentum,
+                                                   parameters.hadron.model.cutoff);
+
+                double neutron_scalar_density =
+                HadronZeroTemperatureScalarDensity(mass,
+                                                   neutron_fermi_momentum,
+                                                   parameters.hadron.model.cutoff);
 
                 double gap_equation =
                 HadronZeroedGapEquation(mass,
-                                        (void *)&gap_params);
+                                        proton_density,
+                                        neutron_density,
+                                        proton_scalar_density,
+                                        neutron_scalar_density);
+
 
                 fprintf(output,
                         "%20.15E\t%20.15E\n",
@@ -1160,5 +1171,4 @@ void RunTests()
 
     return;
 }
-
 

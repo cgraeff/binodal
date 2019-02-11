@@ -39,6 +39,7 @@ typedef struct _HadronMassAndDensitiesSolutionParams{
     double rel_error;
 } HadronMassAndDensitiesSolutionParams;
 
+// TODO: Check below, may be *_renorm_chem_pot;
 typedef struct _hadron_mass_and_renorm_chem_pot_input_params{
 
     double proton_chemical_potential;
@@ -64,14 +65,6 @@ int GridRootFinder(double proton_chemical_potential,
                    double * return_neutron_density,
                    int * return_num_solutions);
 
-typedef struct _hadron_gap_eq_input_params{
-    double proton_fermi_momentum;
-    double neutron_fermi_momentum;
-    double proton_density;
-    double neutron_density;
-    double renormalized_chemical_potential;
-} hadron_gap_eq_input_params;
-
 double HadronSolveGapEquation(double proton_density,
                               double neutron_density,
                               double proton_fermi_momentum,
@@ -80,27 +73,37 @@ double HadronSolveGapEquation(double proton_density,
 double HadronProtonFraction(double proton_barionic_density,
                             double neutron_barionic_density);
 
+double HadronZeroTemperatureScalarDensity(double mass,
+                                          double fermi_momentum,
+                                          double cutoff);
+
 double HadronScalarDensity(double mass,
-                           double fermi_momentum,
-                           double cutoff);
+                           double renorm_chem_pot,
+                           double temperature,
+                           double density);
 
 double HadronVacuumScalarDensity();
 
 double ProtonChemicalPotentialEquation(double proton_fermi_momentum,
-                                       double scalar_density,
+                                       double proton_scalar_density,
+                                       double neutron_scalar_density,
                                        double mass,
                                        double proton_density,
                                        double neutron_density);
 
 double NeutronChemicalPotentialEquation(double neutron_fermi_momentum,
-                                        double scalar_density,
+                                        double proton_scalar_density,
+                                        double neutron_scalar_density,
                                         double mass,
                                         double proton_density,
                                         double neutron_density);
 
-double HadronKinecticEnergyDensity(double mass,
-                                   double proton_fermi_momentum,
-                                   double neutron_fermi_momentum);
+double HadronKinecticEnergyDensity(double temperature,
+                                   double mass,
+                                   double proton_density,
+                                   double neutron_density,
+                                   double proton_renorm_chem_pot,
+                                   double neutron_renorm_chem_pot);
 
 double HadronVacuumKinecticEnergyDensity();
 
@@ -114,15 +117,19 @@ double HadronEnergyDensity(double pressure,
 
 double HadronPressure(double termodynamic_potential);
 
-double HadronThermodynamicPotential(double scalar_density,
-                                    double barionic_density,
-                                    double proton_density,
-                                    double neutron_density,
+double HadronThermodynamicPotential(double mass,
+                                    double proton_scalar_density,
+                                    double neutron_scalar_density,
+                                    double proton_barionic_density,
+                                    double neutron_barionic_density,
                                     double proton_chemical_potential,
                                     double neutron_chemical_potential,
+                                    double proton_renorm_chem_pot,
+                                    double neutron_renorm_chem_pot,
                                     double kinectic_energy_density);
 
-double HadronFermiMomentum(double density);
+double HadronFermiMomentumFromBarionicDensity(double density);
+double HadronBarionicDensityFromFermiMomentum(double fermi_momentum);
 
 int HadronMassAndDensitiesSolution(double proton_chemical_potential,
                                    double neutron_chemical_potential,
@@ -145,6 +152,10 @@ double NeutronChemicalPotential(double barionic_chemical_potential,
 double HadronPhaseAsymmetry(double proton_density, double neutron_density);
 
 double HadronZeroedGapEquation(double mass,
-                               void * params);
+                               double proton_density,
+                               double neutron_density,
+                               double proton_scalar_density,
+                               double neutron_scalar_denstiy);
+
 
 #endif /* HadronPhaseEOS_h */

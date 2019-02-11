@@ -57,14 +57,6 @@ int main(int argc, char * argv[])
         }
     }
 
-    // The solution may be TODO: verify how exactly this solution works
-    if (options.solution_for_barionic_chemical_potential_range){
-
-        SolveBinodalForBarionicChemicalPotentialRange();
-
-        return 0;
-    }
-
     SolveBinodalForBarionicAndIsovectorChemicalPotentialsGrid();
 
     return 0;

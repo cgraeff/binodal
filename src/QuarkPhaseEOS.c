@@ -16,7 +16,7 @@
 #include "Parameters.h"
 #include "CommandlineOptions.h"
 #include "FermiDiracDistributions.h"
-#include "Functions.h"
+#include "DefiniteIntegrals.h"
 
 double QuarkFermiMomentum(double mass, double renormalized_chemical_potential)
 {
@@ -27,8 +27,8 @@ double QuarkFermiMomentum(double mass, double renormalized_chemical_potential)
 }
 
 double QuarkDensity(double mass,
-                    double renormalized_chemical_potential,
-                    double temperature)
+                            double renormalized_chemical_potential,
+                            double temperature)
 {
     double constant = NUM_Q_COLORS / (pow(M_PI, 2.0) * pow(CONST_HBAR_C, 3.0));
 
@@ -41,9 +41,10 @@ double QuarkDensity(double mass,
     }
 
     double integral =
-    FermiDiracDistributionFromDensityIntegral(temperature,
-                                              mass,
-                                              renormalized_chemical_potential);
+    FermiDiracDistributionIntegralFromBarionicDensity(temperature,
+                                                      mass,
+                                                      renormalized_chemical_potential,
+                                                      parameters.quark.model.cutoff);
 
     return constant * integral;
 }
@@ -82,7 +83,8 @@ double QuarkScalarDensity(double temperature,
     double integral =
     FermiDiracDistributionIntegralFromScalarDensity(temperature,
                                                     mass,
-                                                    renorm_chem_pot);
+                                                    renorm_chem_pot,
+                                                    parameters.quark.model.cutoff);
 
     return constant * mass * integral;
 }
@@ -166,13 +168,16 @@ int QuarkVacuumMassDeterminationEquation(const gsl_vector   *x,
     const double up_vacuum_mass = pow(gsl_vector_get(x, 0), 2.0);
     const double down_vacuum_mass = pow(gsl_vector_get(x, 1), 2.0);
 
+    // For the vacuum mass, we use T = 0
+    const double temperature = 0.0;
+
     double up_scalar_density =
-        QuarkScalarDensity(parameters.variables.temperature,
+        QuarkScalarDensity(temperature,
                            up_vacuum_mass,
                            up_renorm_chem_pot);
 
     double down_scalar_density =
-        QuarkScalarDensity(parameters.variables.temperature,
+        QuarkScalarDensity(temperature,
                            down_vacuum_mass,
                            down_renorm_chem_pot);
 
@@ -191,12 +196,6 @@ int QuarkVacuumMassDeterminationEquation(const gsl_vector   *x,
 
     return GSL_SUCCESS;
 }
-
-typedef struct _therm_pot_free_gas_contrib_params{
-    double mass;
-    double temperature;
-    double renormalized_chemical_potential;
-} therm_pot_free_gas_contrib_params;
 
 double QuarkThermodynamicPotentialFreeGasTermIntegrand(double momentum,
                                                        void * parameters);
@@ -222,43 +221,15 @@ double QuarkThermodynamicPotentialFreeGasTerm(double mass,
                   + renorm_chem_pot * pow(fermi_momentum, 3.0) / 3.0);
     }
 
-    therm_pot_free_gas_contrib_params p;
-    p.mass = mass;
-    p.renormalized_chemical_potential = renorm_chem_pot;
-    p.temperature = temperature;
-
-    gsl_function F;
-    F.function = &QuarkThermodynamicPotentialFreeGasTermIntegrand;
-    F.params = &p;
+    double cutoff = parameters.quark.model.cutoff;
 
     double integral =
-    OnedimensionalIntegrator(&F,
-                             parameters.therm_pot_free_gas_integral);
+    FermiDiracDistributionIntegralFromQuarkThermodynamicPotential(temperature,
+                                                                  mass,
+                                                                  renorm_chem_pot,
+                                                                  cutoff);
 
     return constant * integral;
-}
-
-double QuarkThermodynamicPotentialFreeGasTermIntegrand(double momentum,
-                                                       void * parameters)
-{
-    therm_pot_free_gas_contrib_params * p =
-        (therm_pot_free_gas_contrib_params *)parameters;
-
-    double T = p->temperature;
-    double mu_r = p->renormalized_chemical_potential;
-
-    double energy = sqrt(pow(momentum, 2.0) + pow(p->mass, 2.0));
-
-    // From docs:
-    // If x is nearly zero, then the common expression log(1 + x) will
-    // not be able to produce accurate results, as most (or all) of the
-    // information in x will be lost by addition.  Instead, use
-    // log1p(x) to perform the same computation without undue
-    // loss of accuracy.
-    double first_term = T * log1p(exp(-(energy - mu_r)/T));
-    double second_term = T * log1p(exp(-(energy + mu_r)/T));
-
-    return pow(momentum, 2.0) * (energy + first_term + second_term);
 }
 
 double QuarkThermodynamicPotential(double up_mass,
@@ -474,6 +445,7 @@ int QuarkSelfConsistentRenormChemPot(double up_quark_mass,
     gsl_vector * initial_guess = gsl_vector_alloc(dimension);
     gsl_vector * return_results = gsl_vector_alloc(dimension);
 
+    // TODO: Try to change variable mappings
     gsl_vector_set(initial_guess,
                    0,
                    sqrt(params.up_renorm_chem_pot_guess));
@@ -813,13 +785,38 @@ int MySign(double value)
     return sgn;
 }
 
-int QuarkMassAndRenormChemPotSolutionBissection(double up_chemical_potential,
-                                                double down_chemical_potential,
-                                                double temperature,
-                                                double * return_up_mass,
-                                                double * return_down_mass,
-                                                double * return_up_renorm_chem_pot,
-                                                double * return_down_renorm_chem_pot)
+// Calculate quark masses and renormalized chemical potentials, ensuring that
+// the solution minimizes the quark thermodynamic potential. The solutions
+// require the gap function to be self-consistent. This is done by scanning
+// the possible values of mass looking for sign changes in the zeroed gap
+// equation. When a chang occurs, we may find the solution by bissection.
+// The following function exploits the fact that both quark masses are
+// always equal.
+//      Inputs: up chemical potential (MeV)
+//              down chemical potential (MeV)
+//              temperature (MeV)
+//
+//      Outputs: up quark mass (MeV)
+//               down quark mass (MeV)
+//               up renormalized chemical potential (MeV)
+//               down renormalized chemical potential (MeV)
+//
+//      Status: [1]  Only one solution found, with masses equal to zero
+//              [0]  Multiple solutions found (at least one solution with masses
+//                   different than zero)
+//              [-1] Failed to determine a solution that was indicated by
+//                   differences in the sign of the zeroed gap equation
+// Reasons that may cause this function to fail include:
+//      - Solutions outside the maximum mass scanning value
+//      - Multiple solutions in the interval used to check for sign changes
+int
+QuarkMassAndRenormChemPotSolutionBissection(double  up_chemical_potential,
+                                            double  down_chemical_potential,
+                                            double  temperature,
+                                            double *return_up_mass,
+                                            double *return_down_mass,
+                                            double *return_up_renorm_chem_pot,
+                                            double *return_down_renorm_chem_pot)
 {
     // If no solutions are found, we probably have reached
     // the chiral restoration, so we will calculate this solution
@@ -878,8 +875,6 @@ int QuarkMassAndRenormChemPotSolutionBissection(double up_chemical_potential,
 
     while (true){
 
-        //printf("mass: %f\n", point);
-
         int sgn = MySign(MyAdapterFunction(point, (void *)&p));
 
         double lower_bound;
@@ -908,6 +903,8 @@ int QuarkMassAndRenormChemPotSolutionBissection(double up_chemical_potential,
             params.lower_bound = lower_bound;
             params.upper_bound = upper_bound;
 
+            // The solution may be calculated unidimensionaly as in each step
+            // we determine proper values of renormalized chemical potentials
             int status =
             UnidimensionalRootFinder(&F,
                                      params,
