@@ -8,6 +8,11 @@ by the NJLv model (M. Buballa, Physics Reports 407 (2005) 205-376) and the
 hadron phase is described by the eNJL model (Pais, Menezes, and Providência
 Physical Review C 93, 065805 (2016)).
 
+## running variable
+The chempot branch is work in progress to calculate running in the barionic
+chemical potential and in the isovector chemical potential. The idea is to have
+a bidimensional binodal.
+
 ## Obtaining this program
 The latest version of this code is available at
 [github.com/cgraeff/binodal](https://github.com/cgraeff/binodal).
@@ -83,8 +88,19 @@ results can be plotted with included gnuplot scripts:
 * Plot tests with `make tgraph`;
 
 ## Known limitations
-* Due to numerical instabilities, the pressures are not equal at some points.
-  This must be further investigated.
+* The chiral restoration makes guessing good starting values of mass somewhat
+difficult. I have implemented two approaches:
+	* Hadrons: a cut value on proton or neutron chemical potentials
+	  beyond which the hadron mass guess is assumed to be zero.
+	* a smooth function with the form
+		$m = h / (1 + exp((\mu - w) / t_w)$
+	  where
+		$mu = (\mu_u + \mu_d) / 2.0
+	  It seams to be more complex than necessary, but is working most
+	  of time.
+	* Both approaches may fail producing spikes in tests in
+	  `binodal_point_graph` dir (deppending of choice of parameters sets).
+	  Tweaking parameters may help with those problems.
 
 ## Code structure
 

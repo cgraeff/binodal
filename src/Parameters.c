@@ -661,10 +661,13 @@ void SetParametersSet(char * quark_set_identifier, char * hadron_set_identifier)
 
 void NumericalParameters()
 {
-    parameters.variables.num_points = 100;
-    parameters.variables.temperature = 0.0; // (MeV)
-    parameters.variables.min_proton_fraction = 0.35;
-    parameters.variables.max_proton_fraction = 0.5;
+    parameters.variables.num_points = 1000;
+    parameters.variables.temperature = 5.0; // (MeV)
+    parameters.variables.min_isovector_chemical_potential = 0.0;    // (MeV)
+    parameters.variables.max_isovector_chemical_potential = 160.0;    // (MeV)
+    parameters.variables.min_barionic_chemical_potential = 1050.0;
+    parameters.variables.max_barionic_chemical_potential = 2000.0;
+    parameters.variables.pressure_tolerance = 1.0E-1;
 
     // Low lower_bound but not zero, as it may be problematic if bare_mass == 0
     // upper_bound near the value of the nucleon mass.
@@ -705,6 +708,22 @@ void NumericalParameters()
     parameters.fermi_dirac_integrals.abs_error = 1.0E-10;
     parameters.fermi_dirac_integrals.rel_error = 1.0E-10;
 
+/*    parameters.quark_fermi_dirac_integrals.lower_limit = 0.0; // (MeV)
+    parameters.quark_fermi_dirac_integrals.upper_limit = 2000.0; // (MeV)
+    parameters.quark_fermi_dirac_integrals.max_interval_num = 8000;
+    parameters.quark_fermi_dirac_integrals.integration_key = GSL_INTEG_GAUSS61;
+    parameters.quark_fermi_dirac_integrals.max_sub_interval = 8000;
+    parameters.quark_fermi_dirac_integrals.abs_error = 1.0E-10;
+    parameters.quark_fermi_dirac_integrals.rel_error = 1.0E-10;
+
+    parameters.hadron_fermi_dirac_integrals.lower_limit = 0.0; // (MeV)
+    parameters.hadron_fermi_dirac_integrals.upper_limit = 2000.0; // (MeV)
+    parameters.hadron_fermi_dirac_integrals.max_interval_num = 8000;
+    parameters.hadron_fermi_dirac_integrals.integration_key = GSL_INTEG_GAUSS61;
+    parameters.hadron_fermi_dirac_integrals.max_sub_interval = 8000;
+    parameters.hadron_fermi_dirac_integrals.abs_error = 1.0E-10;
+    parameters.hadron_fermi_dirac_integrals.rel_error = 1.0E-10;
+*/
     parameters.therm_pot_free_gas_integral.lower_limit = 0.0; // (MeV)
     parameters.therm_pot_free_gas_integral.upper_limit = 2000.0; // (MeV)
     parameters.therm_pot_free_gas_integral.max_interval_num = 8000;
@@ -713,33 +732,43 @@ void NumericalParameters()
     parameters.therm_pot_free_gas_integral.abs_error = 1.0E-10;
     parameters.therm_pot_free_gas_integral.rel_error = 1.0E-10;
 
-    parameters.hadron.gap_eq_solution_params.max_iterations = 2000;
-    parameters.hadron.gap_eq_solution_params.lower_bound = 0.01;
-    parameters.hadron.gap_eq_solution_params.upper_bound = 4000;
-    parameters.hadron.gap_eq_solution_params.abs_error = 1E-5;
-    parameters.hadron.gap_eq_solution_params.rel_error = 1E-5;
+    parameters.hadron.grid_root_finder.num_pts_mass = 250;
+    parameters.hadron.grid_root_finder.min_mass = 0.0;
+    parameters.hadron.grid_root_finder.max_mass = 1000;
+    parameters.hadron.grid_root_finder.num_pts_dens = 300;
+    parameters.hadron.grid_root_finder.min_density = 0.0;
+    parameters.hadron.grid_root_finder.max_density = 2.5;
+    parameters.hadron.grid_root_finder.zero_tol = 10.0;
 
-    QuarkMassGuess up_mass_guess;
-    up_mass_guess.height = 350.0;
-    up_mass_guess.width = 600.0;
-    up_mass_guess.transition_width = 20.0;
+    parameters.hadron.mass_and_densities_solution.initial_mass_guess = 900.0; // MeV
+    parameters.hadron.mass_and_densities_solution.zero_mass_tolerance = 1.0E-100;
+    parameters.hadron.mass_and_densities_solution.zero_dens_tolerance = 1.0E-10;
+    parameters.hadron.mass_and_densities_solution.initial_proton_density_guess = 0.1; // fm^{-3}
+    parameters.hadron.mass_and_densities_solution.initial_neutron_density_guess = 0.1;
+    parameters.hadron.mass_and_densities_solution.max_iter = 2000;
+    parameters.hadron.mass_and_densities_solution.abs_error = 1.0E-8;
+    parameters.hadron.mass_and_densities_solution.rel_error = 1.0E-8;
 
-    QuarkMassGuess down_mass_guess;
-    down_mass_guess.height = 350.0;
-    down_mass_guess.width = 600.0;
-    down_mass_guess.transition_width = 20.0;
+    parameters.quark.quark_mass_and_renorm_chem_pot_bissec_params.min_mass = 1E-6;
+    parameters.quark.quark_mass_and_renorm_chem_pot_bissec_params.max_mass = 1000.0;
+    parameters.quark.quark_mass_and_renorm_chem_pot_bissec_params.mass_step = 1.0;
 
-    parameters.quark.mass_and_renorm_chem_pot_solution.up_mass_guess = up_mass_guess;
-    parameters.quark.mass_and_renorm_chem_pot_solution.down_mass_guess = down_mass_guess;
+    // not used anymore // Really? I think ir is used! Verify! TODO
+    parameters.quark.mass_and_renorm_chem_pot_solution.initial_up_mass_guess =
+    313.0;
+    parameters.quark.mass_and_renorm_chem_pot_solution.initial_down_mass_guess =
+    313.0;
     parameters.quark.mass_and_renorm_chem_pot_solution.abs_error = 1.0E-8;
     parameters.quark.mass_and_renorm_chem_pot_solution.rel_error = 1.0E-8;
-    parameters.quark.mass_and_renorm_chem_pot_solution.max_iter = 1000;
+    parameters.quark.mass_and_renorm_chem_pot_solution.max_iter = 4000;
+    parameters.quark.mass_and_renorm_chem_pot_solution.zero_mass_tolerance = 1.0E-100;
 
     parameters.binodal_rootfinding_params.max_iterations = 2000;
-    parameters.binodal_rootfinding_params.lower_bound = 0.35;      // This must be decreased
-    parameters.binodal_rootfinding_params.upper_bound = 1.0;
-    parameters.binodal_rootfinding_params.abs_error = 1E-5;
-    parameters.binodal_rootfinding_params.rel_error = 1E-5;
+    parameters.binodal_rootfinding_params.lower_bound = 900.0;
+    parameters.binodal_rootfinding_params.upper_bound = 2000.0;
+    parameters.binodal_rootfinding_params.step_size = 1.0;
+    parameters.binodal_rootfinding_params.abs_error = 1E-2;
+    parameters.binodal_rootfinding_params.rel_error = 1E-2;
 }
 
 void AppendQuarkParametersSetToList(QuarkModelParameters a_set)

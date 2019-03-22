@@ -13,23 +13,26 @@
 
 #include "HadronPhaseEOS.h"
 #include "QuarkPhaseEOS.h"
-
-// Parameters for the variables for which we are
-// performing the calculation of the EOS
-typedef struct _VariableParameters{
-    double temperature;             // (MeV)
-    double min_proton_fraction;     // (no dimension)
-    double max_proton_fraction;
-    int num_points;
-} VariableParameters;
+#include "Binodal.h"
 
 typedef struct _parameters
 {
-    VariableParameters variables;
+    // Parameters for the variables for which we are
+    // performing the calculation of the EOS
+    struct _VariableParameters{
+        double temperature;                         // (MeV)
+        double min_isovector_chemical_potential;    // (MeV)
+        double max_isovector_chemical_potential;    // (MeV)
+        double min_barionic_chemical_potential;     // (MeV)
+        double max_barionic_chemical_potential;     // (MeV)
+        double pressure_tolerance;                  // (MeV)
+        int num_points;
+    } variables;
 
     struct _hadron {
         HadronModelParameters model;
-        UnidimensionalRootFindingParameters gap_eq_solution_params;
+        HadronMassAndDensitiesSolutionParams mass_and_densities_solution;
+        GridRootFinderParameters grid_root_finder;
     } hadron;
 
     struct _quark {
@@ -39,6 +42,8 @@ typedef struct _parameters
         QuarkRenormChemPotSolutionParameters renorm_chem_pot_solution;
 
         QuarkMassAndRenormChemPotSolParams mass_and_renorm_chem_pot_solution;
+        QuarkMassAndRenormChemPotSolParBissec
+            quark_mass_and_renorm_chem_pot_bissec_params;
 
         QuarkThermodynamicPotMinDetermParams therm_pot_minimum;
 
@@ -48,7 +53,7 @@ typedef struct _parameters
     IntegratorParameters fermi_dirac_integrals;
     IntegratorParameters therm_pot_free_gas_integral;
 
-    UnidimensionalRootFindingParameters binodal_rootfinding_params;
+    BinodalBissectionParameters binodal_rootfinding_params;
 
 } Parameters;
 

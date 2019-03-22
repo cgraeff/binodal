@@ -1,5 +1,5 @@
 //
-//  Functions.c
+//  DefiniteIntegrals.c
 //  binodal
 //
 //  Created by Clebson Graeff on 2017-06-20.
@@ -17,4 +17,5 @@ double F2(double mass,
 
 double F_E(double mass,
            double momentum);
+
 #endif /* Functions_h */

@@ -1,43 +1,24 @@
-set term png
+set term pngcairo
 
 ###
 
-set out "pressure_at_transition.png"
+set xlabel "Isovector chemical potential (MeV)"
+set ylabel "Barionic chemical potential (MeV)"
+unset key
 
-plot "data/pressure_at_transition.dat" w l
+set out "binodal.png"
 
-###
-
-set out "pressure_at_transition_by_hadron_asymmetry.png"
-
-plot "data/pressure_at_transition_by_hadron_asymmetry.dat" w l
-
-###
-
-set out "pressure_at_transition_by_quark_asymmetry.png"
-
-plot "data/pressure_at_transition_by_quark_asymmetry.dat" w l
+plot "data/binodal_positive_section.dat", \
+     "data/binodal_negative_section.dat"
 
 ###
 
-set out "barionic_density_at_transition.png"
+set out "pressure_vs_asymmetry.png"
 
-plot "data/barionic_density_at_transition.dat" w l
+set xlabel "alpha"
+set ylabel "Pressure (MeV)"
 
-###
-
-set out "barionic_chemical_potential_at_transition.png"
-
-plot "data/barionic_chemical_potential_at_transition.dat" w l
-
-###
-
-set out "isovector_chemical_potential_at_transition.png"
-
-plot "data/isovector_chemical_potential_at_transition.dat" w l
-
-###
-
-set out "quark_to_hadron_proton_fraction_ratio.png"
-
-plot "data/quark_to_hadron_proton_fraction_ratio.dat" w l
+plot "data/pressure_vs_hadron_asymmetry_pos_sec.dat", \
+     "data/pressure_vs_hadron_asymmetry_neg_sec.dat", \
+     "data/pressure_vs_quark_asymmetry_pos_sec.dat", \
+     "data/pressure_vs_quark_asymmetry_neg_sec.dat"

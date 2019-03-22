@@ -1,0 +1,7 @@
+set term pngcairo
+
+set out "quark_zeroed_functions.png"
+
+plot "data/quark_zeroed_functions.dat" w l, \
+     0 notitle, \
+     "data/solution.dat" w p pt 7 ps 1 lc rgb "black"

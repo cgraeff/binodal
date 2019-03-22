@@ -2,7 +2,7 @@ TARGET = binodal
 LIB_DIR = -L./libdatafun/
 LIBS = -lm -lgsl -lgslcblas -ldatafun
 CC = gcc
-CFLAGS = -Wall -Wno-unknown-pragmas
+CFLAGS = -Wall -Wno-unknown-pragmas -Wunused
 
 # Add path for gsl from Homebrew in OSX
 UNAME_S := $(shell uname -s)

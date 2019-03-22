@@ -30,24 +30,25 @@ typedef struct _QuarkModelParameters{
     double bare_mass;               // (MeV)
 } QuarkModelParameters;
 
-typedef struct _QuarkMassGuess{
-
-    double height;
-    double width;
-    double transition_width;
-
-} QuarkMassGuess;
-
 typedef struct _QuarkMassAndRenormChemPotSolPar{
+
+    double initial_up_mass_guess;
+    double initial_down_mass_guess;
+
+    double zero_mass_tolerance;
 
     double abs_error;
     double rel_error;
     int max_iter;
 
-    QuarkMassGuess up_mass_guess;
-    QuarkMassGuess down_mass_guess;
-
 } QuarkMassAndRenormChemPotSolParams;
+
+typedef struct _QuarkMassAndRenormChemPotSolParBissec{
+        // new parameters
+    double min_mass;
+    double max_mass;
+    double mass_step;
+} QuarkMassAndRenormChemPotSolParBissec;
 
 // Parameters for the determination of
 // entropy by integration
@@ -88,6 +89,14 @@ typedef struct _QuarkRenormChemPotSolutionParameters{
     double max_iter;
 
 } QuarkRenormChemPotSolutionParameters;
+
+typedef struct _quark_mass_and_renorm_chem_pot_input_params{
+    double up_chemical_potential;
+    double down_chemical_potential;
+
+    double up_renorm_chem_pot;
+    double down_renorm_chem_pot;
+} quark_mass_and_renorm_chem_pot_input_params;
 
 double QuarkDensity(double mass,
                     double renormalized_chemical_potential,
@@ -140,13 +149,14 @@ int ZeroedRenormalizedQuarkChemPotEquation(const gsl_vector   *x,
                                            void *params,
                                            gsl_vector *return_values);
 
-void QuarkSelfConsistentRenormChemPot(double up_quark_mass,
-                                      double down_quark_mass,
-                                      double up_chemical_potential,
-                                      double down_chemical_potential,
-                                      double temperature,
-                                      double *return_up_renorm_chem_pot,
-                                      double *return_down_renorm_chem_pot);
+int QuarkSelfConsistentRenormChemPot(double up_quark_mass,
+                                     double down_quark_mass,
+                                     double up_chemical_potential,
+                                     double down_chemical_potential,
+                                     double temperature,
+                                     double *return_up_renorm_chem_pot,
+                                     double *return_down_renorm_chem_pot);
+
 double QuarkZeroedGapEquation(double mass,
                               double up_scalar_density,
                               double down_scalar_density);
@@ -165,10 +175,21 @@ double QuarkFermiMomentum(double mass, double renormalized_chemical_potential);
 
 int QuarkMassAndRenormChemPotSolution(double up_chemical_potential,
                                       double down_chemical_potential,
+                                      double up_mass_guess,
+                                      double down_mass_guess,
                                       double * return_up_mass,
                                       double * return_down_mass,
                                       double * return_up_renorm_chem_pot,
                                       double * return_down_renorm_chem_pot);
+
+int QuarkMassAndRenormChemPotSolutionBissection(double up_chemical_potential,
+                                                double down_chemical_potential,
+                                                double temperature,
+                                                double * return_up_mass,
+                                                double * return_down_mass,
+                                                double * return_up_renorm_chem_pot,
+                                                double * return_down_renorm_chem_pot);
+double MyAdapterFunction(double val, void *params);
 
 double QuarkPhaseAsymmetry(double up_quark_density,
                            double down_quark_density);

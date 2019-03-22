@@ -5,8 +5,7 @@ TARGET = binodal
 HADRON_MULTIRUN_SETS = eNJL2mSigmaRho1 eNJL3SigmaRho1
 
 QUARK_MULTIRUN_SETS = Buballa_1 \
-		      BuballaR_2 \
-		      PCP-0.0 PCP-0.1 PCP-0.2
+		      PCP-0.1
 
 .PHONY: all debug run graph tests tgraph clean
 
@@ -20,6 +19,10 @@ debug:
 	@echo "[done]"
 run:
 	@./$(TARGET) -d $(ARGS)
+drun:
+	@./$(TARGET) -d -! $(ARGS)
+arun:
+	@./$(TARGET) -d -e $(ARGS)
 graph:
 	@echo "[Plotting...]"
 	@cd output; \
@@ -30,12 +33,27 @@ multirun:
 	@echo "[Running for multiple parameterizations...]"
 	@for hadron_set in $(HADRON_MULTIRUN_SETS); do \
 		for quark_set in $(QUARK_MULTIRUN_SETS); do \
+			echo ""; \
+			echo "[$$hadron_set-$$quark_set]"; \
 			./$(TARGET) -d -h "$$hadron_set" -q "$$quark_set" $(ARGS); \
 			if [ -d multioutput/"$$quark_set-$$hadron_set" ]; then \
 				rm -r multioutput/"$$quark_set-$$hadron_set"; \
 			fi; \
 			cp -r output multioutput/"$$quark_set-$$hadron_set"; \
-			echo " "; \
+		done; \
+	done
+	@echo "[done.]"
+multidrun:
+	@echo "[Running for multiple parameterizations...]"
+	@for hadron_set in $(HADRON_MULTIRUN_SETS); do \
+		for quark_set in $(QUARK_MULTIRUN_SETS); do \
+			echo ""; \
+			echo "[$$hadron_set-$$quark_set]"; \
+			./$(TARGET) -d  -e -h "$$hadron_set" -q "$$quark_set" $(ARGS); \
+			if [ -d multioutput/"$$quark_set-$$hadron_set" ]; then \
+				rm -r multioutput/"$$quark_set-$$hadron_set"; \
+			fi; \
+			cp -r output multioutput/"$$quark_set-$$hadron_set"; \
 		done; \
 	done
 	@echo "[done.]"
@@ -45,30 +63,24 @@ mgraph:
 	for dir in `echo */`; do \
 		echo "$$dir"; \
 		cd "$$dir"; \
-		gnuplot gnuplot.gpi; \
+		if [ -e gnuplot.gpi ]; \
+		then \
+			gnuplot gnuplot.gpi; \
+		fi; \
 		cd ..; \
 	done;
 	@echo "[done.]"
 tests:
-	@echo "[Running tests...]"
-	@./$(TARGET) -a $(ARGS)
-	@echo "[done.]"
+	@cd tests; make
 tgraph:
-	@echo "[Plotting tests ...]"
-	@cd tests/ ; \
-	for dir in `echo */`; do \
-		cd "$$dir"; \
-		echo "$$dir"; \
-		gnuplot gnuplot.gpi; \
-		cd ../; \
-	done;
-	@echo "[done.]"
+	@cd tests; make graph
 clean:
 	@echo "[Cleaning...]"
 	@-rm -f $(TARGET)
 	@cd src; make clean
-	@find . -name "*.dat" -type f -delete
-	@find . -name "*.log" -type f -delete
-	@find . -name "*.png" -type f -delete
+	@cd tests; make clean
+	@find output -name "*.dat" -type f -delete
+	@find output -name "*.log" -type f -delete
+	@find output -name "*.png" -type f -delete
 	@cd multioutput; rm -rf */
 	@echo "[done.]"

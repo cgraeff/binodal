@@ -1,0 +1,42 @@
+set term pngcairo
+
+set out "graph/hadron_and_quark_pressure_vs_barionic_chem_pot.png"
+
+set logscale y
+
+set xlabel "$\mu_B$"
+set ylabel "$P^i$"
+
+plot "data/hadron_and_quark_pressure_vs_barionic_chem_pot.dat" u 1:2 t "hadron" w l lw 2, \
+     "" u 1:6 t "quark" w l lw 2
+     
+###
+
+unset logscale y
+
+set ylabel "$m_i$"
+
+set out "graph/hadron_mass_vs_barionic_dens.png"
+
+plot "data/hadron_and_quark_pressure_vs_barionic_chem_pot.dat" u 1:3 w lp t "hadron mass"
+
+###
+
+set ylabel '$\rho_i$'
+
+set out "graph/hadron_densities_vs_barionic_dens.png"
+
+plot "data/hadron_and_quark_pressure_vs_barionic_chem_pot.dat" u 1:4 w l t "proton", "" u 1:5 w l t "neutron"
+
+###
+
+set ylabel "$m_i$"
+
+set yrange[0:450]
+set out "graph/quark_masses_vs_barionic_dens.png"
+
+plot "data/hadron_and_quark_pressure_vs_barionic_chem_pot.dat" u 1:7 w lp t "up mass", "" u 1:8 w lp t "down mass"
+
+
+
+

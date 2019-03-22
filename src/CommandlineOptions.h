@@ -14,10 +14,13 @@
 typedef struct _options{
     // List options and flags that will be acessible
     // during the execution
+    bool abort_on_error;
     bool verbose;
+    bool debug;
     bool dirs;
     bool tests;
     bool list_available_parameterizations;
+    bool solution_for_barionic_chemical_potential_range;
     char * quark_parameterization;
     char * hadron_parameterization;
     double temp;

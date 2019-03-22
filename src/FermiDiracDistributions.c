@@ -12,20 +12,7 @@
 
 #include "Parameters.h"
 #include "FermiDiracDistributions.h"
-
-
-typedef struct _fermi_dirac_distrib_integrand{
-    double mass;
-    double chemical_potential;
-    double temperature;
-} fermi_dirac_distrib_integrand;
-
-
-double FermiDiracDistributionFromDensityIntegralIntegrand(double momentum,
-                                                          void * parameters);
-double FermiDiracDistributionIntegralFromScalarDensityIntegrand(double momentum,
-                                                                void * params);
-
+#include "DefiniteIntegrals.h"
 
 double FermiDiracDistributionForParticles(double energy,
                                           double chemical_potential,
@@ -38,28 +25,14 @@ double FermiDiracDistributionForAntiparticles(double energy,
                                               double chemical_potential,
                                               double temperature)
 {
-    return 1.0 / (1.0 + exp((energy + chemical_potential)/temperature));
+    return FermiDiracDistributionForParticles(energy,
+                                              -chemical_potential,
+                                              temperature);
 }
 
-double FermiDiracDistributionFromDensityIntegral(double temperature,
-                                                 double mass,
-                                                 double renormalized_chemical_potential)
-{
-    fermi_dirac_distrib_integrand p;
-    p.mass = mass;
-    p.chemical_potential = renormalized_chemical_potential;
-    p.temperature = temperature;
-
-    gsl_function F;
-    F.function = &FermiDiracDistributionFromDensityIntegralIntegrand;
-    F.params = &p;
-
-    double integral = OnedimensionalIntegrator(&F, parameters.fermi_dirac_integrals);
-
-    return integral;
-}
-
-double FermiDiracDistributionFromDensityIntegralIntegrand(double momentum, void * params)
+double
+FermiDiracDistributionIntegralFromBarionicDensityIntegrand(double momentum,
+                                                           void * params)
 {
     fermi_dirac_distrib_integrand * p = (fermi_dirac_distrib_integrand *) params;
 
@@ -75,19 +48,22 @@ double FermiDiracDistributionFromDensityIntegralIntegrand(double momentum, void 
     return (particle_term - antiparticle_term) * pow(momentum, 2.0);
 }
 
-
-double FermiDiracDistributionIntegralFromScalarDensity(double temperature,
-                                                       double mass,
-                                                       double renorm_chemical_potential)
+double
+FermiDiracDistributionIntegralFromBarionicDensity(double temperature,
+                                                  double mass,
+                                                  double renorm_chem_pot,
+                                                  double cutoff)
 {
     fermi_dirac_distrib_integrand p;
     p.mass = mass;
-    p.chemical_potential = renorm_chemical_potential;
+    p.chemical_potential = renorm_chem_pot;
     p.temperature = temperature;
 
     gsl_function F;
-    F.function = &FermiDiracDistributionIntegralFromScalarDensityIntegrand;
+    F.function = &FermiDiracDistributionIntegralFromBarionicDensityIntegrand;
     F.params = &p;
+
+    parameters.fermi_dirac_integrals.upper_limit = cutoff;
 
     double integral = OnedimensionalIntegrator(&F, parameters.fermi_dirac_integrals);
 
@@ -101,15 +77,186 @@ double FermiDiracDistributionIntegralFromScalarDensityIntegrand(double momentum,
 
     double E = sqrt(pow(momentum, 2.0) + pow(p->mass, 2.0));
 
-    double particle_term = FermiDiracDistributionForParticles(E,
-                                                              p->chemical_potential,
-                                                              p->temperature);
+    double particle_term =
+    FermiDiracDistributionForParticles(E,
+                                       p->chemical_potential,
+                                       p->temperature);
 
     double antiparticle_term =
-        FermiDiracDistributionForAntiparticles(E,
-                                               p->chemical_potential,
-                                               p->temperature);
+    FermiDiracDistributionForAntiparticles(E,
+                                           p->chemical_potential,
+                                           p->temperature);
 
-    return (1.0 - particle_term - antiparticle_term) * pow(momentum, 2.0) / E;
+    return (particle_term + antiparticle_term) * pow(momentum, 2.0) / E;
 }
 
+double FermiDiracDistributionIntegralFromScalarDensity(double temperature,
+                                                       double mass,
+                                                       double renorm_chem_pot,
+                                                       double cutoff)
+{
+    fermi_dirac_distrib_integrand p;
+    p.mass = mass;
+    p.chemical_potential = renorm_chem_pot;
+    p.temperature = temperature;
+
+    gsl_function F;
+    F.function = &FermiDiracDistributionIntegralFromScalarDensityIntegrand;
+    F.params = &p;
+
+    parameters.fermi_dirac_integrals.upper_limit = cutoff;
+
+    double integral =
+    OnedimensionalIntegrator(&F, parameters.fermi_dirac_integrals);
+
+    return F0(mass, cutoff) - integral;
+}
+
+double FermiDiracDistributionIntegralFromHadronEnergyIntegrand(double momentum,
+                                                               void * params)
+{
+    fermi_dirac_distrib_integrand * p =
+    (fermi_dirac_distrib_integrand *) params;
+
+    double E = sqrt(pow(momentum, 2.0) + pow(p->mass, 2.0));
+
+    double particle_term =
+    FermiDiracDistributionForParticles(E,
+                                       p->chemical_potential,
+                                       p->temperature);
+
+    double antiparticle_term =
+    FermiDiracDistributionForAntiparticles(E,
+                                           p->chemical_potential,
+                                           p->temperature);
+
+    return (particle_term + antiparticle_term) * pow(momentum, 4.0) / E;
+}
+
+double FermiDiracDistributionIntegralFromHadronEnergy(double temperature,
+                                                      double mass,
+                                                      double renorm_chem_pot,
+                                                      double cutoff)
+{
+    fermi_dirac_distrib_integrand p;
+    p.mass = mass;
+    p.chemical_potential = renorm_chem_pot;
+    p.temperature = temperature;
+
+    gsl_function F;
+    F.function = &FermiDiracDistributionIntegralFromHadronEnergyIntegrand;
+    F.params = &p;
+
+    parameters.fermi_dirac_integrals.upper_limit = cutoff;
+
+    double integral =
+    OnedimensionalIntegrator(&F, parameters.fermi_dirac_integrals);
+
+    return F2(mass, cutoff) - integral;
+}
+
+double FermiDiracDistributionIntegralFromHadronEntropyIntegrand(double momentum,
+                                                                void * params)
+{
+    fermi_dirac_distrib_integrand * p =
+    (fermi_dirac_distrib_integrand *) params;
+
+    double E = sqrt(pow(momentum, 2.0) + pow(p->mass, 2.0));
+
+    double np =
+    FermiDiracDistributionForParticles(E,
+                                       p->chemical_potential,
+                                       p->temperature);
+
+    double nap =
+    FermiDiracDistributionForAntiparticles(E,
+                                           p->chemical_potential,
+                                           p->temperature);
+
+    double ln_np = log(np);
+    double ln_1mnp = log1p(-np);
+
+    double ln_nap = log(nap);
+    double ln_1mnap = log1p(-nap);
+
+    double expr = np * ln_np + (1.0 - np) * ln_1mnp
+                  + (1.0 - nap) * ln_1mnap;
+
+    if (nap > 0)
+        expr += nap * ln_nap;
+
+    return expr * pow(momentum, 2.0);
+}
+
+double FermiDiracDistributionIntegralFromHadronEntropy(double temperature,
+                                                       double mass,
+                                                       double renorm_chem_pot,
+                                                       double cutoff)
+{
+    fermi_dirac_distrib_integrand p;
+    p.mass = mass;
+    p.chemical_potential = renorm_chem_pot;
+    p.temperature = temperature;
+
+    gsl_function F;
+    F.function = &FermiDiracDistributionIntegralFromHadronEntropyIntegrand;
+    F.params = &p;
+
+    parameters.fermi_dirac_integrals.upper_limit = cutoff;
+
+    double integral =
+    OnedimensionalIntegrator(&F, parameters.fermi_dirac_integrals);
+
+    return integral;
+}
+
+double
+FermiDiracDistributionIntegralFromQuarkThermodynamicPotentialIntegrand(double momentum,
+                                                                       void * params)
+{
+    fermi_dirac_distrib_integrand * p =
+    (fermi_dirac_distrib_integrand *) params;
+
+    double E = sqrt(pow(momentum, 2.0) + pow(p->mass, 2.0));
+
+    double np =
+    FermiDiracDistributionForParticles(E,
+                                       p->chemical_potential,
+                                       p->temperature);
+
+    double nap =
+    FermiDiracDistributionForAntiparticles(E,
+                                           p->chemical_potential,
+                                           p->temperature);
+
+    double ln_1mnp = log1p(-np);
+
+    double ln_1mnap = log1p(-nap);
+
+    return (ln_1mnap + ln_1mnp) * pow(momentum, 2.0);
+}
+
+double
+FermiDiracDistributionIntegralFromQuarkThermodynamicPotential(double temperature,
+                                                              double mass,
+                                                              double renorm_chem_pot,
+                                                              double cutoff)
+{
+    fermi_dirac_distrib_integrand p;
+    p.mass = mass;
+    p.chemical_potential = renorm_chem_pot;
+    p.temperature = temperature;
+
+    gsl_function F;
+    F.function =
+    &FermiDiracDistributionIntegralFromQuarkThermodynamicPotentialIntegrand;
+    F.params = &p;
+
+    parameters.fermi_dirac_integrals.upper_limit = cutoff;
+
+    double integral =
+    OnedimensionalIntegrator(&F, parameters.fermi_dirac_integrals);
+
+    // TODO: Check this upper limit, I think this should be the hadron cutoff
+    return F_E(mass, cutoff) - temperature * integral;
+}

@@ -1,0 +1,10 @@
+[default]
+name=Default
+runtime=host
+config-opts=
+run-opts=
+prefix=/home/cgraeff/.cache/gnome-builder/install/binodal/host
+app-id=
+postbuild=
+prebuild=
+default=true
