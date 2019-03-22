@@ -4,8 +4,8 @@
 #PBS -N binodal
 
 ### Email on abort (a), begins (b), end (e)
-#PBS -M cgraeff@gmail.com
-#PBS -m abe
+###PBS -M cgraeff@gmail.com
+###PBS -m abe
 
 ### Save stderr and stdout
 #PBS -o output.txt
@@ -26,6 +26,6 @@ echo PBS: current home directory is $PBS_O_HOME
 echo PBS: PATH = $PBS_O_PATH
 echo ------------------------------------------------------
 
-cd #PBS_O_WORKDIR
+cd $PBS_O_WORKDIR
 
 ./binodal
