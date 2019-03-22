@@ -180,7 +180,10 @@ double FermiDiracDistributionIntegralFromHadronEntropyIntegrand(double momentum,
     double ln_1mnap = log1p(-nap);
 
     double expr = np * ln_np + (1.0 - np) * ln_1mnp
-                  + (1.0 - nap) * ln_1mnap + nap * ln_nap;
+                  + (1.0 - nap) * ln_1mnap;
+
+    if (nap > 0)
+        expr += nap * ln_nap;
 
     return expr * pow(momentum, 2.0);
 }

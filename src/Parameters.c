@@ -662,7 +662,7 @@ void SetParametersSet(char * quark_set_identifier, char * hadron_set_identifier)
 void NumericalParameters()
 {
     parameters.variables.num_points = 1000;
-    parameters.variables.temperature = 100.0; // (MeV)
+    parameters.variables.temperature = 5.0; // (MeV)
     parameters.variables.min_isovector_chemical_potential = 0.0;    // (MeV)
     parameters.variables.max_isovector_chemical_potential = 160.0;    // (MeV)
     parameters.variables.min_barionic_chemical_potential = 1050.0;
