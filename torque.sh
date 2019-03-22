@@ -4,8 +4,11 @@
 #PBS -N binodal
 
 ### Email on abort (a), begins (b), end (e)
-###PBS -M cgraeff@gmail.com
-###PBS -m abe
+#PBS -M cgraeff@gmail.com
+#PBS -m abe
+
+### Set max wallclock time
+#PBS -l walltime=100:00:00
 
 ### Save stderr and stdout
 #PBS -o output.txt
