@@ -294,6 +294,8 @@ int GridLoop(double initial_mass_guess,
     double down_mass_scanline_initial_guess = initial_down_mass_guess;
 
     double isovector_chemical_potential = min_isovector_chemical_potential;
+    
+    int num_successful_pts = 0;
     *binodal_count = 0;
     for (int i = 0; i < isovector_chem_pot_num_pts; i++){
 
@@ -335,6 +337,41 @@ int GridLoop(double initial_mass_guess,
             // is met. If it's not, the point is skipped. If the calculation is
             // not successfull, the point is also skipped.
             if (!status){
+            
+                // save values of quark and hadron pressures
+                gsl_matrix_set(quark_pressure_on_grid,
+                               num_successful_pts,
+                               0,
+                               isovector_chemical_potential);
+                               
+                gsl_matrix_set(quark_pressure_on_grid,
+                               num_successful_pts,
+                               1,
+                               barionic_chemical_potential);
+                               
+                gsl_matrix_set(quark_pressure_on_grid,
+                               num_successful_pts,
+                               1,
+                               point.quark_pressure);
+                               
+                gsl_matrix_set(hadron_pressure_on_grid,
+                               num_successful_pts,
+                               0,
+                               isovector_chemical_potential);
+                               
+                gsl_matrix_set(hadron_pressure_on_grid,
+                               num_successful_pts,
+                               1,
+                               barionic_chemical_potential);
+                               
+                gsl_matrix_set(hadron_pressure_on_grid,
+                               num_successful_pts,
+                               1,
+                               point.hadron_pressure);
+                               
+                num_successful_pts++;
+                               
+                               
                 if (fabs(point.quark_pressure - point.hadron_pressure)
                     < parameters.variables.pressure_tolerance){
 
