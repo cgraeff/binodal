@@ -29,14 +29,19 @@ int GridLoop(double initial_mass_guess,
              int isovector_chem_pot_num_pts,
              double barionic_chemical_potential_step,
              double isovector_chemical_potential_step,
-             gsl_matrix * hadron_pressure,
-             gsl_matrix * quark_pressure,
+             gsl_vector * hadron_pressure_grid_barionic_chem_pot,
+             gsl_vector * hadron_pressure_grid_isovector_chem_pot,
+             gsl_vector * hadron_pressure_grid_pressure,
+             gsl_vector * quark_pressure_grid_barionic_chem_pot,
+             gsl_vector * quark_pressure_grid_isovector_chem_pot,
+             gsl_vector * quark_pressure_grid_pressure,
              gsl_vector * binodal_barionic_chem_pot,
              gsl_vector * binodal_isovector_chem_pot,
              gsl_vector * binodal_pressure,
              gsl_vector * binodal_hadron_asymmetry,
              gsl_vector * binodal_quark_asymmetry,
-             int * count);
+             int * count,
+             int * num_successfull_pts);
 
 int SolveBinodalForBarionicAndIsovectorChemicalPotentialsGrid()
 {
@@ -106,17 +111,21 @@ int SolveBinodalForBarionicAndIsovectorChemicalPotentialsGrid()
     parameters.variables.num_points * parameters.variables.num_points;
 
     int count;
-    gsl_matrix * hadron_pressure_on_grid_positive_section =
-    gsl_matrix_alloc(num_grid_pts, 3);
+    int num_successfull_pts;
 
-    gsl_matrix * quark_pressure_on_grid_positive_section =
-    gsl_matrix_alloc(num_grid_pts, 3);
+    gsl_vector * hadron_pressure_grid_barionic_chem_pot =
+        gsl_vector_alloc(num_grid_pts);
+    gsl_vector * hadron_pressure_grid_isovector_chem_pot =
+        gsl_vector_alloc(num_grid_pts);
+    gsl_vector * hadron_pressure_grid_pressure =
+        gsl_vector_alloc(num_grid_pts);
 
-    gsl_matrix * hadron_pressure_on_grid_negative_section =
-    gsl_matrix_alloc(num_grid_pts, 3);
-
-    gsl_matrix * quark_pressure_on_grid_negative_section =
-    gsl_matrix_alloc(num_grid_pts, 3);
+    gsl_vector * quark_pressure_grid_barionic_chem_pot =
+        gsl_vector_alloc(num_grid_pts);
+    gsl_vector * quark_pressure_grid_isovector_chem_pot =
+        gsl_vector_alloc(num_grid_pts);
+    gsl_vector * quark_pressure_grid_pressure =
+        gsl_vector_alloc(num_grid_pts);
 
     gsl_vector * binodal_barionic_chem_pot = gsl_vector_alloc(num_grid_pts);
     gsl_vector * binodal_isovector_chem_pot = gsl_vector_alloc(num_grid_pts);
@@ -141,14 +150,19 @@ int SolveBinodalForBarionicAndIsovectorChemicalPotentialsGrid()
              parameters.variables.num_points,
              barionic_chemical_potential_step,
              isovector_chemical_potential_step,
-             hadron_pressure_on_grid_positive_section,
-             quark_pressure_on_grid_positive_section,
+             hadron_pressure_grid_barionic_chem_pot,
+             hadron_pressure_grid_isovector_chem_pot,
+             hadron_pressure_grid_pressure,
+             quark_pressure_grid_barionic_chem_pot,
+             quark_pressure_grid_isovector_chem_pot,
+             quark_pressure_grid_pressure,
              binodal_barionic_chem_pot,
              binodal_isovector_chem_pot,
              binodal_pressure,
              binodal_hadron_asymmetry,
              binodal_quark_asymmetry,
-             &count);
+             &count,
+             &num_successfull_pts);
 
     if (status == 0){
         WriteVectorsToFileUpToIndex("binodal_positive_section.dat",
@@ -175,21 +189,25 @@ int SolveBinodalForBarionicAndIsovectorChemicalPotentialsGrid()
                                     binodal_quark_asymmetry,
                                     binodal_pressure);
 
-        FILE * f = OpenFile("hadron_pressure_on_grid_positive_section.dat");
-
-        gsl_matrix_fprintf(f,
-                           hadron_pressure_on_grid_positive_section,
-                           "%f");
-
-        fclose(f);
-
-        f = OpenFile("quark_pressure_on_grid_positive_section.dat");
-
-        gsl_matrix_fprintf(f,
-                           quark_pressure_on_grid_positive_section,
-                           "%f");
-
-        fclose(f);
+        WriteVectorsToFileUpToIndex("hadron_pressure_grid_positive_section.dat",
+                                    "# barionic chemical potential (MeV), "
+                                    "isovector chemical potential (MeV), "
+                                    "hadron pressure (MeV/fm^3) \n",
+                                    num_successfull_pts,
+                                    3,
+                                    hadron_pressure_grid_barionic_chem_pot,
+                                    hadron_pressure_grid_isovector_chem_pot,
+                                    hadron_pressure_grid_pressure);
+                                   
+        WriteVectorsToFileUpToIndex("quark_pressure_grid_positive_section.dat",
+                                    "# barionic chemical potential (MeV), "
+                                    "isovector chemical potential (MeV), "
+                                    "quark pressure (MeV/fm^3) \n",
+                                    num_successfull_pts,
+                                    3,
+                                    quark_pressure_grid_barionic_chem_pot,
+                                    quark_pressure_grid_isovector_chem_pot,
+                                    quark_pressure_grid_pressure);
     }
 
     if (options.verbose)
@@ -209,14 +227,19 @@ int SolveBinodalForBarionicAndIsovectorChemicalPotentialsGrid()
              parameters.variables.num_points,
              barionic_chemical_potential_step,
              -isovector_chemical_potential_step,
-             hadron_pressure_on_grid_negative_section,
-             quark_pressure_on_grid_negative_section,
+             hadron_pressure_grid_barionic_chem_pot,
+             hadron_pressure_grid_isovector_chem_pot,
+             hadron_pressure_grid_pressure,
+             quark_pressure_grid_barionic_chem_pot,
+             quark_pressure_grid_isovector_chem_pot,
+             quark_pressure_grid_pressure,
              binodal_barionic_chem_pot,
              binodal_isovector_chem_pot,
              binodal_pressure,
              binodal_hadron_asymmetry,
              binodal_quark_asymmetry,
-             &count);
+             &count,
+             &num_successfull_pts);
 
     if (status_g == 0){
         WriteVectorsToFileUpToIndex("binodal_negative_section.dat",
@@ -243,21 +266,25 @@ int SolveBinodalForBarionicAndIsovectorChemicalPotentialsGrid()
                                     binodal_quark_asymmetry,
                                     binodal_pressure);
 
-        FILE * f = OpenFile("hadron_pressure_on_grid_negative_section.dat");
-
-        gsl_matrix_fprintf(f,
-                           hadron_pressure_on_grid_negative_section,
-                           "%f");
-
-        fclose(f);
-
-        f = OpenFile("quark_pressure_on_grid_negative_section.dat");
-
-        gsl_matrix_fprintf(f,
-                           quark_pressure_on_grid_negative_section,
-                           "%f");
-
-        fclose(f);
+        WriteVectorsToFileUpToIndex("hadron_pressure_grid_negative_section.dat",
+                                    "# barionic chemical potential (MeV), "
+                                    "isovector chemical potential (MeV), "
+                                    "hadron pressure (MeV/fm^3) \n",
+                                    num_successfull_pts,
+                                    3,
+                                    hadron_pressure_grid_barionic_chem_pot,
+                                    hadron_pressure_grid_isovector_chem_pot,
+                                    hadron_pressure_grid_pressure);
+                                   
+        WriteVectorsToFileUpToIndex("quark_pressure_grid_negative_section.dat",
+                                    "# barionic chemical potential (MeV), "
+                                    "isovector chemical potential (MeV), "
+                                    "quark pressure (MeV/fm^3) \n",
+                                    num_successfull_pts,
+                                    3,
+                                    quark_pressure_grid_barionic_chem_pot,
+                                    quark_pressure_grid_isovector_chem_pot,
+                                    quark_pressure_grid_pressure);
     }
 
     return 0;
@@ -277,14 +304,19 @@ int GridLoop(double initial_mass_guess,
              int isovector_chem_pot_num_pts,
              double barionic_chemical_potential_step,
              double isovector_chemical_potential_step,
-             gsl_matrix * hadron_pressure_on_grid,
-             gsl_matrix * quark_pressure_on_grid,
+             gsl_vector * hadron_pressure_grid_barionic_chem_pot,
+             gsl_vector * hadron_pressure_grid_isovector_chem_pot,
+             gsl_vector * hadron_pressure_grid_pressure,
+             gsl_vector * quark_pressure_grid_barionic_chem_pot,
+             gsl_vector * quark_pressure_grid_isovector_chem_pot,
+             gsl_vector * quark_pressure_grid_pressure,
              gsl_vector * binodal_barionic_chem_pot,
              gsl_vector * binodal_isovector_chem_pot,
              gsl_vector * binodal_pressure,
              gsl_vector * binodal_hadron_asymmetry,
              gsl_vector * binodal_quark_asymmetry,
-             int * binodal_count)
+             int * binodal_count,
+             int * num_successfull_pts)
 {
     double hadron_mass_scanline_initial_guess = initial_mass_guess;
     double proton_dens_scanline_initial_guess = initial_proton_density_guess;
@@ -295,7 +327,7 @@ int GridLoop(double initial_mass_guess,
 
     double isovector_chemical_potential = min_isovector_chemical_potential;
     
-    int num_successful_pts = 0;
+    *num_successfull_pts = 0;
     *binodal_count = 0;
     for (int i = 0; i < isovector_chem_pot_num_pts; i++){
 
@@ -339,37 +371,31 @@ int GridLoop(double initial_mass_guess,
             if (!status){
             
                 // save values of quark and hadron pressures
-                gsl_matrix_set(quark_pressure_on_grid,
-                               num_successful_pts,
-                               0,
-                               isovector_chemical_potential);
-                               
-                gsl_matrix_set(quark_pressure_on_grid,
-                               num_successful_pts,
-                               1,
+                gsl_vector_set(hadron_pressure_grid_barionic_chem_pot,
+                               *num_successfull_pts,
                                barionic_chemical_potential);
                                
-                gsl_matrix_set(quark_pressure_on_grid,
-                               num_successful_pts,
-                               1,
-                               point.quark_pressure);
-                               
-                gsl_matrix_set(hadron_pressure_on_grid,
-                               num_successful_pts,
-                               0,
+                gsl_vector_set(hadron_pressure_grid_isovector_chem_pot,
+                               *num_successfull_pts,
                                isovector_chemical_potential);
                                
-                gsl_matrix_set(hadron_pressure_on_grid,
-                               num_successful_pts,
-                               1,
-                               barionic_chemical_potential);
-                               
-                gsl_matrix_set(hadron_pressure_on_grid,
-                               num_successful_pts,
-                               1,
+                gsl_vector_set(hadron_pressure_grid_pressure,
+                               *num_successfull_pts,
                                point.hadron_pressure);
                                
-                num_successful_pts++;
+                gsl_vector_set(quark_pressure_grid_barionic_chem_pot,
+                               *num_successfull_pts,
+                               barionic_chemical_potential);
+                               
+                gsl_vector_set(quark_pressure_grid_isovector_chem_pot,
+                               *num_successfull_pts,
+                               isovector_chemical_potential);
+                               
+                gsl_vector_set(quark_pressure_grid_pressure,
+                               *num_successfull_pts,
+                               point.quark_pressure);
+                               
+                (*num_successfull_pts)++;
                                
                                
                 if (fabs(point.quark_pressure - point.hadron_pressure)
