@@ -74,6 +74,8 @@ tests:
 	@cd tests; make
 tgraph:
 	@cd tests; make graph
+sub:
+    @qsub torque.sh
 clean:
 	@echo "[Cleaning...]"
 	@-rm -f $(TARGET)
