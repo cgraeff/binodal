@@ -6,6 +6,7 @@
 //  Copyright © 2017 Clebson Graeff. All rights reserved.
 //
 
+#include <stdio.h>
 #include "libdatafun/libdatafun.h"
 
 #include "CommandlineOptions.h"
@@ -363,6 +364,9 @@ int GridLoop(double initial_mass_guess,
                                   up_mass_guess,
                                   down_mass_guess,
                                   &point);
+
+//            if (isnan(point.hadron_pressure) || isnan(point.quark_pressure))
+//                abort();
 
             // When BinodalPointCandidate returns zero, we have a successfull
             // calculation. In this case, we will test if the pressure tolerance

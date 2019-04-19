@@ -227,21 +227,10 @@ FermiDiracDistributionIntegralFromQuarkThermodynamicPotentialIntegrand(double mo
 
     double E = sqrt(pow(momentum, 2.0) + pow(p->mass, 2.0));
 
-    double np =
-    FermiDiracDistributionForParticles(E,
-                                       p->chemical_potential,
-                                       p->temperature);
+    double term_1 = log1p(exp(-(E - p->chemical_potential)/p->temperature));
+    double term_2 = log1p(exp(-(E + p->chemical_potential)/p->temperature));
 
-    double nap =
-    FermiDiracDistributionForAntiparticles(E,
-                                           p->chemical_potential,
-                                           p->temperature);
-
-    double ln_1mnp = log1p(-np);
-
-    double ln_1mnap = log1p(-nap);
-
-    return (ln_1mnap + ln_1mnp) * pow(momentum, 2.0);
+    return (term_1+term_2) * pow(momentum, 2.0);
 }
 
 double
@@ -266,5 +255,5 @@ FermiDiracDistributionIntegralFromQuarkThermodynamicPotential(double temperature
     OnedimensionalIntegrator(&F, parameters.fermi_dirac_integrals);
 
     // TODO: Check this upper limit, I think this should be the hadron cutoff
-    return F_E(mass, cutoff) - temperature * integral;
+    return F_E(mass, cutoff) + temperature * integral;
 }

@@ -38,3 +38,6 @@ binodal
 
 # Figures
 *.png
+
+# tags
+tags.*
