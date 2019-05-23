@@ -273,6 +273,10 @@ double HadronKinecticEnergyDensity(double temperature,
                                    double neutron_renorm_chem_pot)
 {
 
+    double cutoff = parameters.hadron.model.cutoff;
+
+    double integral = 0.0;
+
     if (temperature == 0.0){
 
         double proton_fermi_momentum =
@@ -281,27 +285,25 @@ double HadronKinecticEnergyDensity(double temperature,
         double neutron_fermi_momentum =
         HadronFermiMomentumFromBarionicDensity(neutron_density);
 
-        double proton_kinectic_energy = (NUM_H_COLORS  / pow(M_PI, 2.0))
-                                        * (F2(mass, proton_fermi_momentum)
-                                           - F2(mass, parameters.hadron.model.cutoff));
+        double proton_kinectic_energy =
+        F2(mass, cutoff) - F2(mass, proton_fermi_momentum);
 
-        double neutron_kinectic_energy = (NUM_H_COLORS / pow(M_PI, 2.0))
-                                         * (F2(mass, neutron_fermi_momentum)
-                                            - F2(mass, parameters.hadron.model.cutoff));
+        double neutron_kinectic_energy =
+        F2(mass, cutoff) - F2(mass, neutron_fermi_momentum);
 
-        return (proton_kinectic_energy + neutron_kinectic_energy)
-               / (pow(CONST_HBAR_C, 3.0));
+        integral = proton_kinectic_energy + neutron_kinectic_energy;
     }
-
-    double integral =
-    FermiDiracDistributionIntegralFromHadronEnergy(temperature,
-                                                   mass,
-                                                   proton_renorm_chem_pot,
-                                                   parameters.hadron.model.cutoff)
-    + FermiDiracDistributionIntegralFromHadronEnergy(temperature,
-                                                     mass,
-                                                     neutron_renorm_chem_pot,
-                                                     parameters.hadron.model.cutoff);
+    else{
+        integral =
+        FermiDiracDistributionIntegralFromHadronEnergy(temperature,
+                                                       mass,
+                                                       proton_renorm_chem_pot,
+                                                       cutoff)
+        + FermiDiracDistributionIntegralFromHadronEnergy(temperature,
+                                                         mass,
+                                                         neutron_renorm_chem_pot,
+                                                         cutoff);
+    }
 
     return - NUM_H_FLAVORS * NUM_H_COLORS * pow(CONST_HBAR_C, -3.0)
            * integral / pow(M_PI, 2.0);
