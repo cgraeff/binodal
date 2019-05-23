@@ -96,7 +96,7 @@ double HadronBarionicDensity(double mass,
 
     }
     else{
-        double integral =
+        integral =
         FermiDiracDistributionIntegralFromBarionicDensity(temperature,
                                                           mass,
                                                           renorm_chem_pot,
