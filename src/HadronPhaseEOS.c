@@ -87,11 +87,21 @@ double HadronBarionicDensity(double mass,
                              double density,
                              double cutoff)
 {
-    double integral =
-    FermiDiracDistributionIntegralFromBarionicDensity(temperature,
-                                                      mass,
-                                                      renorm_chem_pot,
-                                                      parameters.hadron.model.cutoff);
+    double integral = 0.0;
+
+    if (temperature == 0){
+
+        double fermi_momentum = HadronFermiMomentumFromBarionicDensity(density);
+        integral = pow(fermi_momentum, 3.0) / 3.0;
+
+    }
+    else{
+        double integral =
+        FermiDiracDistributionIntegralFromBarionicDensity(temperature,
+                                                          mass,
+                                                          renorm_chem_pot,
+                                                          cutoff);
+    }
 
     return NUM_H_COLORS * NUM_H_FLAVORS * pow(CONST_HBAR_C, -3.0)
            * (integral / pow(M_PI, 2.0));
@@ -115,11 +125,25 @@ double HadronScalarDensity(double mass,
         return 0.0;
     }
 
-    double integral =
-    FermiDiracDistributionIntegralFromScalarDensity(temperature,
-                                                    mass,
-                                                    renorm_chem_pot,
-                                                    parameters.hadron.model.cutoff);
+    double cutoff = parameters.hadron.model.cutoff;
+
+    double integral = 0.0;
+    if (temperature == 0.0){
+
+        double fermi_momentum = HadronFermiMomentumFromBarionicDensity(density);
+
+        integral =
+        F0(mass, cutoff) - F0(mass, fermi_momentum);
+
+    }
+    else {
+
+        integral =
+        FermiDiracDistributionIntegralFromScalarDensity(temperature,
+                                                        mass,
+                                                        renorm_chem_pot,
+                                                        cutoff);
+    }
 
     return - NUM_H_COLORS * NUM_H_FLAVORS * pow(CONST_HBAR_C, -3.0)
            * mass * integral / pow(M_PI, 2.0);
