@@ -328,44 +328,13 @@ double HadronVacuumEnergyDensity()
            - parameters.hadron.model.G_S * pow(scalar_density_0, 2.0) * CONST_HBAR_C;
 }
 
-/*
-double HadronEntropyIntegrand(double  momentum,
-                              void   *par)
-{
-    fermi_dirac_distrib_integrand * p = (fermi_dirac_distrib_integrand *)par;
-
-    double E = sqrt(pow(momentum, 2.0) + pow(p->mass, 2.0));
-
-    double n_p = FermiDiracDistributionForParticles(E,
-                                                    p->chemical_potential,
-                                                    p->temperature);
-
-    double n_ap = FermiDiracDistributionForAntiparticles(E,
-                                                         p->chemical_potential,
-                                                         p->temperature);
-
-    return pow(momentum, 2.0) * (n_p * log(n_p) + (1.0 - n_p) * log(1.0 - n_p)
-                          + n_ap * log(n_ap) + (1.0 - n_ap) * log(1.0 - n_ap));
-}
- */
-
 double HadronEntropy(double mass,
                      double renorm_chem_pot,
                      double temperature)
 {
-    /*
-    fermi_dirac_distrib_integrand p;
-    p.mass = mass;
-    p.chemical_potential = renorm_chem_pot;
-    p.temperature = temperature;
 
-    gsl_function F;
-    F.function = &HadronEntropyIntegrand;
-    F.params = &p;
-
-    double integral =
-    OnedimensionalIntegrator(&F, parameters.fermi_dirac_integrals);
-     */
+    if (temperature == 0)
+        return 0.0;
 
     double integral =
     FermiDiracDistributionIntegralFromHadronEntropy(temperature,
@@ -373,7 +342,7 @@ double HadronEntropy(double mass,
                                                     renorm_chem_pot,
                                                     parameters.hadron.model.cutoff);
 
-    return -2.0 * NUM_H_FLAVORS * NUM_H_COLORS * pow(CONST_HBAR_C, -3.0)
+    return - NUM_H_FLAVORS * NUM_H_COLORS * pow(CONST_HBAR_C, -3.0)
            * integral / pow(M_PI, 2.0);
 }
 
