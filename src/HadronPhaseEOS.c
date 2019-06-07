@@ -145,7 +145,10 @@ double HadronScalarDensity(double mass,
                                                         cutoff);
     }
 
-    return - NUM_H_COLORS * NUM_H_FLAVORS * pow(CONST_HBAR_C, -3.0)
+    // TODO: Test to match zero temp definition
+    //return - NUM_H_COLORS * NUM_H_FLAVORS * pow(CONST_HBAR_C, -3.0)
+    //       * mass * integral / pow(M_PI, 2.0);
+    return - pow(CONST_HBAR_C, -3.0)
            * mass * integral / pow(M_PI, 2.0);
 }
 
