@@ -518,7 +518,7 @@ int HadronMassAndDensitiesSolutionEquation(const gsl_vector   *x,
     const double neutron_density = pow (gsl_vector_get(x, 2), 2.0);
 
     // TODO: maybe there is no need to make two cases
-    if (parameters.variables.temperature == 0){
+/*    if (parameters.variables.temperature == 0){
         hadron_mass_and_renorm_chem_pot_input_params * p =
         (hadron_mass_and_renorm_chem_pot_input_params *) params;
 
@@ -570,7 +570,7 @@ int HadronMassAndDensitiesSolutionEquation(const gsl_vector   *x,
         gsl_vector_set(return_values, 2, neutron_chem_pot_gap);
     }
     else{
-
+*/
         hadron_mass_and_renorm_chem_pot_input_params * p =
         (hadron_mass_and_renorm_chem_pot_input_params *) params;
 
@@ -626,7 +626,7 @@ int HadronMassAndDensitiesSolutionEquation(const gsl_vector   *x,
         gsl_vector_set(return_values, 0, gap_equation);
         gsl_vector_set(return_values, 1, proton_dens_eq);
         gsl_vector_set(return_values, 2, neutron_dens_eq);
-    }
+//    }
 
     return GSL_SUCCESS;
 }
